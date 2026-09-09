@@ -1,34 +1,63 @@
 # AGENTS.md — english-explainer
 
-Thing Explainer 英语学习网站。科幻 HUD 仪表盘风格，每个 thing 一个沉浸式页面，
-中央 3D 线框模型 + 两侧数据面板 + 底部 simple words 解释。
+Thing Explainer 英语学习网站。复古制图室纸面 + HUD 青光：文章是阅读主体，
+3D 线框图作辅证；核心机制是"词找到物"——文中部件词与图上部件双向点亮。
+产品决策见 `PRODUCT.md`（真相源①），视觉契约见 `DESIGN.md`（真相源②）。
 
 ## 命令
 
 所有命令在项目根目录（本目录）执行：
 
 ```bash
-npm run dev      # 开发服务器 http://localhost:5173
-npm run build    # 生产构建（tsc -b && vite build）
-npx tsc --noEmit # 仅类型检查
+npm run dev                  # 开发服务器 http://localhost:5173
+npm run build                # 生产构建（tsc -b && vite build）
+npx tsc --noEmit             # 仅类型检查
+npx tsx scripts/validate-data.mjs  # 数据一致性校验（句数/partId/dict 闭环）
 ```
 
 ## 结构
 
-- `src/data/things.ts` — 数据注册表，单一事实来源。加新 thing 就是在这里加记录
-  （需要新 3D 造型时再在 ThingScene.tsx 加几何体组件，按 thing.id 分发）
-- `src/components/ThingScene.tsx` — R3F 3D 线框 + 标注标签
-- `src/components/LeftPanel.tsx` / `RightPanel.tsx` — HUD 面板（Canvas 2D 画波形/雷达，无图表库依赖）
-- `src/styles/design-tokens.css` — Tailwind 4 @theme 设计令牌 + HUD 特效类
-  （canvas-grid / scanline / hud-panel / status-blink 等）
+### 数据层（`src/data/`）
+
+- `types.ts` — 类型契约。文章是结构化的：句 = `(string | MarkedSeg)[]` 混排，
+  segment 带可选 `part`（部件关联）+ `dict`（词条 key）。**先改类型，再写数据**
+- `things/` — 每个 thing 一个文件（`nuclear-reactor.ts` 是模板级示例）。
+  内容：parts（id/label/realName/position）+ article（4 段 simple-words 文章，
+  短语级标注）+ flow（工作流程步骤，`sentenceRef` 是全篇连续句索引）+ keyExpressions（复述清单）
+- `dict/` — 每个 thing 一份词条（word/音标 IPA/词性/中文/breakdown 构词拆解）。
+  dict key 用动词原形（文中 "pushes back" → key "push back"）
+- `dictionary.ts` — 词条汇总（先到先得合并），`lookupWord()` 是查询入口
+- `things.ts` — 注册表：导入 `things/` 全部文件，导出 `things` / `getThingBySlug` / `categories`
+- `utils.ts` — 文章铺平 / 词数统计 / 图→词句索引查找
+
+加新 thing = 在 `things/` 加数据文件 + `dict/` 加词条 + 注册表加一行 +
+（需要新造型时）ThingScene.tsx 加几何体组件（mesh 带 `name={partId}`）。
+
+### 组件层（`src/components/`）
+
+- `ThingScene.tsx` — R3F 3D 线框。受控高亮 props：`highlightPartId`（阅读态）、
+  `activePartIds`/`pastPartIds`/`dimOthers`（flow 播放态）、`onPartClick`（图→词）。
+  每个 mesh 带 `name={partId}`，`usePartHighlight` 每帧 lerp 材质亮度
+- `ArticleView.tsx` — 结构化文章渲染（部件词 `.word-part` / 生词 `.word-new`），
+  ref 暴露 `scrollToSentence`
+- `WordPopup.tsx` — 词条卡（fixed 锚定点击词上方，构词拆解）
+- `FlowPlayer.tsx` — 过程动画状态机（每步 3.2s 自动推进）+ 步骤指示器
+- `PracticePanel.tsx` — 复述态：关键表达自评 + 部件名对照
+- `PageActions.tsx` — 底部动作条（read/flow/practice 三态）
+
+### 样式
+
+- `src/styles/design-tokens.css` — Tailwind 4 `@theme` 令牌 + 特效类。
+  阅读层新增：`.word-part`（#0E7C7B 虚线下划线）/ `.word-new` / `.sentence-active` / `.card-pop`
 
 ## 设计约束
 
-- 配色：羊皮纸底 `#F4F1EA` + 墨色 `#2C2A25` + HUD 青 `#3ECFCF`，
-  每 thing 有自己的 accent color（`things.ts` 的 `color` 字段）
-- 字体：Newsreader（标题衬线）/ Inter（正文）/ JetBrains Mono（数据标签）——在 index.html 引入
-- 3D 模型全部程序化生成（Three.js 几何体 wireframe），不依赖外部模型文件
-- 内容遵循 Munroe 风格：simple name + real name 对照，解释只用 ~1000 常用词
+- 配色：羊皮纸底 `#F4F1EA` + 墨色 `#2C2A25` + HUD 青 `#3ECFCF`（唯一主发光色），
+  红/橙仅作部件激活点缀；每 thing 有自己的 accent color（`color` 字段）
+- 字体：Newsreader（阅读正文衬线 20px/1.8/68ch）/ Inter（UI）/ JetBrains Mono（micro-label）—— index.html 引入
+- 3D 模型全部程序化生成（Three.js wireframe），不依赖外部模型文件
+- 内容遵循 Munroe 约束：simple name ↔ real name 对照，解释只用 ~1000 常用词
+  （"gravity" → "the pull of the world"）；释义卡中文不受此限
 
 ## 已知坑
 
@@ -36,3 +65,5 @@ npx tsc --noEmit # 仅类型检查
   （`--color-hud-cyan` → `text-hud-cyan`）
 - drei `Text` 组件不要传 font prop 加载远程 woff2（会 404），默认字体够用
 - hex 颜色写错位数（如 `#3EFCFCF`）不会报错但渲染黑色，注意 6 位
+- `sentenceRef` 是全篇连续句索引（跨段累加，0-based），写 flow 时数清楚
+- GlooLine（drei Line）不参与部件高亮——需要高亮的"线"用 `Rod` 组件（细圆柱 mesh + name）

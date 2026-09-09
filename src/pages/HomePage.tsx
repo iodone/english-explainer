@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { things, categories } from '../data/things'
+import { countArticleWords, flattenSentences, sentencePlainText } from '../data/utils'
+import type { ThingData } from '../data/types'
 import { useState } from 'react'
 
 /**
@@ -63,7 +65,11 @@ export default function HomePage() {
   )
 }
 
-function ThingCard({ thing, index }: { thing: typeof things[0]; index: number }) {
+function ThingCard({ thing, index }: { thing: ThingData; index: number }) {
+  // 文章首句作描述预览；词数从结构化文章计算
+  const firstSentence = sentencePlainText(flattenSentences(thing.article)[0])
+  const words = countArticleWords(thing.article)
+
   return (
     <Link
       to={`/thing/${thing.slug}`}
@@ -86,33 +92,20 @@ function ThingCard({ thing, index }: { thing: typeof things[0]; index: number })
       </h2>
       <p className="micro-label mb-3">{thing.realName.toUpperCase()}</p>
 
-      {/* Description preview */}
+      {/* Description preview — 首句 */}
       <p className="text-sm text-ink-soft leading-relaxed line-clamp-3">
-        {thing.description}
+        {firstSentence}
       </p>
 
-      {/* Bottom metrics */}
+      {/* Bottom metrics — 学习相关：部件数 + 文章词数 */}
       <div className="flex items-center gap-4 mt-4 pt-3 border-t border-canvas-grid">
-        <div className="flex items-center gap-1.5">
-          <span className="micro-label">PWR</span>
-          <div className="w-16 h-1 bg-canvas-dark rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${thing.hudMetrics.power}%`,
-                backgroundColor: thing.color,
-              }}
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="micro-label">WORDS</span>
-          <span className="font-mono text-xs text-ink-faint">{thing.hudMetrics.wordCount}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="micro-label">YEAR</span>
-          <span className="font-mono text-xs text-ink-faint">{thing.hudMetrics.yearInvented}</span>
-        </div>
+        <span className="font-mono text-xs text-ink-faint">
+          {thing.parts.length} PARTS
+        </span>
+        <span className="font-mono text-xs text-ink-faint">·</span>
+        <span className="font-mono text-xs text-ink-faint">
+          {words} WORDS
+        </span>
       </div>
     </Link>
   )

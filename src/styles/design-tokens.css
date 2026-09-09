@@ -27,6 +27,11 @@
   --color-wire-glow: rgba(62, 207, 207, 0.9);
   --color-wire-dim: rgba(62, 207, 207, 0.2);
 
+  /* Reading layer — word-part linking */
+  --color-word-part: #0E7C7B;
+  --color-word-active-bg: rgba(62, 207, 207, 0.18);
+  --color-sentence-active-bg: rgba(62, 207, 207, 0.08);
+
   /* Typography */
   --font-display: 'Newsreader', 'Georgia', serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -130,25 +135,55 @@
   animation: blink 2s ease-in-out infinite;
 }
 
-/* Waveform animation */
-@keyframes waveform {
-  0% { transform: scaleY(0.3); }
-  25% { transform: scaleY(1); }
-  50% { transform: scaleY(0.6); }
-  75% { transform: scaleY(0.9); }
-  100% { transform: scaleY(0.3); }
+/* ─── Reading layer (ArticleView) ─── */
+
+/* 文中部件词：比正文深、可辨识 */
+.word-part {
+  font-weight: 500;
+  color: var(--color-word-part);
+  border-bottom: 1px dashed var(--color-word-part);
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+.word-part:hover {
+  background-color: var(--color-word-active-bg);
 }
 
-/* Glow pulse */
-@keyframes glow-pulse {
-  0%, 100% { filter: drop-shadow(0 0 4px var(--color-hud-cyan)); }
-  50% { filter: drop-shadow(0 0 12px var(--color-hud-cyan)); }
+/* 生词（有词条、非部件） */
+.word-new {
+  cursor: pointer;
+  border-bottom: 1px dotted var(--color-ink-faint);
+  transition: background-color 120ms ease-out;
+}
+.word-new:hover {
+  background-color: var(--color-word-active-bg);
 }
 
-/* Number ticker */
-@keyframes ticker {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-100%); }
+/* 激活态（词被点击 / 图→词反查） */
+.word-active {
+  background-color: var(--color-word-active-bg);
+}
+
+/* 当前阅读句（flow 播放同步） */
+.sentence-active {
+  background-color: var(--color-sentence-active-bg);
+  box-shadow: -12px 0 0 var(--color-sentence-active-bg),
+              12px 0 0 var(--color-sentence-active-bg);
+}
+
+/* 词条卡入场 */
+@keyframes card-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.card-pop {
+  animation: card-pop 160ms ease-out;
 }
 
 /* Scrollbar styling */
