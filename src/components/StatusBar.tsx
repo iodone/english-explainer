@@ -16,12 +16,25 @@ export default function StatusBar() {
         </span>
       </Link>
 
-      {/* Center: breadcrumb or thing name */}
+      {/* Center: primary navigation */}
       <nav className="flex items-center gap-2">
         <span className="micro-label">NAV</span>
-        <span className="text-xs font-mono text-ink-soft">
-          {location.pathname === '/' ? '/HOME' : location.pathname.toUpperCase()}
-        </span>
+        <Link
+          to="/"
+          className={`font-mono text-[10px] uppercase tracking-[0.08em] no-underline transition-colors ${
+            location.pathname === '/' ? 'text-hud-cyan' : 'text-ink-faint hover:text-ink-soft'
+          }`}
+        >
+          HOME
+        </Link>
+        <Link
+          to="/words"
+          className={`font-mono text-[10px] uppercase tracking-[0.08em] no-underline transition-colors ${
+            location.pathname === '/words' ? 'text-hud-cyan' : 'text-ink-faint hover:text-ink-soft'
+          }`}
+        >
+          WORDS
+        </Link>
       </nav>
 
       {/* Right: status indicators */}

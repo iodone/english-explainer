@@ -5,6 +5,7 @@ import './styles/design-tokens.css'
 import App from './App'
 import ThingPage from './pages/ThingPage'
 import HomePage from './pages/HomePage'
+import WordsPage from './pages/WordsPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Route element={<App />}>
           <Route index element={<HomePage />} />
           <Route path="/thing/:slug" element={<ThingPage />} />
+          <Route path="/words" element={<WordsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
