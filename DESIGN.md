@@ -16,6 +16,33 @@
 - 全站只有一种主发光色：HUD 青 `#3ECFCF`；红 `#E8453C` / 橙 `#F0923A` 仅作部件激活与警示点缀
 - 每个 thing 有自己的 accent color（数据字段 `color`），用于卡片标识与该 thing 页的部件激活色
 
+## 1.5 3D 模型绘制风格基准（2026-09-09 · JX-7b 规范）
+
+> 用户提供的风格基准（仿生水母机器人 Model JX-7b 描述）。**后续所有 3D 模型绘制均按此执行**，
+> 是草稿图纸方向（§1 氛围规则）的材质与 HUD 细化。
+
+**结构语言（机械仿生学）**：形态可仿生，但必须拆解为可命名的工程部件
+（伞盖 / 动力舱 / 推进器 / 触手式执行器）——部件化是词-物关联的前提。
+
+**材质分层（核心规则）**：
+| 部件类型 | 材质 | 实现 |
+|---|---|---|
+| 外壳/包裹类（伞盖、箱体、穹顶） | 半透明网格线框（四边形拓扑）+ 内部实体机械结构——双层表达 | 灰实体面 `opacity .12` + 墨 Edges 轮廓 |
+| 结构件（臂、杆、触手、执行器） | 哑光低反射复合材料（matte 100% 粗糙度，无高光），带纵向低多边形结构线 | Rod 4 面方杆 + Edges 纵线 |
+
+**色彩**：军工灰 / 冷灰 / 钛白 + 微弱泛黄复古图纸调（纸面 #F4F1EA 承担）；
+点缀色 = 高饱和工业警示红 `#E8453C`，仅用于核心舱 / 传感器 / 推进器末端等功能指示位
+（数据层 part 角色标记支持后落地，不在常态乱撒）。
+
+**环境（3D viewport = CAD 虚空工作区）**：
+- 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
+- 标注：虚线/细引线 + 等宽全大写技术文本，字号克制、无装饰边框，贴原始工程数据格式
+- HUD：右上角坐标轴 gizmo（数字化指南针）；顶部视角朝向指示器 P1
+- 标签 billboard 朝向相机（drei Text 天然满足），随模型旋转产生空间透视联动
+
+**技术红线**：线框只用于外壳类部件（不是全模型 wireframe）；
+哑光材质禁止高光反射（meshBasicMaterial unlit）；透明外壳 depthWrite 关闭防排序瑕疵。
+
 ## 2. Design Tokens
 
 ### 2.1 Color **[保留]**
@@ -80,6 +107,7 @@
 - 3D 材质：彩色 wireframe → 统一墨线 `#2C2A25` 的 EdgesGeometry 轮廓（无三角剖分线），激活 = accent 色 + lineWidth 2.5；GridFloor/Float/灯光移除，新增虚线中心轴（制图符号）
 - 文章列：`bg-canvas` 实色（干净纸面，网格只存在于图列下方 = 方格草稿纸隐喻）
 - 分界：图列 `border-l-2 ink-soft/70` 制图分界线；PageActions 同步实色纸面
+- **[同日裁决 · 交互四点]**：① 详情页去扫描线（scanline 类只挂 Home）；② 分界线独立成可拖动条（默认 50/50 居中）；③ 图→词命中扩大到模型本体；④ 词条卡点击 → 悬停 2s 触发。落地见 §3.2 / §5.2 / §5.3
 
 ## 3. Layout
 
@@ -97,7 +125,7 @@
 │ StatusBar（保留）                                         │
 ├─────────────────────────────┬──────────────────────────┤
 │                             │                          │
-│   文章主列 60%（min 560px）  │   图辅列 40%（min 420px）  │
+│   文章主列 50%（min 420px） │▌│   图辅列 flex（min 360px）│
 │                             │                          │
 │   ┌ 图纸标题块 ┐             │   ┌──────────────────┐  │
 │   │ simpleName（大衬线）      │   │                  │  │
@@ -116,7 +144,8 @@
 └────────────────────────────────────────────────────────┘
 ```
 
-**阅读态**（默认）：如上图。文章列滚动，图列 sticky（跟随视口）。
+**阅读态**（默认）：如上图。文章列滚动，图列随分栏共存（整页 flex 布局，无 sticky）。
+两列之间是独立拖动条：默认 50/50 居中，按住拖动调宽（约束 30–70%，文章 min 420px / 图 min 360px），`localStorage 'thing-split'` 持久化，双击复位 50%。拖动中 `cursor: col-resize` + 禁止选中文本。
 
 **过程动画态**：
 - 文章列：解说句逐句自动滚动到视口中央并高亮（sentence-active-bg）
@@ -149,7 +178,7 @@
 | 组件 | 职责 | 关键状态 |
 |---|---|---|
 | `ArticleView` | 结构化文章渲染：逐句、部件词/生词标注、点击分发 | idle / part-active / word-popup-open |
-| `WordPopup` | 词条卡：音标、词性、中文释义、构词拆解（复合短语时） | open（定位到点击词上方）/ 词缺失态 |
+| `WordPopup` | 词条卡：音标、词性、中文释义、构词拆解（复合短语时）；悬停词 2s 触发 | open（锚定悬停词上方）/ 词缺失态 |
 | `FlowPlayer` | 过程动画编排：驱动 ThingScene + 文章句同步高亮 | playing / paused / done / step-n |
 | `PracticePanel` | 复述态：关键表达清单、自评勾选、覆盖度 | hidden / active / revealed |
 | `PageActions` | 底部 sticky 动作条：模式切换 | 随三态变化 |
@@ -178,14 +207,17 @@
 4. 词失焦（点别处）后图上部件保持发光直至下一次交互（不自动熄灭——留给学习者对照时间）
 
 ### 5.2 图→词（点击 3D 部件）
-1. 部件 `part-glow`
-2. 文章列滚动到包含该部件词的句子，句加 `sentence-active-bg`，词加 `word-active-bg`
-3. 滚动行为：`scrollIntoView({behavior:'smooth', block:'center'})`
+1. 命中区 = 部件**本体 mesh**（SketchMesh 带 onClick）或标注 dot，命中时 cursor 变 pointer
+2. 部件 `part-glow`
+3. 文章列滚动到包含该部件词的句子，句加 `sentence-active-bg`，词加 `word-active-bg`
+4. 滚动行为：`scrollIntoView({behavior:'smooth', block:'center'})`
 
-### 5.3 词条卡（WordPopup）
-- 锚定点击词上方 8px，最大宽 320px，`hud-panel` + `card-pop` 入场
+### 5.3 词条卡（WordPopup）**[2026-09-09 改悬停触发]**
+- 触发：悬停标注词 **2s**（HOVER_DICT_MS，避免扫读时乱弹）；点击标注词不再弹卡，只做词→图部件关联
+- 锚定悬停词上方 8px，最大宽 320px，`hud-panel` + `card-pop` 入场
 - 内容层级：词头（词 + 音标）→ 词性 → 中文释义 → 构词拆解（仅复合短语）
-- 点卡外任意处关闭；卡开时文章列滚动锁定（防止卡漂移）
+- 关闭链：离开词 250ms 延迟关（容许词→卡移动）；卡上悬停取消关闭，离开卡关；点卡外立即关
+- 卡开时文章列滚动锁定（防止卡漂移）
 
 ### 5.4 过程动画（FlowPlayer）
 - 步进节奏：每步 2.8s（解说句完整可读），步间 400ms
@@ -219,9 +251,19 @@
 - [x] Home 卡片新指标条（6 PARTS · 229 WORDS 形式）
 - [x] 控制台无错误（仅 three 库自身弃用警告）；生产构建通过（gzip 378KB）
 
+### 验收对照 · 交互四点 + JX-7b（2026-09-09 第二轮）
+
+- [x] 详情页无扫描线（`scanline` 类只挂 Home 路由）
+- [x] 分栏默认 50/50 居中；拖动实测 957→1110px（localStorage 记 58%），双击复位；拖动中 col-resize + 禁选中，松手恢复
+- [x] 点击**模型本体**（非仅标注 dot）→ 文中部件词高亮（reactor core 本体实测 "hot part"×3 + "heavy metal" 点亮）+ cursor pointer
+- [x] 词条卡悬停 2s 出现（power 实测 2.2s 出卡）；离词 250ms 关、卡上悬停保持、点外即关
+- [x] 取景自适应：drei `<Bounds fit clip observe margin={1.1} key={thing.id}>`——默认取景合适（模型约占画布高 55%），分栏拖动后画布 resize 自动重取景；调相机距离而非缩放模型（标注 dot 与模型同坐标）
+- [x] JX-7b 规范落地（§1.5）：外壳半透明灰实体面（#6E6C64 · depthWrite off）+ 墨 Edges；地面透视网格 + 虚线中心轴；右上角三色坐标轴 gizmo；等宽大写 billboard 标注
+
 ### 实施备注（与规格的已知偏差）
 
 - PracticePanel 关键表达 hover 的"微亮 40%"实现为全亮（复用 highlightPartId 通道，简化状态）
 - 图上部件标注标签在小部件密集区有重叠（沿用原型的 part position），P1 打磨项
 - 已修复：FlowPlayer 初版因内联回调引用触发 update-depth 循环，回调 ref 化后 effect 只依赖 stepIndex
-- 草稿化后 Part 高亮实现在 SketchMesh 子级 drei `<Edges>`（LineMaterial color/opacity/linewidth 每帧 lerp）；取景距离按 thing 配置（THING_CAMERA 表），调相机而非缩放模型（标注 dot 与模型同坐标，缩放模型会错位）
+- 草稿化后 Part 高亮实现在 SketchMesh 子级 drei `<Edges>`（LineMaterial color/opacity/linewidth 每帧 lerp）
+- 图→词点击通道用 React context（PartClickContext）穿透 Canvas 独立 reconciler root：Provider 放 Canvas children 内，SketchMesh 深处 useContext 直达

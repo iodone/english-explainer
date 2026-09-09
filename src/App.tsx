@@ -7,7 +7,7 @@ export default function App() {
   const isHome = location.pathname === '/'
 
   return (
-    <div className="canvas-grid scanline min-h-screen flex flex-col">
+    <div className={`canvas-grid min-h-screen flex flex-col ${isHome ? 'scanline' : ''}`}>
       {/* Top status bar */}
       <StatusBar />
 

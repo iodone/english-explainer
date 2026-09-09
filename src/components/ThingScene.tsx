@@ -1,34 +1,42 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Line, Text, Edges } from '@react-three/drei'
-import { useRef, useState } from 'react'
+import {
+  OrbitControls,
+  Line,
+  Text,
+  Edges,
+  Bounds,
+  GizmoHelper,
+  GizmoViewport,
+} from '@react-three/drei'
+import { createContext, useContext, useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { ThingData } from '../data/types'
 
 /**
  * ThingScene — 3D 草稿图纸 viewer（word-part linking）
  *
- * 草稿图纸风格：几何体只画轮廓边缘（Edges，非三角剖分 wireframe），
- * 统一墨色 #2C2A25 画在方格纸上；高亮/流程步骤才引入 thing accent 色。
- * 模型静止（无 Float 漂浮），图纸感 = 静态制图 + 可拖拽观察。
+ * 绘制风格按 DESIGN.md §1.5 JX-7b 规范：
+ * - 外壳/结构件 = 半透明灰实体面（体量感）+ 墨 Edges 轮廓（四边形拓扑感）
+ * - 地面 = 3D 透视网格（CAD 虚空工作区）+ 虚线中心轴
+ * - 右上角坐标轴 gizmo；标签 billboard 等宽大写（工程数据格式）
+ * - 取景 = Bounds 自适应（fit + observe，分栏拖动后自动重取景）
  *
  * 受控高亮（DESIGN.md §4.1）：
  * - highlightPartId：阅读态，文中部件词点击 → 该部件墨线变 accent + 加粗
  * - activePartIds / pastPartIds / dimOthers：flow 播放态，
  *   当前步 accent 加粗、已过步 50%、未到步 12%
- * - onPartClick：点击部件标注点 → 文章列滚动到对应句（图→词）
+ * - onPartClick：点击部件本体/标注点 → 文章列滚动到对应句（图→词）
  */
 
 const INK = '#2C2A25'
 const INK_SOFT = '#5A554C'
+/** JX-7b 军工灰：外壳半透明实体面 */
+const HULL_GREY = '#6E6C64'
+/** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
+const PAPER = '#F4F1EA'
 
-/** 每个 thing 的取景距离（模型尺度不同，统一相机会显大小不一） */
-const THING_CAMERA: Record<string, [number, number, number]> = {
-  'nuclear-reactor': [5, 3, 5],
-  helicopter: [3.4, 2.1, 3.4],
-  'space-station': [5, 3, 5],
-  'curiosity-rover': [4.2, 2.5, 4.2],
-  'washing-machine': [4.6, 2.7, 4.6],
-}
+/** 图→词点击通道：SketchMesh（几何深处）经 context 触达，不逐层传 prop */
+const PartClickContext = createContext<((partId: string) => void) | null>(null)
 
 export interface ThingSceneProps {
   thing: ThingData
@@ -59,25 +67,30 @@ export default function ThingScene({
       <div className="absolute top-4 right-4 z-10 pointer-events-none text-right">
         <div className="micro-label">MODEL</div>
         <div className="font-mono text-xs text-ink-faint mt-1">
-          WIREFRAME-{thing.id.slice(0, 8).toUpperCase()}
+          SKETCH-{thing.id.slice(0, 8).toUpperCase()}
         </div>
       </div>
       <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
-        <div className="micro-label">DRAG TO ROTATE · SCROLL TO ZOOM</div>
+        <div className="micro-label">DRAG TO ROTATE · SCROLL TO ZOOM · CLICK A PART</div>
       </div>
 
-      {/* 3D Canvas — 透明底，透出 CSS 方格纸 */}
+      {/* 3D Canvas — 纸色实底（CAD viewport），3D 地面网格提供透视参考 */}
       <Canvas
-        camera={{ position: THING_CAMERA[thing.id] ?? [5, 3, 5], fov: 50 }}
-        style={{ background: 'transparent' }}
+        camera={{ position: [5, 3, 5], fov: 50 }}
+        style={{ background: PAPER }}
       >
-        <SketchModel
-          thing={thing}
-          highlightPartId={highlightPartId}
-          activePartIds={activePartIds}
-          pastPartIds={pastPartIds}
-          dimOthers={dimOthers}
-        />
+        <PartClickContext.Provider value={onPartClick ?? null}>
+          {/* key=thing.id：切模型时 Bounds 重新 fit；margin 略松给标注留空间 */}
+          <Bounds key={thing.id} fit clip observe margin={1.1}>
+            <SketchModel
+              thing={thing}
+              highlightPartId={highlightPartId}
+              activePartIds={activePartIds}
+              pastPartIds={pastPartIds}
+              dimOthers={dimOthers}
+            />
+          </Bounds>
+        </PartClickContext.Provider>
         <AnnotationLabels
           thing={thing}
           highlightPartId={highlightPartId}
@@ -86,14 +99,23 @@ export default function ThingScene({
           onPartClick={onPartClick}
         />
         <CenterAxes />
+        <GroundGrid />
         <OrbitControls
+          makeDefault
           enableDamping
           dampingFactor={0.05}
-          minDistance={3}
-          maxDistance={15}
+          minDistance={2.5}
+          maxDistance={18}
           autoRotate
           autoRotateSpeed={0.4}
         />
+        {/* 右上角数字化指南针（JX-7b §HUD） */}
+        <GizmoHelper alignment="top-right" margin={[76, 76]}>
+          <GizmoViewport
+            axisColors={['#E8453C', '#4ADE80', '#60A5FA']}
+            labelColor={INK}
+          />
+        </GizmoHelper>
       </Canvas>
     </div>
   )
@@ -110,8 +132,7 @@ interface HighlightState {
 
 /**
  * 部件草稿线状态机：每帧 lerp 到目标（点亮有渐变，仪器感）。
- * SketchMesh 本体不可见，实际画线的是其子级 drei <Edges>
- * （Mesh<LineSegmentsGeometry, LineMaterial>）——操作 LineMaterial。
+ * 双材质：本体半透明灰面（体量）+ 子级 drei <Edges> 墨线（轮廓）。
  */
 function usePartHighlight(
   root: React.RefObject<THREE.Group | null>,
@@ -119,6 +140,8 @@ function usePartHighlight(
   state: HighlightState,
 ) {
   const accent = new THREE.Color(thing.color)
+  const hullGrey = new THREE.Color(HULL_GREY)
+  const ink = new THREE.Color(INK)
 
   useFrame(() => {
     const group = root.current
@@ -127,38 +150,41 @@ function usePartHighlight(
       if (!(node instanceof THREE.Mesh)) return
       const partId = node.name
       if (!partId) return
+
+      // 本体半透明面
+      const faceMat = node.material as THREE.MeshBasicMaterial
+      // Edges 墨线（drei Edges 渲染为子 Mesh，材质 LineMaterial）
       const edges = node.children.find(
         c =>
           c instanceof THREE.Mesh &&
           (c.material as THREE.Material | undefined)?.type === 'LineMaterial',
       ) as THREE.Mesh | undefined
       if (!edges) return
-      const mat = edges.material as THREE.MeshBasicMaterial & { linewidth: number }
-      if (!mat.userData.baseColor) {
-        mat.userData.baseColor = mat.color.clone()
-      }
-      const base = mat.userData.baseColor as THREE.Color
+      const lineMat = edges.material as THREE.MeshBasicMaterial & { linewidth: number }
 
-      let targetOpacity = 0.85
-      let targetColor = base
-      let targetWidth = 1
+      let lineOpacity = 0.85
+      let lineColor: THREE.Color = ink
+      let lineWidth = 1
+      let faceOpacity = 0.1
+      let faceColor: THREE.Color = hullGrey
+
       if (state.activePartIds.includes(partId)) {
-        targetOpacity = 1
-        targetColor = accent
-        targetWidth = 2.5
+        lineOpacity = 1; lineColor = accent; lineWidth = 2.5
+        faceOpacity = 0.28; faceColor = accent
       } else if (state.pastPartIds.includes(partId)) {
-        targetOpacity = 0.5
+        lineOpacity = 0.5; faceOpacity = 0.06
       } else if (state.dimOthers) {
-        targetOpacity = 0.12
+        lineOpacity = 0.12; faceOpacity = 0.02
       } else if (state.highlightPartId === partId) {
-        targetOpacity = 1
-        targetColor = accent
-        targetWidth = 2.5
+        lineOpacity = 1; lineColor = accent; lineWidth = 2.5
+        faceOpacity = 0.28; faceColor = accent
       }
 
-      mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.15)
-      mat.color.lerp(targetColor, 0.15)
-      mat.linewidth = THREE.MathUtils.lerp(mat.linewidth, targetWidth, 0.15)
+      faceMat.opacity = THREE.MathUtils.lerp(faceMat.opacity, faceOpacity, 0.15)
+      faceMat.color.lerp(faceColor, 0.15)
+      lineMat.opacity = THREE.MathUtils.lerp(lineMat.opacity, lineOpacity, 0.15)
+      lineMat.color.lerp(lineColor, 0.15)
+      lineMat.linewidth = THREE.MathUtils.lerp(lineMat.linewidth, lineWidth, 0.15)
     })
   })
 }
@@ -185,18 +211,53 @@ function SketchModel({ thing, ...state }: { thing: ThingData } & HighlightState)
 /* ─── Sketch primitives ─── */
 
 /**
- * 草稿网格体：geometry 只画轮廓边缘（EdgesGeometry），
- * 不画三角剖分线 —— 从"3D 渲染"变成"制图"的关键。
+ * 草稿网格体（JX-7b §材质分层）：
+ * 半透明军工灰实体面（体量/遮蔽感）+ Edges 墨线轮廓（非三角剖分）。
+ * 点击本体 = 点部件（图→词）。
  */
 function SketchMesh({
   partId,
   children,
   ...props
 }: React.ComponentProps<'mesh'> & { partId?: string }) {
+  const onPartClick = useContext(PartClickContext)
+  const clickable = !!partId && !!onPartClick
+
   return (
-    <mesh name={partId} {...props}>
+    <mesh
+      name={partId}
+      {...props}
+      onClick={
+        clickable
+          ? e => {
+              e.stopPropagation()
+              onPartClick!(partId!)
+            }
+          : undefined
+      }
+      onPointerOver={
+        clickable
+          ? e => {
+              e.stopPropagation()
+              document.body.style.cursor = 'pointer'
+            }
+          : undefined
+      }
+      onPointerOut={
+        clickable
+          ? () => {
+              document.body.style.cursor = ''
+            }
+          : undefined
+      }
+    >
       {children}
-      <meshBasicMaterial visible={false} />
+      <meshBasicMaterial
+        color={HULL_GREY}
+        transparent
+        opacity={0.1}
+        depthWrite={false}
+      />
       <Edges color={INK} lineWidth={1} threshold={10} transparent opacity={0.85} />
     </mesh>
   )
@@ -502,14 +563,14 @@ function AnnotationLabels({
               transparent
               opacity={dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5}
             />
-            {/* Label */}
+            {/* Label — 等宽大写工程标注（billboard） */}
             <Text
               position={[0.35, 0.2, 0]}
               fontSize={0.15}
               color={isActive ? accent : hoveredNow ? INK : INK_SOFT}
               anchorX="left"
               outlineWidth={0.01}
-              outlineColor="#F4F1EA"
+              outlineColor={PAPER}
             >
               {part.label.toUpperCase()}
             </Text>
@@ -520,7 +581,7 @@ function AnnotationLabels({
   )
 }
 
-/* ─── Environment ─── */
+/* ─── Environment（CAD viewport） ─── */
 
 /** 图纸中心轴线（经典制图符号，虚线淡墨） */
 function CenterAxes() {
@@ -547,5 +608,17 @@ function CenterAxes() {
         gapSize={0.1}
       />
     </group>
+  )
+}
+
+/** 3D 透视地面网格（JX-7b §环境：CAD 虚空工作区的无限延伸淡灰细线） */
+function GroundGrid() {
+  return (
+    <gridHelper
+      args={[40, 40, '#C9C2B4', '#C9C2B4']}
+      position={[0, -1.6, 0]}
+      material-transparent
+      material-opacity={0.22}
+    />
   )
 }

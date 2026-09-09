@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react'
 import type { DictEntry } from '../data/types'
 
 /**
- * WordPopup — 词条卡（DESIGN §5.3）
- * 锚定点击词上方 8px，hud-panel + card-pop 入场。
+ * WordPopup — 词条卡（DESIGN §5.3，2026-09-09 改悬停触发）
+ * 悬停词 2s 后锚定词上方 8px 出现；鼠标移到卡上保持，离开 250ms 关。
  * 内容层级：词头（词 + 音标）→ 词性 → 中文释义 → 构词拆解。
  * 词条缺失 → no-entry 态。
  */
@@ -11,10 +11,12 @@ interface WordPopupProps {
   dictKey: string
   entry: DictEntry | null
   anchorRect: DOMRect
+  onEnter: () => void
+  onLeave: () => void
   onClose: () => void
 }
 
-export default function WordPopup({ dictKey, entry, anchorRect, onClose }: WordPopupProps) {
+export default function WordPopup({ dictKey, entry, anchorRect, onEnter, onLeave, onClose }: WordPopupProps) {
   const cardRef = useRef<HTMLDivElement>(null)
 
   // 点卡外关闭
@@ -38,6 +40,8 @@ export default function WordPopup({ dictKey, entry, anchorRect, onClose }: WordP
     <div
       ref={cardRef}
       className="fixed z-50 card-pop"
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
       style={{
         left,
         top: anchorRect.top,

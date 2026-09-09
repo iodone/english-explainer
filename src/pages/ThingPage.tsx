@@ -39,6 +39,47 @@ export default function ThingPage() {
   const articleRef = useRef<ArticleViewHandle>(null)
   const articleScrollRef = useRef<HTMLDivElement>(null)
 
+  /* ─── 分栏拖动（默认居中 50%，localStorage 持久化） ─── */
+  const [splitPct, setSplitPct] = useState(() => {
+    const saved = Number(localStorage.getItem('thing-split'))
+    return saved >= 30 && saved <= 70 ? saved : 50
+  })
+  const splitPaneRef = useRef<HTMLDivElement>(null)
+  const draggingRef = useRef(false)
+  const splitPctRef = useRef(splitPct)
+  splitPctRef.current = splitPct
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!draggingRef.current || !splitPaneRef.current) return
+      const rect = splitPaneRef.current.getBoundingClientRect()
+      // 文章列 min 420px，图列 min 360px
+      const minL = (420 / rect.width) * 100
+      const maxL = 100 - (360 / rect.width) * 100
+      setSplitPct(Math.min(maxL, Math.max(minL, ((e.clientX - rect.left) / rect.width) * 100)))
+    }
+    const onUp = () => {
+      if (!draggingRef.current) return
+      draggingRef.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      localStorage.setItem('thing-split', String(splitPctRef.current))
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [])
+
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault()
+    draggingRef.current = true
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }
+
   // 切 thing 重置全部状态
   useEffect(() => {
     setMode('read')
@@ -69,10 +110,31 @@ export default function ThingPage() {
 
   /* ─── 交互接线 ─── */
 
-  // 词→图（+词条卡）：点击文中 segment
-  const handleSegmentClick = (seg: MarkedSeg, rect: DOMRect) => {
+  // 词条卡 hover 关闭延迟（词→卡之间移动 / 卡上悬停时不关）
+  const closeTimerRef = useRef<number | null>(null)
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }
+
+  // 点击 segment → 只做词→图部件关联（词条卡改悬停触发）
+  const handleSegmentClick = (seg: MarkedSeg) => {
     if (seg.part) setActivePartId(seg.part)
-    if (seg.dict) setWordPopup({ key: seg.dict, rect })
+  }
+
+  // 悬停 2s → 词条卡（ArticleView 内计时）
+  const handleWordHover = (seg: MarkedSeg, rect: DOMRect) => {
+    if (!seg.dict) return
+    clearCloseTimer()
+    setWordPopup({ key: seg.dict, rect })
+  }
+
+  // 离开词/卡 250ms 后关
+  const handleWordLeave = () => {
+    clearCloseTimer()
+    closeTimerRef.current = window.setTimeout(() => setWordPopup(null), 250)
   }
 
   // 图→词：点击图上部件标注点 → 文章滚动到该部件句
@@ -131,12 +193,13 @@ export default function ThingPage() {
         </div>
       </div>
 
-      {/* 主体：文章列 + 图列 */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      {/* 主体：文章列 + 拖动分界 + 图列 */}
+      <div ref={splitPaneRef} className="flex-1 flex overflow-hidden min-h-0">
         {/* 文章主列 — 实色纸面，遮蔽背景网格（阅读面干净） */}
         <div
           ref={articleScrollRef}
-          className="flex-1 min-w-[560px] overflow-y-auto px-8 py-8 bg-canvas"
+          className="overflow-y-auto px-8 py-8 bg-canvas min-w-[420px]"
+          style={{ width: `${splitPct}%` }}
           onClick={() => setWordPopup(null)}
         >
           {mode === 'practice' ? (
@@ -152,6 +215,8 @@ export default function ThingPage() {
                 activePartId={activePartId}
                 activeSentenceIndex={inFlow ? flowStep.step.sentenceRef : null}
                 onSegmentClick={handleSegmentClick}
+                onWordHover={handleWordHover}
+                onWordLeave={handleWordLeave}
               />
 
               {/* Did you know — 静态小节（原 FunFacts 降级） */}
@@ -172,8 +237,23 @@ export default function ThingPage() {
           )}
         </div>
 
-        {/* 图辅列 — 方格纸（透出背景网格）+ 制图分界线 */}
-        <div className="w-[40%] min-w-[420px] relative border-l-2 border-ink-soft/70 flex-shrink-0">
+        {/* 拖动分界线 — 制图分隔，可拖调两栏宽 */}
+        <div
+          onMouseDown={startDrag}
+          onDoubleClick={() => setSplitPct(50)}
+          className="relative w-1.5 flex-shrink-0 cursor-col-resize bg-ink-soft/50 transition-colors hover:bg-hud-cyan z-10 group"
+          title="拖动调整 · 双击复位"
+        >
+          {/* 中央把手 */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-[3px] py-2 px-1.5 rounded">
+            <span className="block w-3 h-[2px] rounded bg-ink-soft group-hover:bg-canvas" />
+            <span className="block w-3 h-[2px] rounded bg-ink-soft group-hover:bg-canvas" />
+            <span className="block w-3 h-[2px] rounded bg-ink-soft group-hover:bg-canvas" />
+          </div>
+        </div>
+
+        {/* 图辅列 — 方格纸（透出背景网格） */}
+        <div className="flex-1 relative min-w-[360px]">
           <ThingScene
             thing={thing}
             highlightPartId={sceneHighlight}
@@ -201,12 +281,14 @@ export default function ThingPage() {
         onNext={goNextThing}
       />
 
-      {/* 词条卡 */}
+      {/* 词条卡（悬停触发；卡上悬停不关） */}
       {wordPopup && (
         <WordPopup
           dictKey={wordPopup.key}
           entry={lookupWord(wordPopup.key)}
           anchorRect={wordPopup.rect}
+          onEnter={clearCloseTimer}
+          onLeave={handleWordLeave}
           onClose={() => setWordPopup(null)}
         />
       )}
