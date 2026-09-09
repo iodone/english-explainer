@@ -17,12 +17,12 @@ export const washingMachine: ThingData = {
     'If the hot air box gets too hot, your clothes can get smaller and smaller.',
   ],
   parts: [
-    { id: 'drum', label: 'Round Turning Box', realName: 'Drum', position: [0, 0, 0] },
-    { id: 'motor', label: 'Spinning Power', realName: 'Electric Motor', position: [0, -1, 0] },
+    { id: 'drum', label: 'Round Turning Box', realName: 'Drum', position: [0, 0, 0], finish: 'titanium' },
+    { id: 'motor', label: 'Spinning Power', realName: 'Electric Motor', position: [0, -1, 0], finish: 'cold' },
     { id: 'water-in', label: 'Water In', realName: 'Water Inlet', position: [-1, 1, 0] },
     { id: 'soap', label: 'Soap Box', realName: 'Detergent Dispenser', position: [-1, 0.5, 0] },
     { id: 'pump', label: 'Water Pusher', realName: 'Drain Pump', position: [0, -1, 1] },
-    { id: 'hot-air', label: 'Hot Air Blower', realName: 'Heating Element', position: [1, 0, 0] },
+    { id: 'hot-air', label: 'Hot Air Blower', realName: 'Heating Element', position: [1, 0, 0], finish: 'warning' },
   ],
   article: [
     {

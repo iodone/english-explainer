@@ -8,9 +8,9 @@ import {
   GizmoHelper,
   GizmoViewport,
 } from '@react-three/drei'
-import { createContext, useContext, useRef, useState } from 'react'
+import { createContext, useContext, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import type { ThingData } from '../data/types'
+import type { PartFinish, ThingData } from '../data/types'
 
 /**
  * ThingScene — 3D 草稿图纸 viewer（word-part linking）
@@ -32,11 +32,60 @@ const INK = '#2C2A25'
 const INK_SOFT = '#5A554C'
 /** JX-7b 军工灰：外壳半透明实体面 */
 const HULL_GREY = '#6E6C64'
+/** JX-7b 冷灰（结构件/舱段） */
+const COLD_GREY = '#96999D'
+/** JX-7b 钛白（微暖，配泛黄纸调） */
+const TITANIUM = '#D9D5C9'
+/** JX-7b 工业警示红：仅核心舱/传感器/推进器类功能点缀位 */
+const WARNING_RED = '#E8453C'
 /** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
 const PAPER = '#F4F1EA'
 
-/** 图→词点击通道：SketchMesh（几何深处）经 context 触达，不逐层传 prop */
-const PartClickContext = createContext<((partId: string) => void) | null>(null)
+/**
+ * 部件配色池（JX-7b §1.5 色彩规范）：
+ * 三灰阶层次（军工灰/冷灰/钛白）+ 警示红点缀。
+ * 数据层 ThingPart.finish 决定角色；SketchMesh 初值与 usePartHighlight
+ * 常态 lerp 目标共用此表（Color 实例只读，lerp 不改入参）。
+ */
+const FINISH_POOL: Record<
+  PartFinish,
+  { face: THREE.Color; faceOpacity: number; line: THREE.Color; lineOpacity: number }
+> = {
+  hull: {
+    face: new THREE.Color(HULL_GREY),
+    faceOpacity: 0.1,
+    line: new THREE.Color(INK),
+    lineOpacity: 0.85,
+  },
+  cold: {
+    face: new THREE.Color(COLD_GREY),
+    faceOpacity: 0.12,
+    line: new THREE.Color(INK),
+    lineOpacity: 0.8,
+  },
+  titanium: {
+    face: new THREE.Color(TITANIUM),
+    faceOpacity: 0.16,
+    line: new THREE.Color(INK),
+    lineOpacity: 0.85,
+  },
+  warning: {
+    face: new THREE.Color(WARNING_RED),
+    faceOpacity: 0.3,
+    line: new THREE.Color(WARNING_RED),
+    lineOpacity: 0.95,
+  },
+}
+
+/** 图→词点击 + 部件配色查询：SketchMesh（几何深处）经 context 触达，不逐层传 prop */
+interface PartMeta {
+  onPartClick: ((partId: string) => void) | null
+  finishOf: (partId: string) => PartFinish
+}
+const PartMetaContext = createContext<PartMeta>({
+  onPartClick: null,
+  finishOf: () => 'hull',
+})
 
 export interface ThingSceneProps {
   thing: ThingData
@@ -55,6 +104,15 @@ export default function ThingScene({
   dimOthers = false,
   onPartClick,
 }: ThingSceneProps) {
+  // partId → 配色角色（数据驱动，几何层不重复配色知识）
+  const partMeta = useMemo<PartMeta>(
+    () => ({
+      onPartClick: onPartClick ?? null,
+      finishOf: partId => thing.parts.find(p => p.id === partId)?.finish ?? 'hull',
+    }),
+    [thing, onPartClick],
+  )
+
   return (
     <div className="w-full h-full reticle">
       {/* HUD overlay labels */}
@@ -79,7 +137,7 @@ export default function ThingScene({
         camera={{ position: [5, 3, 5], fov: 50 }}
         style={{ background: PAPER }}
       >
-        <PartClickContext.Provider value={onPartClick ?? null}>
+        <PartMetaContext.Provider value={partMeta}>
           {/* key=thing.id：切模型时 Bounds 重新 fit；margin 略松给标注留空间 */}
           <Bounds key={thing.id} fit clip observe margin={1.1}>
             <SketchModel
@@ -90,7 +148,7 @@ export default function ThingScene({
               dimOthers={dimOthers}
             />
           </Bounds>
-        </PartClickContext.Provider>
+        </PartMetaContext.Provider>
         <AnnotationLabels
           thing={thing}
           highlightPartId={highlightPartId}
@@ -132,7 +190,9 @@ interface HighlightState {
 
 /**
  * 部件草稿线状态机：每帧 lerp 到目标（点亮有渐变，仪器感）。
- * 双材质：本体半透明灰面（体量）+ 子级 drei <Edges> 墨线（轮廓）。
+ * 双材质：本体半透明面（体量）+ 子级 drei <Edges> 轮廓线。
+ * 常态目标 = 部件配色角色（FINISH_POOL，JX-7b 三灰阶 + 警示红）；
+ * 激活/已过/压暗覆盖透明度与线宽，激活色 = thing accent（学习聚焦语义）。
  */
 function usePartHighlight(
   root: React.RefObject<THREE.Group | null>,
@@ -140,8 +200,12 @@ function usePartHighlight(
   state: HighlightState,
 ) {
   const accent = new THREE.Color(thing.color)
-  const hullGrey = new THREE.Color(HULL_GREY)
-  const ink = new THREE.Color(INK)
+
+  const finishMap = useMemo(() => {
+    const m = new Map<string, PartFinish>()
+    for (const p of thing.parts) m.set(p.id, p.finish ?? 'hull')
+    return m
+  }, [thing])
 
   useFrame(() => {
     const group = root.current
@@ -162,11 +226,13 @@ function usePartHighlight(
       if (!edges) return
       const lineMat = edges.material as THREE.MeshBasicMaterial & { linewidth: number }
 
-      let lineOpacity = 0.85
-      let lineColor: THREE.Color = ink
+      // 常态 = 配色角色
+      const base = FINISH_POOL[finishMap.get(partId) ?? 'hull']
+      let lineOpacity = base.lineOpacity
+      let lineColor: THREE.Color = base.line
       let lineWidth = 1
-      let faceOpacity = 0.1
-      let faceColor: THREE.Color = hullGrey
+      let faceOpacity = base.faceOpacity
+      let faceColor: THREE.Color = base.face
 
       if (state.activePartIds.includes(partId)) {
         lineOpacity = 1; lineColor = accent; lineWidth = 2.5
@@ -211,8 +277,8 @@ function SketchModel({ thing, ...state }: { thing: ThingData } & HighlightState)
 /* ─── Sketch primitives ─── */
 
 /**
- * 草稿网格体（JX-7b §材质分层）：
- * 半透明军工灰实体面（体量/遮蔽感）+ Edges 墨线轮廓（非三角剖分）。
+ * 草稿网格体（JX-7b §材质分层 + §色彩）：
+ * 半透明实体面（体量/遮蔽感）+ Edges 轮廓线，色按 ThingPart.finish 角色。
  * 点击本体 = 点部件（图→词）。
  */
 function SketchMesh({
@@ -220,8 +286,9 @@ function SketchMesh({
   children,
   ...props
 }: React.ComponentProps<'mesh'> & { partId?: string }) {
-  const onPartClick = useContext(PartClickContext)
+  const { onPartClick, finishOf } = useContext(PartMetaContext)
   const clickable = !!partId && !!onPartClick
+  const base = FINISH_POOL[partId ? finishOf(partId) : 'hull']
 
   return (
     <mesh
@@ -253,12 +320,18 @@ function SketchMesh({
     >
       {children}
       <meshBasicMaterial
-        color={HULL_GREY}
+        color={base.face}
         transparent
-        opacity={0.1}
+        opacity={base.faceOpacity}
         depthWrite={false}
       />
-      <Edges color={INK} lineWidth={1} threshold={10} transparent opacity={0.85} />
+      <Edges
+        color={base.line}
+        lineWidth={1}
+        threshold={10}
+        transparent
+        opacity={base.lineOpacity}
+      />
     </mesh>
   )
 }
@@ -527,7 +600,9 @@ function AnnotationLabels({
         const isActive =
           highlightPartId === part.id || activePartIds.includes(part.id)
         const show = hoveredNow || isActive
-        const dotColor = isActive ? accent : hoveredNow ? '#3ECFCF' : INK
+        // 常态 dot 跟部件配色角色：警示红件红 dot，灰件墨 dot
+        const idleColor = part.finish === 'warning' ? WARNING_RED : INK
+        const dotColor = isActive ? accent : hoveredNow ? '#3ECFCF' : idleColor
         const dotOpacity = dimOthers && !isActive ? 0.2 : show ? 1 : 0.85
         return (
           <group key={part.id} position={part.position}>

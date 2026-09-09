@@ -17,12 +17,12 @@ export const nuclearReactor: ThingData = {
     'The hot parts must stay in water all the time so they never get too hot.',
   ],
   parts: [
-    { id: 'core', label: 'Hot Part', realName: 'Reactor Core', position: [0, 0.5, 0] },
+    { id: 'core', label: 'Hot Part', realName: 'Reactor Core', position: [0, 0.5, 0], finish: 'warning' },
     { id: 'rods', label: 'Sticks That Stop Heat', realName: 'Control Rods', position: [0, 2.2, 0] },
-    { id: 'water', label: 'Hot Water Box', realName: 'Coolant System', position: [1.5, 0, 0] },
+    { id: 'water', label: 'Hot Water Box', realName: 'Coolant System', position: [1.5, 0, 0], finish: 'cold' },
     { id: 'steam', label: 'Steam Maker', realName: 'Steam Generator', position: [2.5, 1, 0] },
-    { id: 'wheel', label: 'Power Wheel', realName: 'Turbine', position: [3.5, 1, 0] },
-    { id: 'building', label: 'Big Round House', realName: 'Containment Dome', position: [0, 3, 0] },
+    { id: 'wheel', label: 'Power Wheel', realName: 'Turbine', position: [3.5, 1, 0], finish: 'warning' },
+    { id: 'building', label: 'Big Round House', realName: 'Containment Dome', position: [0, 3, 0], finish: 'titanium' },
   ],
   article: [
     {

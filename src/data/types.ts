@@ -23,11 +23,20 @@ export interface ArticleParagraph {
   sentences: Sentence[]
 }
 
+/**
+ * 部件配色角色（JX-7b 色彩规范，DESIGN §1.5）：
+ * - hull 军工灰（默认）· cold 冷灰 · titanium 钛白 —— 三灰阶层次
+ * - warning 警示红 —— 仅核心舱/传感器/推进器类功能指示位（每件 1-2 处）
+ */
+export type PartFinish = 'hull' | 'cold' | 'titanium' | 'warning'
+
 export interface ThingPart {
   id: string
   label: string        // simple name（Munroe 式命名）
   realName: string     // 真实术语
   position: [number, number, number]
+  /** 配色角色，缺省 hull */
+  finish?: PartFinish
 }
 
 /** 过程动画步骤 */

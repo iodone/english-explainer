@@ -17,12 +17,12 @@ export const curiosityRover: ThingData = {
     'It is about the size of a small car.',
   ],
   parts: [
-    { id: 'body', label: 'Car Body', realName: 'Warm Electronics Box', position: [0, 0.5, 0] },
-    { id: 'wheels', label: 'Rolling Feet', realName: 'Rocker-Bogie Wheels', position: [0, -0.5, 0] },
-    { id: 'mast', label: 'Long Neck', realName: 'Camera Mast', position: [0, 1.5, 0] },
+    { id: 'body', label: 'Car Body', realName: 'Warm Electronics Box', position: [0, 0.5, 0], finish: 'titanium' },
+    { id: 'wheels', label: 'Rolling Feet', realName: 'Rocker-Bogie Wheels', position: [0, -0.5, 0], finish: 'cold' },
+    { id: 'mast', label: 'Long Neck', realName: 'Camera Mast', position: [0, 1.5, 0], finish: 'warning' },
     { id: 'arm', label: 'Reaching Hand', realName: 'Robotic Arm', position: [0, 0, 1] },
-    { id: 'power', label: 'Hot Box', realName: 'RTG Power Source', position: [-1, 0.8, 0] },
-    { id: 'brain', label: 'Think Box', realName: 'Rover Computer', position: [0, 0.5, 0] },
+    { id: 'power', label: 'Hot Box', realName: 'RTG Power Source', position: [-1, 0.8, 0], finish: 'warning' },
+    { id: 'brain', label: 'Think Box', realName: 'Rover Computer', position: [0, 0.5, 0], finish: 'cold' },
   ],
   article: [
     {

@@ -17,12 +17,12 @@ export const helicopter: ThingData = {
     'Even if the hot air machine stops, the turning wings can keep turning by themselves for a short time, so the boat can still come down safely.',
   ],
   parts: [
-    { id: 'rotor', label: 'Turning Wings', realName: 'Main Rotor', position: [0, 2.5, 0] },
+    { id: 'rotor', label: 'Turning Wings', realName: 'Main Rotor', position: [0, 2.5, 0], finish: 'cold' },
     { id: 'tail', label: 'Back Turning Stick', realName: 'Tail Rotor', position: [0, 1, -3] },
-    { id: 'body', label: 'Sky Boat Body', realName: 'Fuselage', position: [0, 0, 0] },
-    { id: 'engine', label: 'Hot Air Machine', realName: 'Turboshaft Engine', position: [0, 1.5, 0] },
+    { id: 'body', label: 'Sky Boat Body', realName: 'Fuselage', position: [0, 0, 0], finish: 'titanium' },
+    { id: 'engine', label: 'Hot Air Machine', realName: 'Turboshaft Engine', position: [0, 1.5, 0], finish: 'warning' },
     { id: 'skids', label: 'Standing Legs', realName: 'Landing Skids', position: [0, -1, 0] },
-    { id: 'window', label: 'See-Through Front', realName: 'Windshield', position: [0, 0.5, 1.5] },
+    { id: 'window', label: 'See-Through Front', realName: 'Windshield', position: [0, 0.5, 1.5], finish: 'warning' },
   ],
   article: [
     {

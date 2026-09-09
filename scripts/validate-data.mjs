@@ -58,17 +58,28 @@ for (const thing of things) {
     }
   }
 
-  // 4. 每个部件至少被文中标注一次
+  // 4. 每个部件至少被文中标注一次 + finish 枚举
   const markedParts = new Set(
     thing.article.flatMap(p => p.sentences.flat())
       .filter(s => typeof s !== 'string' && s.part)
       .map(s => s.part),
   )
+  const FINISHES = new Set(['hull', 'cold', 'titanium', 'warning'])
+  let warnings = 0
   for (const part of thing.parts) {
     if (!markedParts.has(part.id)) {
       console.error(`✗ ${label} 部件 "${part.id}" 未在文中标注`)
       errors++
     }
+    if (part.finish !== undefined && !FINISHES.has(part.finish)) {
+      console.error(`✗ ${label} 部件 "${part.id}" finish "${part.finish}" 不在枚举内`)
+      errors++
+    }
+    if (part.finish === 'warning') warnings++
+  }
+  if (warnings > 2) {
+    console.error(`✗ ${label} warning 红点缀 ${warnings} 处超过 2（JX-7b：点缀不喧宾）`)
+    errors++
   }
 
   console.log(

@@ -31,8 +31,13 @@
 | 结构件（臂、杆、触手、执行器） | 哑光低反射复合材料（matte 100% 粗糙度，无高光），带纵向低多边形结构线 | Rod 4 面方杆 + Edges 纵线 |
 
 **色彩**：军工灰 / 冷灰 / 钛白 + 微弱泛黄复古图纸调（纸面 #F4F1EA 承担）；
-点缀色 = 高饱和工业警示红 `#E8453C`，仅用于核心舱 / 传感器 / 推进器末端等功能指示位
-（数据层 part 角色标记支持后落地，不在常态乱撒）。
+点缀色 = 高饱和工业警示红 `#E8453C`，仅用于核心舱 / 传感器 / 推进器末端等功能指示位。
+**已落地（2026-09-09）**：`ThingPart.finish?: 'hull' | 'cold' | 'titanium' | 'warning'` 数据角色
+驱动渲染（FINISH_POOL 单源：面/线色 + 透明度），校验脚本约束每件 warning ≤ 2 处。
+激活态一律覆盖为 thing accent（学习聚焦语义），常态红件标注 dot 同红。
+当前标注：reactor = core+wheel 红 / dome 钛白 / water 冷灰；helicopter = engine+window 红 / body 钛白 / rotor 冷灰；
+station = solar+dome 红 / truss 钛白 / modules 冷灰；rover = mast+power 红 / body 钛白 / wheels+brain 冷灰；
+washer = hot-air 红 / drum 钛白 / motor 冷灰。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -259,6 +264,14 @@
 - [x] 词条卡悬停 2s 出现（power 实测 2.2s 出卡）；离词 250ms 关、卡上悬停保持、点外即关
 - [x] 取景自适应：drei `<Bounds fit clip observe margin={1.1} key={thing.id}>`——默认取景合适（模型约占画布高 55%），分栏拖动后画布 resize 自动重取景；调相机距离而非缩放模型（标注 dot 与模型同坐标）
 - [x] JX-7b 规范落地（§1.5）：外壳半透明灰实体面（#6E6C64 · depthWrite off）+ 墨 Edges；地面透视网格 + 虚线中心轴；右上角三色坐标轴 gizmo；等宽大写 billboard 标注
+
+### 验收对照 · 部件配色（2026-09-09 第三轮）
+
+- [x] `ThingPart.finish` 四角色数据驱动：reactor 四色同屏可见（core/wheel 警示红、dome 钛白、water 冷灰、rods/steam 军工灰）；helicopter 抽查通过（body 钛白、window 警示红）
+- [x] 常态→激活覆盖：core（红）→ accent 青绿（线 2.5 + 面 .28），word 侧 "hot part"×3 + "heavy metal" 同步点亮；water（冷灰）→ accent 亦验证
+- [x] 警示红件标注 dot 同红（HOT AIR MACHINE 无几何仅 dot，红 dot 正确标记）
+- [x] 校验：finish 枚举 + 每件 warning ≤ 2（validate-data.mjs）
+- 备注：raycast 取最近命中——reactor 的 dome 在多数视角遮挡 core（安全壳包着堆芯，物理写实），学习者可旋转视角点 core；engine/brain/motor/water-in 数据 part 无几何体（既有空缺，仅标注 dot）
 
 ### 实施备注（与规格的已知偏差）
 
