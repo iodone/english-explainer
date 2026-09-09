@@ -1,0 +1,222 @@
+/* Thing Explainer HUD — Design Tokens
+ * Parchment canvas + sci-fi HUD overlay aesthetic
+ */
+
+@import "tailwindcss";
+
+@theme {
+  /* Canvas — aged parchment */
+  --color-canvas: #F4F1EA;
+  --color-canvas-dark: #E8E4DA;
+  --color-canvas-grid: rgba(180, 170, 155, 0.15);
+
+  /* Ink — technical drawing */
+  --color-ink: #2C2A25;
+  --color-ink-soft: #5A554C;
+  --color-ink-faint: #8E8678;
+
+  /* HUD accents */
+  --color-hud-red: #E8453C;
+  --color-hud-orange: #F0923A;
+  --color-hud-cyan: #3ECFCF;
+  --color-hud-green: #4ADE80;
+  --color-hud-blue: #60A5FA;
+
+  /* Wireframe */
+  --color-wire: rgba(62, 207, 207, 0.6);
+  --color-wire-glow: rgba(62, 207, 207, 0.9);
+  --color-wire-dim: rgba(62, 207, 207, 0.2);
+
+  /* Typography */
+  --font-display: 'Newsreader', 'Georgia', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+/* Grid background pattern */
+.canvas-grid {
+  background-color: var(--color-canvas);
+  background-image:
+    linear-gradient(var(--color-canvas-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-canvas-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  position: relative;
+}
+
+.canvas-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--color-canvas-grid) 2px, transparent 2px),
+    linear-gradient(90deg, var(--color-canvas-grid) 2px, transparent 2px);
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+/* Reticle crosshair */
+.reticle {
+  position: relative;
+}
+.reticle::after {
+  content: '+';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--color-wire-dim);
+  pointer-events: none;
+}
+
+/* HUD panel styling */
+.hud-panel {
+  background: rgba(244, 241, 234, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(180, 170, 155, 0.3);
+  position: relative;
+}
+
+.hud-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-hud-cyan) 20%,
+    var(--color-hud-cyan) 80%,
+    transparent 100%
+  );
+  opacity: 0.4;
+}
+
+/* Scan line animation */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scanline::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-hud-cyan),
+    transparent
+  );
+  opacity: 0.15;
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Blinking status indicator */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.status-blink {
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* Waveform animation */
+@keyframes waveform {
+  0% { transform: scaleY(0.3); }
+  25% { transform: scaleY(1); }
+  50% { transform: scaleY(0.6); }
+  75% { transform: scaleY(0.9); }
+  100% { transform: scaleY(0.3); }
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--color-hud-cyan)); }
+  50% { filter: drop-shadow(0 0 12px var(--color-hud-cyan)); }
+}
+
+/* Number ticker */
+@keyframes ticker {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-canvas-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-faint);
+  border-radius: 3px;
+}
+
+/* Thing title — Munroe style hand-lettering feel */
+.thing-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Micro label — HUD data labels */
+.micro-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+/* Annotation line */
+.annotation-line {
+  position: relative;
+}
+.annotation-line::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 16px;
+  height: 1px;
+  background: var(--color-hud-cyan);
+  opacity: 0.6;
+}
+
+/* Panel corner accents */
+.corner-accent {
+  position: relative;
+}
+.corner-accent::before,
+.corner-accent::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--color-hud-cyan);
+  opacity: 0.5;
+}
+.corner-accent::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+.corner-accent::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
