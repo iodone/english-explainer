@@ -1,18 +1,35 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Float, Line, Text } from '@react-three/drei'
+import { OrbitControls, Line, Text, Edges } from '@react-three/drei'
 import { useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { ThingData } from '../data/types'
 
 /**
- * ThingScene — 3D wireframe viewer with word-part linking
+ * ThingScene — 3D 草稿图纸 viewer（word-part linking）
+ *
+ * 草稿图纸风格：几何体只画轮廓边缘（Edges，非三角剖分 wireframe），
+ * 统一墨色 #2C2A25 画在方格纸上；高亮/流程步骤才引入 thing accent 色。
+ * 模型静止（无 Float 漂浮），图纸感 = 静态制图 + 可拖拽观察。
  *
  * 受控高亮（DESIGN.md §4.1）：
- * - highlightPartId：阅读态，文中部件词点击 → 该部件点亮（thing.color）
+ * - highlightPartId：阅读态，文中部件词点击 → 该部件墨线变 accent + 加粗
  * - activePartIds / pastPartIds / dimOthers：flow 播放态，
- *   当前步全亮、已过步 55%、未到步 15%
+ *   当前步 accent 加粗、已过步 50%、未到步 12%
  * - onPartClick：点击部件标注点 → 文章列滚动到对应句（图→词）
  */
+
+const INK = '#2C2A25'
+const INK_SOFT = '#5A554C'
+
+/** 每个 thing 的取景距离（模型尺度不同，统一相机会显大小不一） */
+const THING_CAMERA: Record<string, [number, number, number]> = {
+  'nuclear-reactor': [5, 3, 5],
+  helicopter: [3.4, 2.1, 3.4],
+  'space-station': [5, 3, 5],
+  'curiosity-rover': [4.2, 2.5, 4.2],
+  'washing-machine': [4.6, 2.7, 4.6],
+}
+
 export interface ThingSceneProps {
   thing: ThingData
   highlightPartId?: string | null
@@ -49,14 +66,12 @@ export default function ThingScene({
         <div className="micro-label">DRAG TO ROTATE · SCROLL TO ZOOM</div>
       </div>
 
-      {/* 3D Canvas */}
+      {/* 3D Canvas — 透明底，透出 CSS 方格纸 */}
       <Canvas
-        camera={{ position: [5, 3, 5], fov: 50 }}
+        camera={{ position: THING_CAMERA[thing.id] ?? [5, 3, 5], fov: 50 }}
         style={{ background: 'transparent' }}
       >
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={0.5} color="#3ECFCF" />
-        <WireframeModel
+        <SketchModel
           thing={thing}
           highlightPartId={highlightPartId}
           activePartIds={activePartIds}
@@ -70,14 +85,14 @@ export default function ThingScene({
           dimOthers={dimOthers}
           onPartClick={onPartClick}
         />
-        <GridFloor />
+        <CenterAxes />
         <OrbitControls
           enableDamping
           dampingFactor={0.05}
           minDistance={3}
           maxDistance={15}
           autoRotate
-          autoRotateSpeed={0.5}
+          autoRotateSpeed={0.4}
         />
       </Canvas>
     </div>
@@ -93,7 +108,11 @@ interface HighlightState {
   dimOthers: boolean
 }
 
-/** 部件材质状态机：每帧 lerp 到目标亮度，点亮有渐变（仪器感） */
+/**
+ * 部件草稿线状态机：每帧 lerp 到目标（点亮有渐变，仪器感）。
+ * SketchMesh 本体不可见，实际画线的是其子级 drei <Edges>
+ * （Mesh<LineSegmentsGeometry, LineMaterial>）——操作 LineMaterial。
+ */
 function usePartHighlight(
   root: React.RefObject<THREE.Group | null>,
   thing: ThingData,
@@ -107,92 +126,93 @@ function usePartHighlight(
     group.traverse(node => {
       if (!(node instanceof THREE.Mesh)) return
       const partId = node.name
-      if (!partId) return // 未标注部件的装饰 mesh 不参与
-      const mat = node.material as THREE.MeshBasicMaterial
+      if (!partId) return
+      const edges = node.children.find(
+        c =>
+          c instanceof THREE.Mesh &&
+          (c.material as THREE.Material | undefined)?.type === 'LineMaterial',
+      ) as THREE.Mesh | undefined
+      if (!edges) return
+      const mat = edges.material as THREE.MeshBasicMaterial & { linewidth: number }
       if (!mat.userData.baseColor) {
         mat.userData.baseColor = mat.color.clone()
       }
       const base = mat.userData.baseColor as THREE.Color
 
-      let targetOpacity = 0.6
+      let targetOpacity = 0.85
       let targetColor = base
+      let targetWidth = 1
       if (state.activePartIds.includes(partId)) {
-        targetOpacity = 0.95
+        targetOpacity = 1
         targetColor = accent
+        targetWidth = 2.5
       } else if (state.pastPartIds.includes(partId)) {
-        targetOpacity = 0.55
+        targetOpacity = 0.5
       } else if (state.dimOthers) {
-        targetOpacity = 0.15
+        targetOpacity = 0.12
       } else if (state.highlightPartId === partId) {
-        targetOpacity = 0.95
+        targetOpacity = 1
         targetColor = accent
+        targetWidth = 2.5
       }
 
       mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, 0.15)
       mat.color.lerp(targetColor, 0.15)
+      mat.linewidth = THREE.MathUtils.lerp(mat.linewidth, targetWidth, 0.15)
     })
   })
 }
 
 /**
- * Procedural wireframe model — switches geometry based on thing.id
- * 每个 mesh 带 name={partId}，供 usePartHighlight 驱动
+ * 草稿线框模型 — 按 thing.id 分发几何体。
+ * SketchMesh 带 name={partId}，供 usePartHighlight 驱动。
  */
-function WireframeModel({ thing, ...state }: { thing: ThingData } & HighlightState) {
+function SketchModel({ thing, ...state }: { thing: ThingData } & HighlightState) {
   const groupRef = useRef<THREE.Group>(null)
   usePartHighlight(groupRef, thing, state)
 
   return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
-      <group ref={groupRef}>
-        {thing.id === 'nuclear-reactor' && <NuclearReactorWire />}
-        {thing.id === 'helicopter' && <HelicopterWire />}
-        {thing.id === 'space-station' && <SpaceStationWire />}
-        {thing.id === 'curiosity-rover' && <CuriosityRoverWire />}
-        {thing.id === 'washing-machine' && <WashingMachineWire />}
-      </group>
-    </Float>
+    <group ref={groupRef}>
+      {thing.id === 'nuclear-reactor' && <NuclearReactorSketch />}
+      {thing.id === 'helicopter' && <HelicopterSketch />}
+      {thing.id === 'space-station' && <SpaceStationSketch />}
+      {thing.id === 'curiosity-rover' && <CuriosityRoverSketch />}
+      {thing.id === 'washing-machine' && <WashingMachineSketch />}
+    </group>
   )
 }
 
-/* ─── Wireframe Geometries ─── */
+/* ─── Sketch primitives ─── */
 
-function WireframeMaterial({ color = '#3ECFCF' }: { color?: string }) {
+/**
+ * 草稿网格体：geometry 只画轮廓边缘（EdgesGeometry），
+ * 不画三角剖分线 —— 从"3D 渲染"变成"制图"的关键。
+ */
+function SketchMesh({
+  partId,
+  children,
+  ...props
+}: React.ComponentProps<'mesh'> & { partId?: string }) {
   return (
-    <meshBasicMaterial
-      color={color}
-      wireframe
-      transparent
-      opacity={0.6}
-    />
+    <mesh name={partId} {...props}>
+      {children}
+      <meshBasicMaterial visible={false} />
+      <Edges color={INK} lineWidth={1} threshold={10} transparent opacity={0.85} />
+    </mesh>
   )
 }
 
-function GlowLine({ points, color = '#3ECFCF' }: { points: [number, number, number][]; color?: string }) {
-  return (
-    <Line
-      points={points}
-      color={color}
-      lineWidth={1.5}
-      transparent
-      opacity={0.5}
-    />
-  )
-}
-
-/** 细杆 mesh —— 可被部件高亮命中的"线"（GlowLine 的 Line 不参与高亮） */
+/** 细杆 —— 可被部件高亮命中的"线"（4 面方杆，手绘粗线感） */
 function Rod({
   from,
   to,
   radius = 0.03,
   partId,
-  color = '#3ECFCF',
 }: {
   from: [number, number, number]
   to: [number, number, number]
   radius?: number
   partId?: string
-  color?: string
 }) {
   const start = new THREE.Vector3(...from)
   const end = new THREE.Vector3(...to)
@@ -204,99 +224,102 @@ function Rod({
   )
   const { x, y, z, w } = quat
   return (
-    <mesh
-      name={partId}
+    <SketchMesh
+      partId={partId}
       position={mid.toArray()}
       quaternion={[x, y, z, w]}
     >
-      <cylinderGeometry args={[radius, radius, dir.length(), 6]} />
-      <WireframeMaterial color={color} />
-    </mesh>
+      <cylinderGeometry args={[radius, radius, dir.length(), 4]} />
+    </SketchMesh>
   )
 }
 
-function NuclearReactorWire() {
+/** 淡墨辅助线（面板格线等，不参与高亮） */
+function DraftLine({ points }: { points: [number, number, number][] }) {
+  return (
+    <Line
+      points={points}
+      color={INK}
+      lineWidth={1}
+      transparent
+      opacity={0.4}
+    />
+  )
+}
+
+/* ─── Geometries（草稿化，统一墨线） ─── */
+
+function NuclearReactorSketch() {
   return (
     <group>
       {/* Containment dome — hemisphere */}
-      <mesh name="building" position={[0, 2, 0]}>
+      <SketchMesh partId="building" position={[0, 2, 0]}>
         <sphereGeometry args={[2, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Reactor vessel — cylinder */}
-      <mesh name="core" position={[0, 0.5, 0]}>
+      <SketchMesh partId="core" position={[0, 0.5, 0]}>
         <cylinderGeometry args={[1.2, 1.2, 3, 12]} />
-        <WireframeMaterial color="#E8453C" />
-      </mesh>
+      </SketchMesh>
       {/* Control rods */}
       {[-0.4, 0, 0.4].map((x, i) => (
-        <mesh key={i} name="rods" position={[x, 2.2, 0]}>
+        <SketchMesh key={i} partId="rods" position={[x, 2.2, 0]}>
           <boxGeometry args={[0.15, 1.5, 0.15]} />
-          <WireframeMaterial color="#F0923A" />
-        </mesh>
+        </SketchMesh>
       ))}
       {/* Cooling towers */}
       {[-2.5, 2.5].map((x, i) => (
-        <mesh key={i} name="water" position={[x, 1, 0]}>
+        <SketchMesh key={i} partId="water" position={[x, 1, 0]}>
           <cylinderGeometry args={[0.6, 0.8, 3, 8]} />
-          <WireframeMaterial />
-        </mesh>
+        </SketchMesh>
       ))}
       {/* Steam pipes → turbine */}
       <Rod from={[1.2, 1, 0]} to={[2.6, 1, 0]} partId="steam" />
       <Rod from={[-1.2, 1, 0]} to={[-2.6, 1, 0]} partId="steam" />
       {/* Power wheel (turbine) */}
-      <mesh name="wheel" position={[3.2, 1, 0]} rotation={[0, 0, Math.PI / 2]}>
+      <SketchMesh partId="wheel" position={[3.2, 1, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.5, 0.5, 0.35, 10]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Turbine blades */}
       {[0, 1, 2, 3, 4, 5].map(i => {
         const angle = (i / 6) * Math.PI * 2
         return (
-          <mesh
+          <SketchMesh
             key={i}
-            name="wheel"
+            partId="wheel"
             position={[3.2 + Math.cos(angle) * 0.7, 1 + Math.sin(angle) * 0.7, 0]}
             rotation={[0, 0, angle + Math.PI / 2]}
           >
             <boxGeometry args={[0.35, 0.06, 0.06]} />
-            <WireframeMaterial />
-          </mesh>
+          </SketchMesh>
         )
       })}
     </group>
   )
 }
 
-function HelicopterWire() {
+function HelicopterSketch() {
   return (
     <group>
       {/* Fuselage */}
-      <mesh name="body" position={[0, 0, 0]}>
+      <SketchMesh partId="body" position={[0, 0, 0]}>
         <capsuleGeometry args={[0.6, 2, 8, 12]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Main rotor */}
-      <mesh name="rotor" position={[0, 1.2, 0]}>
+      <SketchMesh partId="rotor" position={[0, 1.2, 0]}>
         <boxGeometry args={[4, 0.05, 0.3]} />
-        <WireframeMaterial color="#F0923A" />
-      </mesh>
+      </SketchMesh>
       {/* Rotor hub */}
-      <mesh name="rotor" position={[0, 1.2, 0]}>
+      <SketchMesh partId="rotor" position={[0, 1.2, 0]}>
         <cylinderGeometry args={[0.15, 0.15, 0.3, 8]} />
-        <WireframeMaterial color="#F0923A" />
-      </mesh>
+      </SketchMesh>
       {/* Tail boom */}
-      <mesh name="tail" position={[0, 0.2, -2.5]}>
+      <SketchMesh partId="tail" position={[0, 0.2, -2.5]}>
         <boxGeometry args={[0.3, 0.3, 2.5]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Tail rotor */}
-      <mesh name="tail" position={[0.3, 0.2, -3.8]} rotation={[0, 0, Math.PI / 2]}>
+      <SketchMesh partId="tail" position={[0.3, 0.2, -3.8]} rotation={[0, 0, Math.PI / 2]}>
         <boxGeometry args={[1, 0.03, 0.15]} />
-        <WireframeMaterial color="#F0923A" />
-      </mesh>
+      </SketchMesh>
       {/* Landing skids — two rails + struts */}
       <Rod from={[-0.5, -1.2, 0.9]} to={[-0.5, -1.2, -0.9]} partId="skids" />
       <Rod from={[0.5, -1.2, 0.9]} to={[0.5, -1.2, -0.9]} partId="skids" />
@@ -305,132 +328,115 @@ function HelicopterWire() {
       <Rod from={[0.5, -0.8, 0.6]} to={[0.5, -1.2, 0.6]} partId="skids" />
       <Rod from={[0.5, -0.8, -0.6]} to={[0.5, -1.2, -0.6]} partId="skids" />
       {/* Windshield */}
-      <mesh name="window" position={[0, 0.3, 1.2]}>
+      <SketchMesh partId="window" position={[0, 0.3, 1.2]}>
         <sphereGeometry args={[0.5, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <WireframeMaterial color="#60A5FA" />
-      </mesh>
+      </SketchMesh>
     </group>
   )
 }
 
-function SpaceStationWire() {
+function SpaceStationSketch() {
   return (
     <group>
       {/* Central truss */}
-      <mesh name="truss" position={[0, 0, 0]}>
+      <SketchMesh partId="truss" position={[0, 0, 0]}>
         <boxGeometry args={[5, 0.3, 0.3]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Modules */}
       {[-1.5, 0, 1.5].map((x, i) => (
-        <mesh key={i} name="modules" position={[x, 0, 0.8]}>
+        <SketchMesh key={i} partId="modules" position={[x, 0, 0.8]}>
           <cylinderGeometry args={[0.4, 0.4, 1.2, 8]} />
-          <WireframeMaterial color="#60A5FA" />
-        </mesh>
+        </SketchMesh>
       ))}
       {/* Solar arrays */}
       {[-3, 3].map((x, i) => (
         <group key={i} position={[x, 0, 0]}>
-          <mesh name="solar">
+          <SketchMesh partId="solar">
             <boxGeometry args={[2.5, 1.8, 0.05]} />
-            <WireframeMaterial color="#F0923A" />
-          </mesh>
+          </SketchMesh>
           {/* Panel grid lines */}
-          <GlowLine points={[[-1.25, -0.9, 0.01], [-1.25, 0.9, 0.01]]} />
-          <GlowLine points={[[-0.625, -0.9, 0.01], [-0.625, 0.9, 0.01]]} />
-          <GlowLine points={[[0, -0.9, 0.01], [0, 0.9, 0.01]]} />
-          <GlowLine points={[[0.625, -0.9, 0.01], [0.625, 0.9, 0.01]]} />
+          <DraftLine points={[[-1.25, -0.9, 0.01], [-1.25, 0.9, 0.01]]} />
+          <DraftLine points={[[-0.625, -0.9, 0.01], [-0.625, 0.9, 0.01]]} />
+          <DraftLine points={[[0, -0.9, 0.01], [0, 0.9, 0.01]]} />
+          <DraftLine points={[[0.625, -0.9, 0.01], [0.625, 0.9, 0.01]]} />
         </group>
       ))}
       {/* Radiators */}
-      <mesh name="radiators" position={[2, 1, 0]}>
+      <SketchMesh partId="radiators" position={[2, 1, 0]}>
         <boxGeometry args={[1.5, 1, 0.05]} />
-        <WireframeMaterial color="#E8453C" />
-      </mesh>
+      </SketchMesh>
       {/* Cupola */}
-      <mesh name="dome" position={[0, -0.5, 1.2]}>
+      <SketchMesh partId="dome" position={[0, -0.5, 1.2]}>
         <sphereGeometry args={[0.3, 8, 6, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2]} />
-        <WireframeMaterial color="#60A5FA" />
-      </mesh>
+      </SketchMesh>
       {/* Long grabber (Canadarm) — two segments */}
-      <Rod from={[-0.5, 0.9, 0.8]} to={[0.2, 1.4, 0.4]} partId="arm" color="#F0923A" />
-      <Rod from={[0.2, 1.4, 0.4]} to={[0.9, 1.7, 0]} partId="arm" color="#F0923A" />
+      <Rod from={[-0.5, 0.9, 0.8]} to={[0.2, 1.4, 0.4]} partId="arm" />
+      <Rod from={[0.2, 1.4, 0.4]} to={[0.9, 1.7, 0]} partId="arm" />
     </group>
   )
 }
 
-function CuriosityRoverWire() {
+function CuriosityRoverSketch() {
   return (
     <group>
       {/* Body box */}
-      <mesh name="body" position={[0, 0.5, 0]}>
+      <SketchMesh partId="body" position={[0, 0.5, 0]}>
         <boxGeometry args={[1.5, 0.8, 2]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Camera mast */}
-      <mesh name="mast" position={[0, 1.8, 0.5]}>
+      <SketchMesh partId="mast" position={[0, 1.8, 0.5]}>
         <cylinderGeometry args={[0.08, 0.08, 1.5, 6]} />
-        <WireframeMaterial color="#F0923A" />
-      </mesh>
+      </SketchMesh>
       {/* Camera head */}
-      <mesh name="mast" position={[0, 2.5, 0.5]}>
+      <SketchMesh partId="mast" position={[0, 2.5, 0.5]}>
         <boxGeometry args={[0.4, 0.3, 0.3]} />
-        <WireframeMaterial color="#E8453C" />
-      </mesh>
+      </SketchMesh>
       {/* Wheels — 6 of them */}
       {[[-0.9, 0, 0.7], [-0.9, 0, -0.7], [0.9, 0, 0.7], [0.9, 0, -0.7], [-0.9, 0, 0], [0.9, 0, 0]].map(([x, y, z], i) => (
-        <mesh key={i} name="wheels" position={[x, y, z]} rotation={[0, 0, Math.PI / 2]}>
+        <SketchMesh key={i} partId="wheels" position={[x, y, z]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.35, 0.35, 0.15, 12]} />
-          <WireframeMaterial />
-        </mesh>
+        </SketchMesh>
       ))}
       {/* Robotic arm — two segments */}
-      <Rod from={[0, 0.5, 1]} to={[0, 0.35, 1.7]} partId="arm" color="#F0923A" radius={0.04} />
-      <Rod from={[0, 0.35, 1.7]} to={[0, 0.1, 2.3]} partId="arm" color="#F0923A" radius={0.04} />
+      <Rod from={[0, 0.5, 1]} to={[0, 0.35, 1.7]} partId="arm" radius={0.04} />
+      <Rod from={[0, 0.35, 1.7]} to={[0, 0.1, 2.3]} partId="arm" radius={0.04} />
       {/* RTG power */}
-      <mesh name="power" position={[-1, 0.8, 0]}>
+      <SketchMesh partId="power" position={[-1, 0.8, 0]}>
         <boxGeometry args={[0.4, 0.6, 0.4]} />
-        <WireframeMaterial color="#E8453C" />
-      </mesh>
+      </SketchMesh>
     </group>
   )
 }
 
-function WashingMachineWire() {
+function WashingMachineSketch() {
   return (
     <group>
       {/* Washing machine */}
-      <mesh name="drum" position={[-1.2, 0, 0]}>
+      <SketchMesh partId="drum" position={[-1.2, 0, 0]}>
         <boxGeometry args={[1.5, 2, 1.5]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Drum */}
-      <mesh name="drum" position={[-1.2, 0, 0.76]} rotation={[Math.PI / 2, 0, 0]}>
+      <SketchMesh partId="drum" position={[-1.2, 0, 0.76]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.55, 0.05, 8, 16]} />
-        <WireframeMaterial color="#4ADE80" />
-      </mesh>
+      </SketchMesh>
       {/* Door circle */}
-      <mesh name="drum" position={[-1.2, 0, 0.78]}>
+      <SketchMesh partId="drum" position={[-1.2, 0, 0.78]}>
         <ringGeometry args={[0.4, 0.55, 16]} />
-        <WireframeMaterial color="#4ADE80" />
-      </mesh>
+      </SketchMesh>
       {/* Dryer */}
-      <mesh name="hot-air" position={[1.2, 0, 0]}>
+      <SketchMesh partId="hot-air" position={[1.2, 0, 0]}>
         <boxGeometry args={[1.5, 2, 1.5]} />
-        <WireframeMaterial color="#F0923A" />
-      </mesh>
+      </SketchMesh>
       {/* Dryer drum */}
-      <mesh name="hot-air" position={[1.2, 0, 0.76]} rotation={[Math.PI / 2, 0, 0]}>
+      <SketchMesh partId="hot-air" position={[1.2, 0, 0.76]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.55, 0.05, 8, 16]} />
-        <WireframeMaterial color="#F0923A" />
-      </mesh>
+      </SketchMesh>
       {/* Control panel / soap box area */}
-      <mesh name="soap" position={[-1.2, 1.1, 0.76]}>
+      <SketchMesh partId="soap" position={[-1.2, 1.1, 0.76]}>
         <boxGeometry args={[1.2, 0.3, 0.05]} />
-        <WireframeMaterial />
-      </mesh>
+      </SketchMesh>
       {/* Connection pipe */}
-      <Rod from={[-0.45, 0.5, 0]} to={[0.45, 0.5, 0]} partId="pump" color="#4ADE80" />
+      <Rod from={[-0.45, 0.5, 0]} to={[0.45, 0.5, 0]} partId="pump" />
     </group>
   )
 }
@@ -460,18 +466,28 @@ function AnnotationLabels({
         const isActive =
           highlightPartId === part.id || activePartIds.includes(part.id)
         const show = hoveredNow || isActive
-        const dotColor = isActive ? accent : hoveredNow ? '#E8453C' : '#3ECFCF'
-        const dotOpacity = dimOthers && !isActive ? 0.2 : show ? 1 : 0.5
+        const dotColor = isActive ? accent : hoveredNow ? '#3ECFCF' : INK
+        const dotOpacity = dimOthers && !isActive ? 0.2 : show ? 1 : 0.85
         return (
           <group key={part.id} position={part.position}>
             {/* Dot marker — clickable (图→词) */}
             <mesh
-              onPointerOver={e => { e.stopPropagation(); setHovered(part.id) }}
-              onPointerOut={() => setHovered(null)}
-              onClick={e => { e.stopPropagation(); onPartClick?.(part.id) }}
+              onPointerOver={e => {
+                e.stopPropagation()
+                setHovered(part.id)
+                document.body.style.cursor = 'pointer'
+              }}
+              onPointerOut={() => {
+                setHovered(null)
+                document.body.style.cursor = ''
+              }}
+              onClick={e => {
+                e.stopPropagation()
+                onPartClick?.(part.id)
+              }}
               scale={show ? 1.5 : 1}
             >
-              <sphereGeometry args={[0.08, 8, 8]} />
+              <sphereGeometry args={[0.07, 8, 8]} />
               <meshBasicMaterial
                 color={dotColor}
                 transparent
@@ -481,16 +497,16 @@ function AnnotationLabels({
             {/* Leader line from dot to label */}
             <Line
               points={[[0, 0, 0], [0.3, 0.2, 0]]}
-              color={show ? dotColor : '#3ECFCF'}
+              color={show ? dotColor : INK}
               lineWidth={show ? 1.5 : 1}
               transparent
-              opacity={dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.4}
+              opacity={dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5}
             />
             {/* Label */}
             <Text
               position={[0.35, 0.2, 0]}
               fontSize={0.15}
-              color={show ? dotColor : '#5A554C'}
+              color={isActive ? accent : hoveredNow ? INK : INK_SOFT}
               anchorX="left"
               outlineWidth={0.01}
               outlineColor="#F4F1EA"
@@ -506,11 +522,30 @@ function AnnotationLabels({
 
 /* ─── Environment ─── */
 
-function GridFloor() {
+/** 图纸中心轴线（经典制图符号，虚线淡墨） */
+function CenterAxes() {
   return (
-    <gridHelper
-      args={[12, 24, '#8E8678', '#B4AA9B']}
-      position={[0, -2, 0]}
-    />
+    <group position={[0, -1.6, 0]}>
+      <Line
+        points={[[-6, 0, 0], [6, 0, 0]]}
+        color={INK}
+        lineWidth={1}
+        transparent
+        opacity={0.25}
+        dashed
+        dashSize={0.15}
+        gapSize={0.1}
+      />
+      <Line
+        points={[[0, 0, -6], [0, 0, 6]]}
+        color={INK}
+        lineWidth={1}
+        transparent
+        opacity={0.25}
+        dashed
+        dashSize={0.15}
+        gapSize={0.1}
+      />
+    </group>
   )
 }

@@ -16,7 +16,7 @@ interface PageActionsProps {
 
 export default function PageActions({ mode, thing, flowStep, onModeChange, onNext }: PageActionsProps) {
   return (
-    <div className="sticky bottom-0 z-30 px-8 py-4 border-t border-canvas-grid bg-canvas/85 backdrop-blur-sm">
+    <div className="sticky bottom-0 z-30 px-8 py-4 border-t border-ink-soft/40 bg-canvas">
       <div className="flex items-center gap-4">
         {mode === 'read' && (
           <>

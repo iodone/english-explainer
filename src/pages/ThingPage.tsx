@@ -133,10 +133,10 @@ export default function ThingPage() {
 
       {/* 主体：文章列 + 图列 */}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* 文章主列 */}
+        {/* 文章主列 — 实色纸面，遮蔽背景网格（阅读面干净） */}
         <div
           ref={articleScrollRef}
-          className="flex-1 min-w-[560px] overflow-y-auto px-8 py-8"
+          className="flex-1 min-w-[560px] overflow-y-auto px-8 py-8 bg-canvas"
           onClick={() => setWordPopup(null)}
         >
           {mode === 'practice' ? (
@@ -172,8 +172,8 @@ export default function ThingPage() {
           )}
         </div>
 
-        {/* 图辅列 */}
-        <div className="w-[40%] min-w-[420px] relative border-l border-canvas-grid flex-shrink-0">
+        {/* 图辅列 — 方格纸（透出背景网格）+ 制图分界线 */}
+        <div className="w-[40%] min-w-[420px] relative border-l-2 border-ink-soft/70 flex-shrink-0">
           <ThingScene
             thing={thing}
             highlightPartId={sceneHighlight}
