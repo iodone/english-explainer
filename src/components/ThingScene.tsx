@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import {
   OrbitControls,
   Line,
@@ -8,6 +8,7 @@ import {
   GizmoViewport,
 } from '@react-three/drei'
 import { useMemo, useRef, useState } from 'react'
+import type { ComponentRef } from 'react'
 import * as THREE from 'three'
 import type { ThingData } from '../data/types'
 import {
@@ -22,6 +23,60 @@ import type { HighlightState, PartMeta } from '../geometry'
 
 /** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
 const PAPER = '#F4F1EA'
+const LABEL_BASE_OFFSET = new THREE.Vector3(0.35, 0.2, 0)
+const LABEL_LINE_POINTS: [number, number, number][] = [
+  [0, 0, 0],
+  [0.3, 0.2, 0],
+]
+const LABEL_OFFSET_CANDIDATES: Array<[number, number]> = [
+  [0, 0],
+  [0, 0.24],
+  [0, -0.24],
+  [0, 0.48],
+  [0, -0.48],
+  [0, 0.72],
+  [0, -0.72],
+]
+const LABEL_CHARACTER_WIDTH = 0.095
+const LABEL_HEIGHT = 0.18
+
+interface ScreenRect {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+
+type LineElement = ComponentRef<typeof Line>
+type TextElement = ComponentRef<typeof Text>
+
+function updateLeaderLine(line: unknown, labelOffset: THREE.Vector3) {
+  const lineElement = line as {
+    geometry: { setPositions: (positions: number[]) => void }
+    computeLineDistances?: () => void
+  }
+
+  lineElement.geometry.setPositions([
+    0,
+    0,
+    0,
+    labelOffset.x - 0.05,
+    labelOffset.y,
+    labelOffset.z,
+  ])
+  lineElement.computeLineDistances?.()
+}
+
+function setMaterialOpacity(object: unknown, opacity: number) {
+  const material = (object as { material?: THREE.Material | THREE.Material[] }).material
+  if (!material) return
+
+  const materials = Array.isArray(material) ? material : [material]
+  for (const item of materials) {
+    item.transparent = true
+    item.opacity = opacity
+  }
+}
 
 /**
  * ThingScene — 3D 草稿图纸 viewer（word-part linking）
@@ -167,10 +222,146 @@ function AnnotationLabels({
 }) {
   const [hovered, setHovered] = useState<string | null>(null)
   const accent = thing.color
+  const labelGroupRefs = useRef<(THREE.Group | null)[]>([])
+  const lineRefs = useRef<(LineElement | null)[]>([])
+  const textRefs = useRef<(TextElement | null)[]>([])
+  const layoutTemp = useMemo(
+    () => ({
+      cameraRight: new THREE.Vector3(),
+      cameraUp: new THREE.Vector3(),
+      partPosition: new THREE.Vector3(),
+      baseWorld: new THREE.Vector3(),
+      candidateWorld: new THREE.Vector3(),
+      widthEnd: new THREE.Vector3(),
+      heightEnd: new THREE.Vector3(),
+      projected: new THREE.Vector3(),
+      labelOffset: new THREE.Vector3(),
+    }),
+    [],
+  )
+  const labelPriority = (partId: string) => {
+    const isActive =
+      highlightPartId === partId || activePartIds.includes(partId)
+
+    return isActive ? 0 : hovered === partId ? 1 : 2
+  }
+
+  useFrame(({ camera, size }) => {
+    const order = thing.parts.map((_, index) => index)
+    const distances = thing.parts.map(() => 0)
+    const occupied: ScreenRect[] = []
+
+    layoutTemp.cameraRight.set(1, 0, 0).applyQuaternion(camera.quaternion)
+    layoutTemp.cameraUp.set(0, 1, 0).applyQuaternion(camera.quaternion)
+
+    for (let index = 0; index < thing.parts.length; index += 1) {
+      const position = thing.parts[index].position
+      layoutTemp.partPosition.set(position[0], position[1], position[2])
+      distances[index] = camera.position.distanceToSquared(layoutTemp.partPosition)
+    }
+
+    order.sort((left, right) => {
+      const priority =
+        labelPriority(thing.parts[left].id) - labelPriority(thing.parts[right].id)
+      if (priority !== 0) return priority
+      return distances[left] - distances[right]
+    })
+
+    for (const index of order) {
+      const part = thing.parts[index]
+      const labelGroup = labelGroupRefs.current[index]
+      const line = lineRefs.current[index]
+      const text = textRefs.current[index]
+      if (!labelGroup || !line || !text) continue
+
+      layoutTemp.baseWorld.set(
+        part.position[0] + LABEL_BASE_OFFSET.x,
+        part.position[1] + LABEL_BASE_OFFSET.y,
+        part.position[2] + LABEL_BASE_OFFSET.z,
+      )
+
+      let selectedRect: ScreenRect | null = null
+      let selectedOffset = LABEL_OFFSET_CANDIDATES[0]
+      const labelWidthWorld = Math.max(
+        0.35,
+        part.label.length * LABEL_CHARACTER_WIDTH,
+      )
+
+      for (const candidateOffset of LABEL_OFFSET_CANDIDATES) {
+        layoutTemp.candidateWorld
+          .copy(layoutTemp.baseWorld)
+          .addScaledVector(layoutTemp.cameraRight, candidateOffset[0])
+          .addScaledVector(layoutTemp.cameraUp, candidateOffset[1])
+
+        layoutTemp.projected.copy(layoutTemp.candidateWorld).project(camera)
+        const screenX =
+          (layoutTemp.projected.x * 0.5 + 0.5) * size.width
+        const screenY =
+          (-layoutTemp.projected.y * 0.5 + 0.5) * size.height
+
+        layoutTemp.widthEnd
+          .copy(layoutTemp.candidateWorld)
+          .addScaledVector(layoutTemp.cameraRight, 1)
+        layoutTemp.projected.copy(layoutTemp.widthEnd).project(camera)
+        const unitEndX =
+          (layoutTemp.projected.x * 0.5 + 0.5) * size.width
+        const pixelsPerWorldX = Math.abs(unitEndX - screenX)
+        const widthPx = labelWidthWorld * pixelsPerWorldX
+
+        layoutTemp.heightEnd
+          .copy(layoutTemp.candidateWorld)
+          .addScaledVector(layoutTemp.cameraUp, 1)
+        layoutTemp.projected.copy(layoutTemp.heightEnd).project(camera)
+        const unitEndY =
+          (-layoutTemp.projected.y * 0.5 + 0.5) * size.height
+        const pixelsPerWorldY = Math.abs(unitEndY - screenY)
+        const heightPx = LABEL_HEIGHT * pixelsPerWorldY
+
+        const candidateRect: ScreenRect = {
+          left: screenX - 3,
+          right: screenX + widthPx + 3,
+          top: screenY - heightPx / 2 - 3,
+          bottom: screenY + heightPx / 2 + 3,
+        }
+        const intersects = occupied.some(rect =>
+          candidateRect.left < rect.right &&
+          candidateRect.right > rect.left &&
+          candidateRect.top < rect.bottom &&
+          candidateRect.bottom > rect.top,
+        )
+
+        if (!intersects) {
+          selectedRect = candidateRect
+          selectedOffset = candidateOffset
+          break
+        }
+      }
+
+      layoutTemp.labelOffset
+        .copy(LABEL_BASE_OFFSET)
+        .addScaledVector(layoutTemp.cameraRight, selectedOffset[0])
+        .addScaledVector(layoutTemp.cameraUp, selectedOffset[1])
+      labelGroup.position.copy(layoutTemp.labelOffset)
+      updateLeaderLine(line, layoutTemp.labelOffset)
+
+      const isActive =
+        highlightPartId === part.id || activePartIds.includes(part.id)
+      const isHovered = hovered === part.id
+      const show = isActive || isHovered
+      const lineOpacity =
+        dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5
+      const isFaded = selectedRect === null
+
+      setMaterialOpacity(text, isFaded ? 0.18 : 1)
+      setMaterialOpacity(line, isFaded ? lineOpacity * 0.25 : lineOpacity)
+
+      if (selectedRect) occupied.push(selectedRect)
+    }
+  })
 
   return (
     <group>
-      {thing.parts.map(part => {
+      {thing.parts.map((part, index) => {
         const hoveredNow = hovered === part.id
         const isActive =
           highlightPartId === part.id || activePartIds.includes(part.id)
@@ -207,23 +398,36 @@ function AnnotationLabels({
             </mesh>
             {/* Leader line from dot to label */}
             <Line
-              points={[[0, 0, 0], [0.3, 0.2, 0]]}
+              ref={line => {
+                lineRefs.current[index] = line
+              }}
+              points={LABEL_LINE_POINTS}
               color={show ? dotColor : INK}
               lineWidth={show ? 1.5 : 1}
               transparent
               opacity={dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5}
             />
             {/* Label — 等宽大写工程标注（billboard） */}
-            <Text
-              position={[0.35, 0.2, 0]}
-              fontSize={0.15}
-              color={isActive ? accent : hoveredNow ? INK : INK_SOFT}
-              anchorX="left"
-              outlineWidth={0.01}
-              outlineColor={PAPER}
+            <group
+              ref={group => {
+                labelGroupRefs.current[index] = group
+              }}
+              position={LABEL_BASE_OFFSET.toArray() as [number, number, number]}
             >
-              {part.label.toUpperCase()}
-            </Text>
+              <Text
+                ref={text => {
+                  textRefs.current[index] = text
+                }}
+                position={[0, 0, 0]}
+                fontSize={0.15}
+                color={isActive ? accent : hoveredNow ? INK : INK_SOFT}
+                anchorX="left"
+                outlineWidth={0.01}
+                outlineColor={PAPER}
+              >
+                {part.label.toUpperCase()}
+              </Text>
+            </group>
           </group>
         )
       })}

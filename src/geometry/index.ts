@@ -4,6 +4,9 @@ import HelicopterSketch from './helicopter'
 import SpaceStationSketch from './space-station'
 import CuriosityRoverSketch from './curiosity-rover'
 import WashingMachineSketch from './washing-machine'
+import MicrowaveSketch from './microwave'
+import RefrigeratorSketch from './refrigerator'
+import ElevatorSketch from './elevator'
 
 /**
  * thing.id → 几何体分发表。
@@ -16,6 +19,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-station': SpaceStationSketch,
   'curiosity-rover': CuriosityRoverSketch,
   'washing-machine': WashingMachineSketch,
+  microwave: MicrowaveSketch,
+  refrigerator: RefrigeratorSketch,
+  elevator: ElevatorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

@@ -37,11 +37,17 @@
 激活态一律覆盖为 thing accent（学习聚焦语义），常态红件标注 dot 同红。
 当前标注：reactor = core+wheel 红 / dome 钛白 / water 冷灰；helicopter = engine+window 红 / body 钛白 / rotor 冷灰；
 station = solar+dome 红 / truss 钛白 / modules 冷灰；rover = mast+power 红 / body 钛白 / wheels+brain 冷灰；
-washer = hot-air 红 / drum 钛白 / motor 冷灰。
+washer = hot-air 红 / drum 钛白 / motor 冷灰；
+microwave = wave-maker 红 / turning-table 钛白 / door-screen 外壳灰（余冷灰）；
+refrigerator = cold-maker+heat-watcher 红 / ice-room 钛白 / cold-box 外壳灰（余冷灰）；
+elevator = top-wheel+catch-teeth 红 / room 钛白 / other-weight 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
 - 标注：虚线/细引线 + 等宽全大写技术文本，字号克制、无装饰边框，贴原始工程数据格式
+- 标注防重叠（2026-09-09）：标签逐帧屏面碰撞布局——按优先级（激活 > 悬停 > 常态，同级近相机优先）取槽，
+  每标签在 7 个垂直候选偏移里选第一个不与已占屏面矩形相交的槽位；全部冲突时该标签淡至 .18 而非叠字，
+  引线随标签移动实时重画（`setPositions` 直写顶点）
 - HUD：右上角坐标轴 gizmo（数字化指南针）；顶部视角朝向指示器 P1
 - 标签 billboard 朝向相机（drei Text 天然满足），随模型旋转产生空间透视联动
 
@@ -315,10 +321,20 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] StatusBar 导航：HOME/WORDS 链接，当前页青色高亮
 - 备注：徽标显示 thing 名（simpleName）而非 part 名——设计选择，部件信息在 thing 页内呈现；ThingPage.tsx:114 既有 lint 错误与本轮无关（遗留）
 
+### 验收对照 · production line 首批 3 thing（2026-09-09 第六轮）
+
+- [x] 3 新 thing 全链路：microwave（Food-Heating Radio Box，accent 橙）/ refrigerator（Cold Box，accent 蓝）/ elevator（Up-Down Room，accent 紫 #A78BFA —— 首个紫色系 accent）——数据 + 词条 + 几何 + 注册，各 7 部件 / 12-13 句 / flow 5-6 步 / keyExpressions 9
+- [x] JX-7b finish 角色齐备（§1.5 当前标注新增三行）：每件 warning ≤ 2（elevator top-wheel+catch-teeth、refrigerator cold-maker+heat-watcher、microwave wave-maker）
+- [x] Munroe 闸门 8 thing 全绿（新件 dict 豁免依赖：microwave 3 / refrigerator 1 / elevator 1 词）；validate-data 全通过，词典 96 词条
+- [x] 标注防重叠引擎：3 新 thing 视角实测标签无重叠、激活标签优先占位、无槽位标签淡出不糊字（word→part 激活后标签重排实测）
+- [x] 词表分包：WordsPage + word-list 拆懒加载 chunk（gzip 2.3KB + 3.6KB，主 bundle 不再含词表页）；/words 直达与 Home→/words 双路径零控制台错误
+- [x] 浏览器回归：3 新 thing 阅读态渲染 / 词→图高亮（wave maker / cold maker / room 实测）/ flow 播放（microwave 02/06、elevator 03/06 中段实测）通过；Home 卡片 8/8
+- [x] 构建链：tsc / build（255ms）/ validate-data / 闸门 exit 0
+
 ### 实施备注（与规格的已知偏差）
 
 - PracticePanel 关键表达 hover 的"微亮 40%"实现为全亮（复用 highlightPartId 通道，简化状态）
-- 图上部件标注标签在小部件密集区有重叠（沿用原型的 part position），P1 打磨项
+- 已解决（2026-09-09）：标注标签重叠（原 P1 打磨项）——屏面碰撞布局引擎（useFrame 逐帧 · 候选偏移避让 · 无槽位淡出）替代固定偏移
 - 已修复：FlowPlayer 初版因内联回调引用触发 update-depth 循环，回调 ref 化后 effect 只依赖 stepIndex
 - 草稿化后 Part 高亮实现在 SketchMesh 子级 drei `<Edges>`（LineMaterial color/opacity/linewidth 每帧 lerp）
 - 图→词点击通道用 React context（PartClickContext）穿透 Canvas 独立 reconciler root：Provider 放 Canvas children 内，SketchMesh 深处 useContext 直达

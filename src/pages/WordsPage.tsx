@@ -1,11 +1,12 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { lookupWord } from '../data/dictionary'
-import { SIMPLE_WORDS, SIMPLE_WORDS_SET } from '../data/word-list'
 import { things } from '../data/things'
 import type { DictEntry, ThingData } from '../data/types'
 
 const KNOWN_WORDS_KEY = 'known-words'
+
+type WordListModule = typeof import('../data/word-list')
 
 interface ThingLink {
   slug: string
@@ -30,13 +31,16 @@ function readKnownWords(): string[] {
   }
 }
 
-function buildWordThingLinks(): Map<string, ThingLink[]> {
+function buildWordThingLinks(
+  simpleWords: string[],
+  simpleWordsSet: Set<string>,
+): Map<string, ThingLink[]> {
   const wordThingLinks = new Map<string, ThingLink[]>()
-  const lowerSimpleWords = new Set(SIMPLE_WORDS.map(word => word.toLowerCase()))
+  const lowerSimpleWords = new Set(simpleWords.map(word => word.toLowerCase()))
 
   const addLink = (thing: ThingData, word: string) => {
     const normalizedWord = word.toLowerCase()
-    if (!SIMPLE_WORDS_SET.has(normalizedWord) && !lowerSimpleWords.has(normalizedWord)) return
+    if (!simpleWordsSet.has(normalizedWord) && !lowerSimpleWords.has(normalizedWord)) return
 
     const links = wordThingLinks.get(normalizedWord) ?? []
     if (!links.some(link => link.slug === thing.slug)) {
@@ -155,19 +159,51 @@ function WordItem({
 export default function WordsPage() {
   const [query, setQuery] = useState('')
   const [knownWords, setKnownWords] = useState<string[]>(readKnownWords)
+  const [wordList, setWordList] = useState<WordListModule | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
-  const wordThingLinks = useMemo(() => buildWordThingLinks(), [])
-  const knownWordSet = useMemo(() => new Set(knownWords), [knownWords])
-  const knownCount = useMemo(
-    () => SIMPLE_WORDS.filter(word => knownWordSet.has(word)).length,
-    [knownWordSet],
+  useEffect(() => {
+    let isActive = true
+
+    import('../data/word-list').then(
+      module => {
+        if (isActive) setWordList(module)
+      },
+      error => {
+        if (isActive) {
+          setLoadError(
+            error instanceof Error ? error.message : 'Unable to load the word list.',
+          )
+        }
+      },
+    )
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  const wordThingLinks = useMemo(
+    () =>
+      wordList
+        ? buildWordThingLinks(wordList.SIMPLE_WORDS, wordList.SIMPLE_WORDS_SET)
+        : new Map<string, ThingLink[]>(),
+    [wordList],
   )
+  const knownWordSet = useMemo(() => new Set(knownWords), [knownWords])
+  const knownCount = useMemo(() => {
+    if (!wordList) return 0
+    return wordList.SIMPLE_WORDS.filter(word => knownWordSet.has(word)).length
+  }, [knownWordSet, wordList])
 
   const normalizedQuery = query.trim().toLowerCase()
   const filteredWords = useMemo(() => {
-    if (!normalizedQuery) return SIMPLE_WORDS
-    return SIMPLE_WORDS.filter(word => word.toLowerCase().includes(normalizedQuery))
-  }, [normalizedQuery])
+    if (!wordList) return []
+    if (!normalizedQuery) return wordList.SIMPLE_WORDS
+    return wordList.SIMPLE_WORDS.filter(word =>
+      word.toLowerCase().includes(normalizedQuery),
+    )
+  }, [normalizedQuery, wordList])
 
   const wordGroups = useMemo(
     () => groupWordsByFirstLetter(filteredWords),
@@ -195,7 +231,9 @@ export default function WordsPage() {
 
             <div className="hud-panel corner-accent px-4 py-3">
               <div className="font-mono text-sm text-ink">
-                {knownCount} / {SIMPLE_WORDS.length} KNOWN
+                {wordList
+                  ? `${knownCount} / ${wordList.SIMPLE_WORDS.length} KNOWN`
+                  : 'LOADING WORD LIST'}
               </div>
               <div className="micro-label mt-1">
                 TEN HUNDRED WORDS · XKCD SIMPLE WRITER
@@ -207,16 +245,17 @@ export default function WordsPage() {
             <label className="micro-label shrink-0" htmlFor="word-search">
               SEARCH
             </label>
-            <input
-              id="word-search"
-              type="search"
-              value={query}
-              onChange={event => setQuery(event.target.value)}
+              <input
+                id="word-search"
+                type="search"
+                value={query}
+                disabled={!wordList}
+                onChange={event => setQuery(event.target.value)}
               placeholder="Type part of a word…"
               className="min-w-0 flex-1 bg-transparent font-mono text-sm text-ink outline-none placeholder:text-ink-faint"
             />
             <span className="shrink-0 font-mono text-xs text-ink-faint">
-              {filteredWords.length} SHOWN
+              {wordList ? `${filteredWords.length} SHOWN` : '—'}
             </span>
           </div>
         </div>
@@ -224,7 +263,17 @@ export default function WordsPage() {
 
       <section className="flex-1 px-8 pb-12">
         <div className="mx-auto w-full max-w-6xl space-y-5">
-          {wordGroups.length === 0 ? (
+          {loadError ? (
+            <div className="hud-panel corner-accent flex min-h-40 flex-col items-center justify-center p-8 text-center">
+              <p className="thing-title text-2xl text-ink">WORD LIST UNAVAILABLE</p>
+              <p className="micro-label mt-3">{loadError.toUpperCase()}</p>
+            </div>
+          ) : !wordList ? (
+            <div className="hud-panel corner-accent flex min-h-40 flex-col items-center justify-center p-8 text-center">
+              <p className="thing-title text-2xl text-ink">LOADING WORDS…</p>
+              <p className="micro-label mt-3">PREPARING THE VOCABULARY INDEX</p>
+            </div>
+          ) : wordGroups.length === 0 ? (
             <div className="hud-panel corner-accent flex min-h-40 flex-col items-center justify-center p-8 text-center">
               <p className="thing-title text-2xl text-ink">
                 NO WORDS FOUND — try fewer letters

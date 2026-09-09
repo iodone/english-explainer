@@ -35,6 +35,7 @@ export default function ThingPage() {
   const [activePartId, setActivePartId] = useState<string | null>(null)
   const [wordPopup, setWordPopup] = useState<{ key: string; rect: DOMRect } | null>(null)
   const [flowStep, setFlowStep] = useState<FlowStepInfo | null>(null)
+  const closeTimerRef = useRef<number | null>(null)
 
   const articleRef = useRef<ArticleViewHandle>(null)
   const articleScrollRef = useRef<HTMLDivElement>(null)
@@ -111,7 +112,6 @@ export default function ThingPage() {
   /* ─── 交互接线 ─── */
 
   // 词条卡 hover 关闭延迟（词→卡之间移动 / 卡上悬停时不关）
-  const closeTimerRef = useRef<number | null>(null)
   const clearCloseTimer = () => {
     if (closeTimerRef.current !== null) {
       window.clearTimeout(closeTimerRef.current)

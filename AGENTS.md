@@ -13,6 +13,7 @@ npm run dev                  # 开发服务器 http://localhost:5173
 npm run build                # 生产构建（tsc -b && vite build）
 npx tsc --noEmit             # 仅类型检查
 npx tsx scripts/validate-data.mjs  # 数据一致性校验（句数/partId/dict 闭环）
+npx tsx scripts/check-simple-words.mjs  # Munroe ~1000 词闸门（article/flow/keyExpressions/funFacts 四通道）
 ```
 
 ## 结构
@@ -30,8 +31,15 @@ npx tsx scripts/validate-data.mjs  # 数据一致性校验（句数/partId/dict 
 - `things.ts` — 注册表：导入 `things/` 全部文件，导出 `things` / `getThingBySlug` / `categories`
 - `utils.ts` — 文章铺平 / 词数统计 / 图→词句索引查找
 
-加新 thing = 在 `things/` 加数据文件 + `dict/` 加词条 + 注册表加一行 +
-（需要新造型时）ThingScene.tsx 加几何体组件（mesh 带 `name={partId}`）。
+加新 thing = `things/` 加数据文件 + `dict/` 加词条 + `things.ts`/`dictionary.ts` 各注册一行 +
+`src/geometry/<slug>.tsx` 加几何体（`geometry/index.ts` GEOMETRY map 注册一行）。
+ThingScene.tsx 只做 Canvas 编排与标注层，不再放几何体。
+
+### 几何层（`src/geometry/`）
+
+- `primitives.tsx` — 公共面：FINISH_POOL 配色池 / PartMetaContext / usePartHighlight / SketchMesh / Rod / DraftLine
+- `<slug>.tsx` — 每个 thing 一个几何体文件（部件 mesh 带 `name={partId}` + `finish` 角色）
+- `index.ts` — `GEOMETRY` 分发 map（thing.id → 组件）
 
 ### 组件层（`src/components/`）
 
