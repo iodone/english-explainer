@@ -99,4 +99,10 @@ export const nuclearReactorDict: Record<string, DictEntry> = {
     pos: 'adj.',
     meaning: '安全的，没有危险的',
   },
+  gas: {
+    word: 'gas',
+    phonetic: '/ɡæs/',
+    pos: 'n.',
+    meaning: '气体；燃气',
+  },
 }

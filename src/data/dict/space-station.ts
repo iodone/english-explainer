@@ -124,4 +124,16 @@ export const spaceStationDict: Record<string, DictEntry> = {
     pos: 'v.',
     meaning: '抓住；接住',
   },
+  test: {
+    word: 'test',
+    phonetic: '/test/',
+    pos: 'n.',
+    meaning: '试验，检验',
+  },
+  football: {
+    word: 'football',
+    phonetic: '/ˈfʊtbɔːl/',
+    pos: 'n.',
+    meaning: '足球',
+  },
 }

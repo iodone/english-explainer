@@ -1,16 +1,27 @@
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import {
   OrbitControls,
   Line,
   Text,
-  Edges,
   Bounds,
   GizmoHelper,
   GizmoViewport,
 } from '@react-three/drei'
-import { createContext, useContext, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import type { PartFinish, ThingData } from '../data/types'
+import type { ThingData } from '../data/types'
+import {
+  GEOMETRY,
+  PartMetaContext,
+  usePartHighlight,
+  INK,
+  INK_SOFT,
+  WARNING_RED,
+} from '../geometry'
+import type { HighlightState, PartMeta } from '../geometry'
+
+/** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
+const PAPER = '#F4F1EA'
 
 /**
  * ThingScene — 3D 草稿图纸 viewer（word-part linking）
@@ -21,71 +32,15 @@ import type { PartFinish, ThingData } from '../data/types'
  * - 右上角坐标轴 gizmo；标签 billboard 等宽大写（工程数据格式）
  * - 取景 = Bounds 自适应（fit + observe，分栏拖动后自动重取景）
  *
+ * 几何体按 thing.id 从 GEOMETRY map 分发（src/geometry/<slug>.tsx，一 thing 一文件）；
+ * 本文件只保留场景编排：Canvas、标注层（AnnotationLabels）、环境（轴/网格）、相机控制。
+ *
  * 受控高亮（DESIGN.md §4.1）：
  * - highlightPartId：阅读态，文中部件词点击 → 该部件墨线变 accent + 加粗
  * - activePartIds / pastPartIds / dimOthers：flow 播放态，
  *   当前步 accent 加粗、已过步 50%、未到步 12%
  * - onPartClick：点击部件本体/标注点 → 文章列滚动到对应句（图→词）
  */
-
-const INK = '#2C2A25'
-const INK_SOFT = '#5A554C'
-/** JX-7b 军工灰：外壳半透明实体面 */
-const HULL_GREY = '#6E6C64'
-/** JX-7b 冷灰（结构件/舱段） */
-const COLD_GREY = '#96999D'
-/** JX-7b 钛白（微暖，配泛黄纸调） */
-const TITANIUM = '#D9D5C9'
-/** JX-7b 工业警示红：仅核心舱/传感器/推进器类功能点缀位 */
-const WARNING_RED = '#E8453C'
-/** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
-const PAPER = '#F4F1EA'
-
-/**
- * 部件配色池（JX-7b §1.5 色彩规范）：
- * 三灰阶层次（军工灰/冷灰/钛白）+ 警示红点缀。
- * 数据层 ThingPart.finish 决定角色；SketchMesh 初值与 usePartHighlight
- * 常态 lerp 目标共用此表（Color 实例只读，lerp 不改入参）。
- */
-const FINISH_POOL: Record<
-  PartFinish,
-  { face: THREE.Color; faceOpacity: number; line: THREE.Color; lineOpacity: number }
-> = {
-  hull: {
-    face: new THREE.Color(HULL_GREY),
-    faceOpacity: 0.1,
-    line: new THREE.Color(INK),
-    lineOpacity: 0.85,
-  },
-  cold: {
-    face: new THREE.Color(COLD_GREY),
-    faceOpacity: 0.12,
-    line: new THREE.Color(INK),
-    lineOpacity: 0.8,
-  },
-  titanium: {
-    face: new THREE.Color(TITANIUM),
-    faceOpacity: 0.16,
-    line: new THREE.Color(INK),
-    lineOpacity: 0.85,
-  },
-  warning: {
-    face: new THREE.Color(WARNING_RED),
-    faceOpacity: 0.3,
-    line: new THREE.Color(WARNING_RED),
-    lineOpacity: 0.95,
-  },
-}
-
-/** 图→词点击 + 部件配色查询：SketchMesh（几何深处）经 context 触达，不逐层传 prop */
-interface PartMeta {
-  onPartClick: ((partId: string) => void) | null
-  finishOf: (partId: string) => PartFinish
-}
-const PartMetaContext = createContext<PartMeta>({
-  onPartClick: null,
-  finishOf: () => 'hull',
-})
 
 export interface ThingSceneProps {
   thing: ThingData
@@ -179,398 +134,18 @@ export default function ThingScene({
   )
 }
 
-/* ─── Part highlight engine ─── */
-
-interface HighlightState {
-  highlightPartId: string | null
-  activePartIds: string[]
-  pastPartIds: string[]
-  dimOthers: boolean
-}
-
 /**
- * 部件草稿线状态机：每帧 lerp 到目标（点亮有渐变，仪器感）。
- * 双材质：本体半透明面（体量）+ 子级 drei <Edges> 轮廓线。
- * 常态目标 = 部件配色角色（FINISH_POOL，JX-7b 三灰阶 + 警示红）；
- * 激活/已过/压暗覆盖透明度与线宽，激活色 = thing accent（学习聚焦语义）。
- */
-function usePartHighlight(
-  root: React.RefObject<THREE.Group | null>,
-  thing: ThingData,
-  state: HighlightState,
-) {
-  const accent = new THREE.Color(thing.color)
-
-  const finishMap = useMemo(() => {
-    const m = new Map<string, PartFinish>()
-    for (const p of thing.parts) m.set(p.id, p.finish ?? 'hull')
-    return m
-  }, [thing])
-
-  useFrame(() => {
-    const group = root.current
-    if (!group) return
-    group.traverse(node => {
-      if (!(node instanceof THREE.Mesh)) return
-      const partId = node.name
-      if (!partId) return
-
-      // 本体半透明面
-      const faceMat = node.material as THREE.MeshBasicMaterial
-      // Edges 墨线（drei Edges 渲染为子 Mesh，材质 LineMaterial）
-      const edges = node.children.find(
-        c =>
-          c instanceof THREE.Mesh &&
-          (c.material as THREE.Material | undefined)?.type === 'LineMaterial',
-      ) as THREE.Mesh | undefined
-      if (!edges) return
-      const lineMat = edges.material as THREE.MeshBasicMaterial & { linewidth: number }
-
-      // 常态 = 配色角色
-      const base = FINISH_POOL[finishMap.get(partId) ?? 'hull']
-      let lineOpacity = base.lineOpacity
-      let lineColor: THREE.Color = base.line
-      let lineWidth = 1
-      let faceOpacity = base.faceOpacity
-      let faceColor: THREE.Color = base.face
-
-      if (state.activePartIds.includes(partId)) {
-        lineOpacity = 1; lineColor = accent; lineWidth = 2.5
-        faceOpacity = 0.28; faceColor = accent
-      } else if (state.pastPartIds.includes(partId)) {
-        lineOpacity = 0.5; faceOpacity = 0.06
-      } else if (state.dimOthers) {
-        lineOpacity = 0.12; faceOpacity = 0.02
-      } else if (state.highlightPartId === partId) {
-        lineOpacity = 1; lineColor = accent; lineWidth = 2.5
-        faceOpacity = 0.28; faceColor = accent
-      }
-
-      faceMat.opacity = THREE.MathUtils.lerp(faceMat.opacity, faceOpacity, 0.15)
-      faceMat.color.lerp(faceColor, 0.15)
-      lineMat.opacity = THREE.MathUtils.lerp(lineMat.opacity, lineOpacity, 0.15)
-      lineMat.color.lerp(lineColor, 0.15)
-      lineMat.linewidth = THREE.MathUtils.lerp(lineMat.linewidth, lineWidth, 0.15)
-    })
-  })
-}
-
-/**
- * 草稿线框模型 — 按 thing.id 分发几何体。
- * SketchMesh 带 name={partId}，供 usePartHighlight 驱动。
+ * 草稿线框模型 — 按 thing.id 从 GEOMETRY map 取几何体分发。
+ * 几何文件内部 SketchMesh 带 name={partId}，供 usePartHighlight 驱动。
  */
 function SketchModel({ thing, ...state }: { thing: ThingData } & HighlightState) {
   const groupRef = useRef<THREE.Group>(null)
   usePartHighlight(groupRef, thing, state)
+  const Sketch = GEOMETRY[thing.id]
 
   return (
     <group ref={groupRef}>
-      {thing.id === 'nuclear-reactor' && <NuclearReactorSketch />}
-      {thing.id === 'helicopter' && <HelicopterSketch />}
-      {thing.id === 'space-station' && <SpaceStationSketch />}
-      {thing.id === 'curiosity-rover' && <CuriosityRoverSketch />}
-      {thing.id === 'washing-machine' && <WashingMachineSketch />}
-    </group>
-  )
-}
-
-/* ─── Sketch primitives ─── */
-
-/**
- * 草稿网格体（JX-7b §材质分层 + §色彩）：
- * 半透明实体面（体量/遮蔽感）+ Edges 轮廓线，色按 ThingPart.finish 角色。
- * 点击本体 = 点部件（图→词）。
- */
-function SketchMesh({
-  partId,
-  children,
-  ...props
-}: React.ComponentProps<'mesh'> & { partId?: string }) {
-  const { onPartClick, finishOf } = useContext(PartMetaContext)
-  const clickable = !!partId && !!onPartClick
-  const base = FINISH_POOL[partId ? finishOf(partId) : 'hull']
-
-  return (
-    <mesh
-      name={partId}
-      {...props}
-      onClick={
-        clickable
-          ? e => {
-              e.stopPropagation()
-              onPartClick!(partId!)
-            }
-          : undefined
-      }
-      onPointerOver={
-        clickable
-          ? e => {
-              e.stopPropagation()
-              document.body.style.cursor = 'pointer'
-            }
-          : undefined
-      }
-      onPointerOut={
-        clickable
-          ? () => {
-              document.body.style.cursor = ''
-            }
-          : undefined
-      }
-    >
-      {children}
-      <meshBasicMaterial
-        color={base.face}
-        transparent
-        opacity={base.faceOpacity}
-        depthWrite={false}
-      />
-      <Edges
-        color={base.line}
-        lineWidth={1}
-        threshold={10}
-        transparent
-        opacity={base.lineOpacity}
-      />
-    </mesh>
-  )
-}
-
-/** 细杆 —— 可被部件高亮命中的"线"（4 面方杆，手绘粗线感） */
-function Rod({
-  from,
-  to,
-  radius = 0.03,
-  partId,
-}: {
-  from: [number, number, number]
-  to: [number, number, number]
-  radius?: number
-  partId?: string
-}) {
-  const start = new THREE.Vector3(...from)
-  const end = new THREE.Vector3(...to)
-  const mid = start.clone().add(end).multiplyScalar(0.5)
-  const dir = end.clone().sub(start)
-  const quat = new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(0, 1, 0),
-    dir.clone().normalize(),
-  )
-  const { x, y, z, w } = quat
-  return (
-    <SketchMesh
-      partId={partId}
-      position={mid.toArray()}
-      quaternion={[x, y, z, w]}
-    >
-      <cylinderGeometry args={[radius, radius, dir.length(), 4]} />
-    </SketchMesh>
-  )
-}
-
-/** 淡墨辅助线（面板格线等，不参与高亮） */
-function DraftLine({ points }: { points: [number, number, number][] }) {
-  return (
-    <Line
-      points={points}
-      color={INK}
-      lineWidth={1}
-      transparent
-      opacity={0.4}
-    />
-  )
-}
-
-/* ─── Geometries（草稿化，统一墨线） ─── */
-
-function NuclearReactorSketch() {
-  return (
-    <group>
-      {/* Containment dome — hemisphere */}
-      <SketchMesh partId="building" position={[0, 2, 0]}>
-        <sphereGeometry args={[2, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-      </SketchMesh>
-      {/* Reactor vessel — cylinder */}
-      <SketchMesh partId="core" position={[0, 0.5, 0]}>
-        <cylinderGeometry args={[1.2, 1.2, 3, 12]} />
-      </SketchMesh>
-      {/* Control rods */}
-      {[-0.4, 0, 0.4].map((x, i) => (
-        <SketchMesh key={i} partId="rods" position={[x, 2.2, 0]}>
-          <boxGeometry args={[0.15, 1.5, 0.15]} />
-        </SketchMesh>
-      ))}
-      {/* Cooling towers */}
-      {[-2.5, 2.5].map((x, i) => (
-        <SketchMesh key={i} partId="water" position={[x, 1, 0]}>
-          <cylinderGeometry args={[0.6, 0.8, 3, 8]} />
-        </SketchMesh>
-      ))}
-      {/* Steam pipes → turbine */}
-      <Rod from={[1.2, 1, 0]} to={[2.6, 1, 0]} partId="steam" />
-      <Rod from={[-1.2, 1, 0]} to={[-2.6, 1, 0]} partId="steam" />
-      {/* Power wheel (turbine) */}
-      <SketchMesh partId="wheel" position={[3.2, 1, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.5, 0.5, 0.35, 10]} />
-      </SketchMesh>
-      {/* Turbine blades */}
-      {[0, 1, 2, 3, 4, 5].map(i => {
-        const angle = (i / 6) * Math.PI * 2
-        return (
-          <SketchMesh
-            key={i}
-            partId="wheel"
-            position={[3.2 + Math.cos(angle) * 0.7, 1 + Math.sin(angle) * 0.7, 0]}
-            rotation={[0, 0, angle + Math.PI / 2]}
-          >
-            <boxGeometry args={[0.35, 0.06, 0.06]} />
-          </SketchMesh>
-        )
-      })}
-    </group>
-  )
-}
-
-function HelicopterSketch() {
-  return (
-    <group>
-      {/* Fuselage */}
-      <SketchMesh partId="body" position={[0, 0, 0]}>
-        <capsuleGeometry args={[0.6, 2, 8, 12]} />
-      </SketchMesh>
-      {/* Main rotor */}
-      <SketchMesh partId="rotor" position={[0, 1.2, 0]}>
-        <boxGeometry args={[4, 0.05, 0.3]} />
-      </SketchMesh>
-      {/* Rotor hub */}
-      <SketchMesh partId="rotor" position={[0, 1.2, 0]}>
-        <cylinderGeometry args={[0.15, 0.15, 0.3, 8]} />
-      </SketchMesh>
-      {/* Tail boom */}
-      <SketchMesh partId="tail" position={[0, 0.2, -2.5]}>
-        <boxGeometry args={[0.3, 0.3, 2.5]} />
-      </SketchMesh>
-      {/* Tail rotor */}
-      <SketchMesh partId="tail" position={[0.3, 0.2, -3.8]} rotation={[0, 0, Math.PI / 2]}>
-        <boxGeometry args={[1, 0.03, 0.15]} />
-      </SketchMesh>
-      {/* Landing skids — two rails + struts */}
-      <Rod from={[-0.5, -1.2, 0.9]} to={[-0.5, -1.2, -0.9]} partId="skids" />
-      <Rod from={[0.5, -1.2, 0.9]} to={[0.5, -1.2, -0.9]} partId="skids" />
-      <Rod from={[-0.5, -0.8, 0.6]} to={[-0.5, -1.2, 0.6]} partId="skids" />
-      <Rod from={[-0.5, -0.8, -0.6]} to={[-0.5, -1.2, -0.6]} partId="skids" />
-      <Rod from={[0.5, -0.8, 0.6]} to={[0.5, -1.2, 0.6]} partId="skids" />
-      <Rod from={[0.5, -0.8, -0.6]} to={[0.5, -1.2, -0.6]} partId="skids" />
-      {/* Windshield */}
-      <SketchMesh partId="window" position={[0, 0.3, 1.2]}>
-        <sphereGeometry args={[0.5, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2]} />
-      </SketchMesh>
-    </group>
-  )
-}
-
-function SpaceStationSketch() {
-  return (
-    <group>
-      {/* Central truss */}
-      <SketchMesh partId="truss" position={[0, 0, 0]}>
-        <boxGeometry args={[5, 0.3, 0.3]} />
-      </SketchMesh>
-      {/* Modules */}
-      {[-1.5, 0, 1.5].map((x, i) => (
-        <SketchMesh key={i} partId="modules" position={[x, 0, 0.8]}>
-          <cylinderGeometry args={[0.4, 0.4, 1.2, 8]} />
-        </SketchMesh>
-      ))}
-      {/* Solar arrays */}
-      {[-3, 3].map((x, i) => (
-        <group key={i} position={[x, 0, 0]}>
-          <SketchMesh partId="solar">
-            <boxGeometry args={[2.5, 1.8, 0.05]} />
-          </SketchMesh>
-          {/* Panel grid lines */}
-          <DraftLine points={[[-1.25, -0.9, 0.01], [-1.25, 0.9, 0.01]]} />
-          <DraftLine points={[[-0.625, -0.9, 0.01], [-0.625, 0.9, 0.01]]} />
-          <DraftLine points={[[0, -0.9, 0.01], [0, 0.9, 0.01]]} />
-          <DraftLine points={[[0.625, -0.9, 0.01], [0.625, 0.9, 0.01]]} />
-        </group>
-      ))}
-      {/* Radiators */}
-      <SketchMesh partId="radiators" position={[2, 1, 0]}>
-        <boxGeometry args={[1.5, 1, 0.05]} />
-      </SketchMesh>
-      {/* Cupola */}
-      <SketchMesh partId="dome" position={[0, -0.5, 1.2]}>
-        <sphereGeometry args={[0.3, 8, 6, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2]} />
-      </SketchMesh>
-      {/* Long grabber (Canadarm) — two segments */}
-      <Rod from={[-0.5, 0.9, 0.8]} to={[0.2, 1.4, 0.4]} partId="arm" />
-      <Rod from={[0.2, 1.4, 0.4]} to={[0.9, 1.7, 0]} partId="arm" />
-    </group>
-  )
-}
-
-function CuriosityRoverSketch() {
-  return (
-    <group>
-      {/* Body box */}
-      <SketchMesh partId="body" position={[0, 0.5, 0]}>
-        <boxGeometry args={[1.5, 0.8, 2]} />
-      </SketchMesh>
-      {/* Camera mast */}
-      <SketchMesh partId="mast" position={[0, 1.8, 0.5]}>
-        <cylinderGeometry args={[0.08, 0.08, 1.5, 6]} />
-      </SketchMesh>
-      {/* Camera head */}
-      <SketchMesh partId="mast" position={[0, 2.5, 0.5]}>
-        <boxGeometry args={[0.4, 0.3, 0.3]} />
-      </SketchMesh>
-      {/* Wheels — 6 of them */}
-      {[[-0.9, 0, 0.7], [-0.9, 0, -0.7], [0.9, 0, 0.7], [0.9, 0, -0.7], [-0.9, 0, 0], [0.9, 0, 0]].map(([x, y, z], i) => (
-        <SketchMesh key={i} partId="wheels" position={[x, y, z]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.35, 0.35, 0.15, 12]} />
-        </SketchMesh>
-      ))}
-      {/* Robotic arm — two segments */}
-      <Rod from={[0, 0.5, 1]} to={[0, 0.35, 1.7]} partId="arm" radius={0.04} />
-      <Rod from={[0, 0.35, 1.7]} to={[0, 0.1, 2.3]} partId="arm" radius={0.04} />
-      {/* RTG power */}
-      <SketchMesh partId="power" position={[-1, 0.8, 0]}>
-        <boxGeometry args={[0.4, 0.6, 0.4]} />
-      </SketchMesh>
-    </group>
-  )
-}
-
-function WashingMachineSketch() {
-  return (
-    <group>
-      {/* Washing machine */}
-      <SketchMesh partId="drum" position={[-1.2, 0, 0]}>
-        <boxGeometry args={[1.5, 2, 1.5]} />
-      </SketchMesh>
-      {/* Drum */}
-      <SketchMesh partId="drum" position={[-1.2, 0, 0.76]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.55, 0.05, 8, 16]} />
-      </SketchMesh>
-      {/* Door circle */}
-      <SketchMesh partId="drum" position={[-1.2, 0, 0.78]}>
-        <ringGeometry args={[0.4, 0.55, 16]} />
-      </SketchMesh>
-      {/* Dryer */}
-      <SketchMesh partId="hot-air" position={[1.2, 0, 0]}>
-        <boxGeometry args={[1.5, 2, 1.5]} />
-      </SketchMesh>
-      {/* Dryer drum */}
-      <SketchMesh partId="hot-air" position={[1.2, 0, 0.76]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.55, 0.05, 8, 16]} />
-      </SketchMesh>
-      {/* Control panel / soap box area */}
-      <SketchMesh partId="soap" position={[-1.2, 1.1, 0.76]}>
-        <boxGeometry args={[1.2, 0.3, 0.05]} />
-      </SketchMesh>
-      {/* Connection pipe */}
-      <Rod from={[-0.45, 0.5, 0]} to={[0.45, 0.5, 0]} partId="pump" />
+      {Sketch && <Sketch />}
     </group>
   )
 }

@@ -12,7 +12,7 @@ export const washingMachine: ThingData = {
   realName: 'Washing Machine & Dryer',
   category: 'home',
   funFacts: [
-    'One wash can use more than forty liters of water — that is about two hundred cups.',
+    'One wash can use more than 40 liters of water — that is about two hundred cups.',
     'When the box spins the water out, it can turn faster than the wheels of a car driving down the road.',
     'If the hot air box gets too hot, your clothes can get smaller and smaller.',
   ],
@@ -146,7 +146,7 @@ export const washingMachine: ThingData = {
     },
     {
       partIds: ['soap'],
-      caption: 'Soap water flows in from the soap box. Soap is very good at grabbing dirt.',
+      caption: 'Soap water moves in from the soap box. Soap is very good at grabbing dirt.',
       sentenceRef: 4,
     },
     {

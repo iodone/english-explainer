@@ -159,4 +159,34 @@ export const washingMachineDict: Record<string, DictEntry> = {
       { part: 'out', gloss: '向外' },
     ],
   },
+  soap: {
+    word: 'soap',
+    phonetic: '/soʊp/',
+    pos: 'n.',
+    meaning: '肥皂',
+  },
+  dirty: {
+    word: 'dirty',
+    phonetic: '/ˈdɜːrti/',
+    pos: 'adj.',
+    meaning: '脏的',
+  },
+  umbrella: {
+    word: 'umbrella',
+    phonetic: '/ʌmˈbrelə/',
+    pos: 'n.',
+    meaning: '雨伞',
+  },
+  rainy: {
+    word: 'rainy',
+    phonetic: '/ˈreɪni/',
+    pos: 'adj.',
+    meaning: '下雨的；多雨的',
+  },
+  liter: {
+    word: 'liter',
+    phonetic: '/ˈliːtər/',
+    pos: 'n.',
+    meaning: '升（容量单位）',
+  },
 }

@@ -12,7 +12,7 @@ export const spaceStation: ThingData = {
   realName: 'International Space Station',
   category: 'space',
   funFacts: [
-    'It goes around our world sixteen times every day.',
+    'It goes around our world 16 times every day.',
     'At night you can see it from the ground — it looks like a bright star moving across the sky.',
     'The whole house is as big as a football field.',
   ],
@@ -43,7 +43,7 @@ export const spaceStation: ThingData = {
         [
           'The house moves so fast that it ',
           { text: 'goes around', dict: 'go around' },
-          ' the world sixteen times every day.',
+          ' the world 16 times every day.',
         ],
       ],
     },

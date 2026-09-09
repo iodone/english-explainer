@@ -171,7 +171,7 @@ washer = hot-air 红 / drum 钛白 / motor 冷灰。
 │ StatusBar（NAV · HOME / WORDS 链接，当前页青色高亮）        │
 ├────────────────────────────────────────────────────────┤
 │ Hero：micro-label「C7 · VOCABULARY INDEX」+ 大标题 Words  │
-│       统计条 hud-panel：X / 1275 KNOWN · 来源标注          │
+│       统计条 hud-panel：X / 1283 KNOWN · 来源标注          │
 │ 搜索条 hud-panel：SEARCH + as-you-type 过滤 + N SHOWN     │
 ├────────────────────────────────────────────────────────┤
 │ 字母分组（A-Z，每组 hud-panel + 组头 字母 / N WORDS）       │
@@ -185,7 +185,9 @@ washer = hot-air 红 / drum 钛白 / motor 冷灰。
 └────────────────────────────────────────────────────────┘
 ```
 
-数据：`src/data/word-list.ts`（xkcd Simple Writer 0.2.1，家族合并 3634 形式 → 1275 基础词）；
+数据：`src/data/word-list.ts`（xkcd Simple Writer 0.2.1，家族合并 3634 形式 → 1283 基础词，含 2026-09-09 补的
+8 个基础词 early/find/good/hold/letter/mind/officer/word——旧合并的单层后缀剥离把它们错折到了 fin/goo/min/ear 等同形异义短词）；
+Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.txt`（3634 全形式）。
 掌握标记 localStorage `'known-words'`（防御解析）；thing 关联运行时从 article dict 标注构建 word→thingSlug 映射。
 
 ## 4. Modules
@@ -292,6 +294,15 @@ washer = hot-air 红 / drum 钛白 / motor 冷灰。
 - [x] 警示红件标注 dot 同红（HOT AIR MACHINE 无几何仅 dot，红 dot 正确标记）
 - [x] 校验：finish 枚举 + 每件 warning ≤ 2（validate-data.mjs）
 - 备注：raycast 取最近命中——reactor 的 dome 在多数视角遮挡 core（安全壳包着堆芯，物理写实），学习者可旋转视角点 core；engine/brain/motor/water-in 数据 part 无几何体（既有空缺，仅标注 dot）
+
+### 验收对照 · 几何分文件 + Munroe 闸门（2026-09-09 第五轮，production line 前置改造）
+
+- [x] 几何分文件：ThingScene.tsx 699 → 283 行（只剩 Canvas 编排/标注层/环境）；`src/geometry/primitives.tsx`（配色池 + PartMetaContext + usePartHighlight + SketchMesh/Rod/DraftLine）+ 5 个 `<slug>.tsx` 几何文件 + `index.ts` GEOMETRY map 分发。加新 thing 不再碰 ThingScene
+- [x] Munroe 闸门 `scripts/check-simple-words.mjs` 四通道：vendored xkcd 原表（3634 形式）∨ 词表（1283）∨ dict 词条 ∨ 屈折逆推（链式 + er/est 补 e/双写 + ly）；检查范围 = article + flow caption + keyExpressions + funFacts；每 thing 报告 dict 豁免依赖词数（review 盯防指标）
+- [x] 词表修正：旧合并把 good/find/word/hold/early/mind/letter/officer 错折到 goo/fin/…（单层后缀剥离的同形异义陷阱），补 8 词 → 1283；闸门实测抓出并修正
+- [x] 闸门首跑收获：11 个概念词补 dict 词条（gas/soap/sideways/backward/difference/test/football/dirty/umbrella/rainy/liter，词典 73→83）+ 3 处改文更 Munroe（sixteen→16、forty→40、flows→moves）
+- [x] 验证全绿：tsc / build / validate-data / 闸门 exit 0；浏览器回归 5 thing 页 3D 渲染完整（截图逐页核对，washer 门圈为 autoRotate 背面时序非 bug）+ /words 显示 0/1283
+- 备注：验证中发现 Vite HMR 对 R3F 组件树热替换有陈旧模块态（改造后 navigate 首次截图模型消失，硬刷新即恢复）——production line 的 pi 验证 3D 时须硬刷新
 
 ### 验收对照 · 词表页 C7（2026-09-09 第四轮，dsx：codex 实现 / claude+pi 双验证）
 

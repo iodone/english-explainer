@@ -136,4 +136,22 @@ export const helicopterDict: Record<string, DictEntry> = {
     pos: 'adj.',
     meaning: '平坦的；平的',
   },
+  gas: {
+    word: 'gas',
+    phonetic: '/ɡæs/',
+    pos: 'n.',
+    meaning: '气体；燃气',
+  },
+  backward: {
+    word: 'backward',
+    phonetic: '/ˈbækwərd/',
+    pos: 'adv.',
+    meaning: '向后；倒着',
+  },
+  difference: {
+    word: 'difference',
+    phonetic: '/ˈdɪfrəns/',
+    pos: 'n.',
+    meaning: '差别；不同之处',
+  },
 }
