@@ -43,7 +43,10 @@ refrigerator = cold-maker+heat-watcher 红 / ice-room 钛白 / cold-box 外壳�
 elevator = top-wheel+catch-teeth 红 / room 钛白 / other-weight 外壳灰（余冷灰）；
 bicycle = hand-stoppers 红 / metal-bones 钛白 / 余冷灰（纯线架，无外壳件）；
 clock = turning-heart+tick-stopper 红 / time-face 钛白 / 余冷灰；
-vacuum-cleaner = air-puller 红 / dust-bag 外壳灰 / 余冷灰。
+vacuum-cleaner = air-puller 红 / dust-bag 外壳灰 / 余冷灰；
+toilet = water-door 红 / water-bowl 钛白 / 余冷灰（water-tank 顶置）；
+speaker = wire-ring 红 / sound-paper 钛白 / box-body 外壳灰（余冷灰）；
+drill = go-button 红 / speed-changer 钛白 / 余冷灰。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -343,6 +346,15 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 词典 106 词条；validate-data 11 thing 全通过
 - [x] 浏览器回归（CDP 硬刷新流）：3 新 thing 阅读态渲染完整零错误 / 词→图高亮（metal bones / turning heart / air puller 实测，文章滚句+标签重排）/ flow 多部件步（bicycle 04/05 转向杆+前轮、clock 05/05 双针、vacuum 02/05 嘴+鼻，past 部件半亮）/ dict 悬停卡（tube /tuːb/ 实测）/ Home 11/11 卡片
 - [x] 构建链：tsc / build（242ms）/ validate-data / 闸门 / oxlint 新增代码零告警 exit 0
+
+### 验收对照 · production line 第三批 3 thing（2026-09-09 第八轮，概念零重叠选题）
+
+- [x] 3 新 thing 全链路：toilet（Water Swirl Seat，accent 天蓝 #38BDF8，虹吸水力学）/ speaker（Sound Box，accent 靛 #6366F1，电磁声学）/ drill（Fast-Spinning Hole Maker，accent 品红 #D946EF，齿轮减速）——各 6-7 部件 / 14 句 / flow 5 步 / keyExpressions 9；选题原则：与既有 11 thing 概念零重叠（弃 dishwasher≈洗衣机水+泵+皂、fan≈吸尘器风机+直升机旋翼）
+- [x] 几何探索三型：toilet 侧视剖面（4-Rod 虹吸暗道路径 + 双水位 DraftLine）/ speaker 前视 X 光（锥盆-线圈-磁铁 z 轴堆叠 + 3 道声波弧线）/ drill 侧视朝右（三齿轮减速组 + 两段收细钻头 + 钻尖转动指示圈）
+- [x] Munroe 闸门 14 thing 全绿（新件 dict 豁免依赖：toilet 7 = toilet+handle+tank+bowl+pipe+float+chain（float 借空间站、chain 借自行车；flows/screws 经屈折通道由 flow/screw 词条覆盖）/ speaker 3 = wire+magnet+apart（apart 借核反应堆）/ drill 5 = drill+strength+button+speed+grip）；首跑抓 24 超纲词：概念词 11 个走词条通道（handle/tank/bowl/pipe/flow/wire/button/speed/strength/grip/screw，dict 分词 132→143）、普通词 13 处改写（tight/glued/mixing/clicks/trades/frame/endless/mix/brush…）
+- [x] 词典 121 词条；validate-data 14 thing 全通过
+- [x] 浏览器回归（CDP 硬刷新流）：3 新 thing 阅读态渲染完整零错误 / 词→图高亮（water tank / sound wire / power box 实测）/ flow 多部件步（toilet 05/05 float ball+fill pipe 双亮、speaker 02/05 wire ring+still magnet 双亮、drill 03/05 speed-changer 齿轮组）/ dict 悬停卡（toilet /ˈtɔɪlət/、speaker /ˈspiːkər/、drill /drɪl/ 实测）/ Home 14/14 卡片
+- [x] 构建链：tsc / build（271ms）/ validate-data / 闸门 / oxlint 新增代码零输出 exit 0
 
 ### 实施备注（与规格的已知偏差）
 

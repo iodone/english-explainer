@@ -10,6 +10,9 @@ import { elevatorDict } from './dict/elevator'
 import { bicycleDict } from './dict/bicycle'
 import { clockDict } from './dict/clock'
 import { vacuumCleanerDict } from './dict/vacuum-cleaner'
+import { toiletDict } from './dict/toilet'
+import { speakerDict } from './dict/speaker'
+import { drillDict } from './dict/drill'
 
 /**
  * 词典汇总层。
@@ -28,6 +31,9 @@ const sources: Record<string, DictEntry>[] = [
   bicycleDict,
   clockDict,
   vacuumCleanerDict,
+  toiletDict,
+  speakerDict,
+  drillDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

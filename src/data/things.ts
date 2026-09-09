@@ -10,6 +10,9 @@ import { elevator } from './things/elevator'
 import { bicycle } from './things/bicycle'
 import { clock } from './things/clock'
 import { vacuumCleaner } from './things/vacuum-cleaner'
+import { toilet } from './things/toilet'
+import { speaker } from './things/speaker'
+import { drill } from './things/drill'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -27,6 +30,9 @@ export const things: ThingData[] = [
   bicycle,
   clock,
   vacuumCleaner,
+  toilet,
+  speaker,
+  drill,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
