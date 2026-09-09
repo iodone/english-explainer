@@ -164,9 +164,29 @@ washer = hot-air 红 / drum 钛白 / motor 冷灰。
 - 清单项：checkbox（hud-cyan 选中态）+ 关键短语 + 覆盖度计数 `7/10`
 - 动作条：`↺ Read again` / `Next thing →`
 
-### 3.3 词表页 /words **[新增，P1 后置]**
+### 3.3 词表页 /words **[已实现 2026-09-09]**
 
-本期不实施，占位路由不留。
+```
+┌────────────────────────────────────────────────────────┐
+│ StatusBar（NAV · HOME / WORDS 链接，当前页青色高亮）        │
+├────────────────────────────────────────────────────────┤
+│ Hero：micro-label「C7 · VOCABULARY INDEX」+ 大标题 Words  │
+│       统计条 hud-panel：X / 1275 KNOWN · 来源标注          │
+│ 搜索条 hud-panel：SEARCH + as-you-type 过滤 + N SHOWN     │
+├────────────────────────────────────────────────────────┤
+│ 字母分组（A-Z，每组 hud-panel + 组头 字母 / N WORDS）       │
+│   词卡网格 1/2/3/4 列响应式：                              │
+│   · 词（Newsreader thing-title，已知 = HUD 青 + ✓）        │
+│   · 有词条 → 内联 音标 · 词性 · 中文                        │
+│   · 有 thing 覆盖 → simpleName 徽标（点击跳 /thing/:slug）  │
+│ 检索无结果 → 空态（NO WORDS FOUND — try fewer letters）    │
+├────────────────────────────────────────────────────────┤
+│ Footer：来源标注 + ← BACK TO THINGS                       │
+└────────────────────────────────────────────────────────┘
+```
+
+数据：`src/data/word-list.ts`（xkcd Simple Writer 0.2.1，家族合并 3634 形式 → 1275 基础词）；
+掌握标记 localStorage `'known-words'`（防御解析）；thing 关联运行时从 article dict 标注构建 word→thingSlug 映射。
 
 ## 4. Modules
 
@@ -272,6 +292,17 @@ washer = hot-air 红 / drum 钛白 / motor 冷灰。
 - [x] 警示红件标注 dot 同红（HOT AIR MACHINE 无几何仅 dot，红 dot 正确标记）
 - [x] 校验：finish 枚举 + 每件 warning ≤ 2（validate-data.mjs）
 - 备注：raycast 取最近命中——reactor 的 dome 在多数视角遮挡 core（安全壳包着堆芯，物理写实），学习者可旋转视角点 core；engine/brain/motor/water-in 数据 part 无几何体（既有空缺，仅标注 dot）
+
+### 验收对照 · 词表页 C7（2026-09-09 第四轮，dsx：codex 实现 / claude+pi 双验证）
+
+- [x] 构建链：tsc -b 零错误、build 成功、validate-data 全通过（pi 首跑）、新增代码 oxlint 零告警
+- [x] 检索：as-you-type contains 过滤（water → water+watery）、trim/大小写归一、无匹配空态 + QUERY 回显
+- [x] 掌握标记：点击 ✓ + HUD 青、localStorage `known-words`、计数 X/1275、刷新持久化（实测）
+- [x] thing 关联：water → Heavy Metal Power Building 徽标（dict 标注运行时映射，22/1275 词覆盖）、点击跳 /thing/nuclear-reactor（实测）
+- [x] 词条内联：about /əˈbaʊt/ · prep · 关于（lookupWord 命中词显示音标/词性/中文）
+- [x] 性能：1275 卡全渲染，程序化滚动 61fps 满帧（hud-panel blur 实测无碍）；已知优化点 = 词表进主 bundle（gzip 388KB，P1 可 dynamic import 拆）
+- [x] StatusBar 导航：HOME/WORDS 链接，当前页青色高亮
+- 备注：徽标显示 thing 名（simpleName）而非 part 名——设计选择，部件信息在 thing 页内呈现；ThingPage.tsx:114 既有 lint 错误与本轮无关（遗留）
 
 ### 实施备注（与规格的已知偏差）
 
