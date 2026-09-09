@@ -33,7 +33,7 @@
 
 | # | 能力 | 说明 | 状态 |
 |---|---|---|---|
-| C1 | 事物图解阅读 | 8 个 thing（2026-09-09 production line 首批扩 3：microwave / refrigerator / elevator），每篇 simple-words 文章 + 3D 线框图 | 已实现 |
+| C1 | 事物图解阅读 | 11 个 thing（2026-09-09 production line 两批：batch 1 microwave / refrigerator / elevator，batch 2 bicycle / clock / vacuum-cleaner），每篇 simple-words 文章 + 3D 线框图 | 已实现 |
 | C2 | 词-物双向关联 | 文中部件词点击 → 图中部件高亮；图中部件点击 → 文中词高亮 | 新增 |
 | C3 | 工作流程过程动画 | 部件按工作原理顺序点亮并配解说（如核反应堆：燃料→热水→蒸汽→轮子→电） | 新增 |
 | C4 | 单词释义 | 点击任意单词 → 弹出音标、词性、中文释义；复合词组（如 food-heating radio box）展示构词拆解 | 新增，词典数据源见未决项 |
@@ -48,7 +48,7 @@
 1. **学习优先于炫技**：每个像素都要回答"这帮助学英语吗"。
 2. **阅读不打断**：文章是主阅读流；释义、关联均以轻量弹出/高亮实现，不跳转、不遮挡。
 3. **词-物关联是核心机制**：具象词汇的习得靠意象，不是靠背诵。
-4. **Simple words 约束**：解释文本遵循 Munroe 原书精神——只用 ~1000 常用词（释义卡、UI 文案不受此限）。由 `scripts/check-simple-words.mjs` 四通道闸门强制（xkcd 原表 3634 形式 ∨ 站内词表 ∨ dict 词条 ∨ 屈折逆推），表外概念词必须以 dict 词条显式引入。
+4. **Simple words 约束**：解释文本遵循 Munroe 原书精神——只用 ~1000 常用词（释义卡、UI 文案不受此限）。由 `scripts/check-simple-words.mjs` 四通道闸门强制（xkcd 原表 3634 形式 ∨ 站内词表 ∨ dict 词条 ∨ 屈折逆推），表外概念词必须以 dict 词条显式引入。创作参考词表：Ogden Basic English 850（"90% 的概念可用 850 词表达"，vendored 于 `scripts/data/ogden-basic-english-850.txt`，2026-09-09）——与 xkcd 表仅 ~58% 重合，机器词（chain/spring/pump/wire…）有意经 dict 词条通道引入。
 5. **英文呈现优先**：正文英文为主，大字号、高可读性；中文仅出现在释义卡。
 
 ### Brand
@@ -171,6 +171,6 @@ interface ThingData {
 | # | 项 | 建议 |
 |---|---|---|
 | U1 | 单词释义词典数据源 | 用开源 ECDICT 筛出 5 篇文章实际用词（约 300-500 词），生成内置 JSON（音标/词性/中文） |
-| U2 | 文章正文来源 | 现有 8 篇均为原创 simple-words 改写；是否需要按原书内容逐篇替换/扩充（版权自担） |
+| U2 | 文章正文来源 | 现有 11 篇均为原创 simple-words 改写；是否需要按原书内容逐篇替换/扩充（版权自担） |
 | U3 | 词-物关联匹配粒度 | 词级匹配（"core" → 部件）还是短语级（"hot water box" → 部件）；建议短语级优先、词级兜底 |
 | U4 | 复述练习是否记录历史 | 建议本期仅会话内自评，不做持久化（P2 再说） |

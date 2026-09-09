@@ -7,6 +7,9 @@ import { washingMachine } from './things/washing-machine'
 import { microwave } from './things/microwave'
 import { refrigerator } from './things/refrigerator'
 import { elevator } from './things/elevator'
+import { bicycle } from './things/bicycle'
+import { clock } from './things/clock'
+import { vacuumCleaner } from './things/vacuum-cleaner'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -21,6 +24,9 @@ export const things: ThingData[] = [
   microwave,
   refrigerator,
   elevator,
+  bicycle,
+  clock,
+  vacuumCleaner,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

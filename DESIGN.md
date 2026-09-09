@@ -40,7 +40,10 @@ station = solar+dome 红 / truss 钛白 / modules 冷灰；rover = mast+power �
 washer = hot-air 红 / drum 钛白 / motor 冷灰；
 microwave = wave-maker 红 / turning-table 钛白 / door-screen 外壳灰（余冷灰）；
 refrigerator = cold-maker+heat-watcher 红 / ice-room 钛白 / cold-box 外壳灰（余冷灰）；
-elevator = top-wheel+catch-teeth 红 / room 钛白 / other-weight 外壳灰（余冷灰）。
+elevator = top-wheel+catch-teeth 红 / room 钛白 / other-weight 外壳灰（余冷灰）；
+bicycle = hand-stoppers 红 / metal-bones 钛白 / 余冷灰（纯线架，无外壳件）；
+clock = turning-heart+tick-stopper 红 / time-face 钛白 / 余冷灰；
+vacuum-cleaner = air-puller 红 / dust-bag 外壳灰 / 余冷灰。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -330,6 +333,16 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 词表分包：WordsPage + word-list 拆懒加载 chunk（gzip 2.3KB + 3.6KB，主 bundle 不再含词表页）；/words 直达与 Home→/words 双路径零控制台错误
 - [x] 浏览器回归：3 新 thing 阅读态渲染 / 词→图高亮（wave maker / cold maker / room 实测）/ flow 播放（microwave 02/06、elevator 03/06 中段实测）通过；Home 卡片 8/8
 - [x] 构建链：tsc / build（255ms）/ validate-data / 闸门 exit 0
+
+### 验收对照 · production line 第二批 3 thing（2026-09-09 第七轮，参考 Ogden Basic English 850 创作）
+
+- [x] 3 新 thing 全链路：bicycle（Two-Wheel Push Machine，accent 绿 #4ADE80，transport 域补位）/ clock（Round Time Keeper，accent 黄 #EAB308，机械钟擒纵叙事）/ vacuum-cleaner（Dust Eater，accent 粉 #F472B6，气压物理）——各 7 部件 / 13-14 句 / flow 5 步 / keyExpressions 9
+- [x] 几何探索三型：bicycle 纯线架（torus 轮 + Rod 菱形车架 + 链条双股线 + 刹车线）/ clock 半展开（表盘 10:10 双针在位，机芯四件拉出下方）/ vacuum-cleaner 在位剖视（microwave 式机身 + 左端拉出风机）——DraftLine 首次用于表盘刻度（12 线循环生成）与车轮辐条
+- [x] Basic English 850 参考：vendored `scripts/data/ogden-basic-english-850.txt`（852 形式）；与 xkcd 表交叉核对仅 ~58% 重合，机器词（chain…）按产品设计走 dict 词条通道而非扩闸门
+- [x] Munroe 闸门 11 thing 全绿（新件 dict 豁免依赖：bicycle 2 = bicycle+chain / clock 4 = clock+tick+tock+forth（forth 借微波炉词条，全局共享池符合设计）/ vacuum 3 = vacuum+tube+dirty（dirty 借洗衣机词条））；首跑抓 9 超纲词：chain 走词条、motor/rule/hungry/printed/speed/fully/guide 等 8 处改写
+- [x] 词典 106 词条；validate-data 11 thing 全通过
+- [x] 浏览器回归（CDP 硬刷新流）：3 新 thing 阅读态渲染完整零错误 / 词→图高亮（metal bones / turning heart / air puller 实测，文章滚句+标签重排）/ flow 多部件步（bicycle 04/05 转向杆+前轮、clock 05/05 双针、vacuum 02/05 嘴+鼻，past 部件半亮）/ dict 悬停卡（tube /tuːb/ 实测）/ Home 11/11 卡片
+- [x] 构建链：tsc / build（242ms）/ validate-data / 闸门 / oxlint 新增代码零告警 exit 0
 
 ### 实施备注（与规格的已知偏差）
 
