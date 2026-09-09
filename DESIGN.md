@@ -72,9 +72,14 @@
 **[新增]**：
 | 类 | 说明 |
 |---|---|
-| `.part-glow` | 3D 部件激活：`filter: drop-shadow(0 0 12px accent)` + 材质 opacity .95 |
-| `.part-dim` | 过程动画中未到步骤部件：opacity .25 |
+| `.part-glow` | 3D 部件激活（草稿化后为 LineMaterial 实现，见 §7） |
+| `.part-dim` | 过程动画中未到步骤部件：线 opacity .12 |
 | `.card-pop` | 词条卡入场：translateY(4px)+fade，160ms ease-out |
+
+**[2026-09-09 用户裁决 · 草稿图纸化]**：背景网格与 3D 冲突、两区需明显分界、3D 偏草稿图纸风。落地：
+- 3D 材质：彩色 wireframe → 统一墨线 `#2C2A25` 的 EdgesGeometry 轮廓（无三角剖分线），激活 = accent 色 + lineWidth 2.5；GridFloor/Float/灯光移除，新增虚线中心轴（制图符号）
+- 文章列：`bg-canvas` 实色（干净纸面，网格只存在于图列下方 = 方格草稿纸隐喻）
+- 分界：图列 `border-l-2 ink-soft/70` 制图分界线；PageActions 同步实色纸面
 
 ## 3. Layout
 
@@ -219,3 +224,4 @@
 - PracticePanel 关键表达 hover 的"微亮 40%"实现为全亮（复用 highlightPartId 通道，简化状态）
 - 图上部件标注标签在小部件密集区有重叠（沿用原型的 part position），P1 打磨项
 - 已修复：FlowPlayer 初版因内联回调引用触发 update-depth 循环，回调 ref 化后 effect 只依赖 stepIndex
+- 草稿化后 Part 高亮实现在 SketchMesh 子级 drei `<Edges>`（LineMaterial color/opacity/linewidth 每帧 lerp）；取景距离按 thing 配置（THING_CAMERA 表），调相机而非缩放模型（标注 dot 与模型同坐标，缩放模型会错位）
