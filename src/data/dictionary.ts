@@ -47,6 +47,9 @@ import { electricMotorDict } from './dict/electric-motor'
 import { bridgeDict } from './dict/bridge'
 import { earthDict } from './dict/earth'
 import { atomDict } from './dict/atom'
+import { droneDict } from './dict/drone'
+import { galaxyDict } from './dict/galaxy'
+import { geothermalDict } from './dict/geothermal'
 
 /**
  * 词典汇总层。
@@ -102,6 +105,9 @@ const sources: Record<string, DictEntry>[] = [
   bridgeDict,
   earthDict,
   atomDict,
+  droneDict,
+  galaxyDict,
+  geothermalDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

@@ -52,6 +52,9 @@ import { electricMotor } from './things/electric-motor'
 import { bridge } from './things/bridge'
 import { earth } from './things/earth'
 import { atom } from './things/atom'
+import { drone } from './things/drone'
+import { galaxy } from './things/galaxy'
+import { geothermal } from './things/geothermal'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -111,6 +114,9 @@ export const things: ThingData[] = [
   bridge,
   earth,
   atom,
+  drone,
+  galaxy,
+  geothermal,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

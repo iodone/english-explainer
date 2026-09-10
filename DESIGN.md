@@ -85,7 +85,10 @@ mars = red-dust 红 / ice-caps 钛白 / thin-air 外壳灰（余冷灰）；
 electric-motor = spin-heart 红 / still-ring 钛白 / box-body 外壳灰（余冷灰）；
 bridge = great-lines 红 / hold-towers 钛白 / road-way 外壳灰（余冷灰）；
 earth = turning-heart 红 / power-field 钛白 / air-skin 外壳灰（余冷灰）；
-atom = heavy-heart 红 / near-road 钛白 / far-road 外壳灰（余冷灰）。
+atom = heavy-heart 红 / near-road 钛白 / far-road 外壳灰（余冷灰）；
+drone = sky-eye 红 / spin-blades 钛白 / fly-box 外壳灰（余冷灰）；
+galaxy = heart-light 红 / turning-arms 钛白 / flat-wheel 外壳灰（余冷灰）；
+geothermal = heat-rocks 红 / deep-holes 钛白 / steam-hall 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -548,6 +551,19 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 类别平衡达成：53 件 = home 17 / transport 12 / space 12 / power 12
 - [x] pi 独立验证（2026-09-11，tmp/b16-pi-report.md + tmp/b16-pi-verify/ 39 截图全证据链，判定**通过（4 处内容修复后）**）：五闸门独立重跑全绿（53·词典 193·分词 215 / build 746 / oxlint 0）；数据 85 断言 + 几何 58 断言全过（括号平衡解析器直读 tsx 杜绝转录误差——悬链步长递减 0.16→0.03、海洋球 |p|+r∈(0.62,0.80)、月亮贴轨 Δ0.0008、电子落壳 Δ<1e-3、核子六点交错 60°）；**Munroe 四通道第二实现独立复算 3001 词次 offender 0**（pi 自曝勘误：其首轮漏 -ily→-y 屈折规则产假阳性，补规则归零——官方闸门语义正确）；浏览器矩阵：词→物 21/21 word-active 全命中、物→词 21/21 词激活正确（pi 自设"居中句/位移"二级观测对多部件同屏情形失真为方法学局限非产品缺陷；earth turning-heart 激活点像素未检出 = 洋葱包层遮挡同因）；pi §4-§6 叙述因 128k 上下文 compact 失败未落盘，证据完整存 tmp/b16-pi-verify/，由 🥔 终审合成
 - [x] pi 数字自洽审计 4 项终审裁定（claude，修复已应用 + 三闸门复跑全绿）：① bridge s3 主缆 "100,000 thin steel wires" 与 funFact1 "more than 25,000" 同物自相矛盾（金门实况 27,572 根/缆）——**修复**：s3 改 "more than 25,000 thin steel wires" ② earth funFact1 外核单独小于火星（r 2,260 vs 3,390 km），仅核球+外核合计 3,480 才略大——**修复**："the sea of flowing iron around it a little bigger" 改 "ball and sea together a little bigger" ③ earth s5 地幔厚 "2,000 miles"（实 ~1,800）——**修复**：改 "1,800 miles" ④ atom funFact1 "99 parts of every 100"（实况空隙率 10^-15 量级，方向保守但数字为假）——**修复**：删错误数字，playing field/dust 类比自承载尺度；教训：数字不在词汇闸门管辖，产线简报新增"数字自洽预检"条款（下批起执行）
+
+### 验收对照 · production line 第十七批 3 thing（2026-09-11 第二十二轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：drone（The Sky Watcher，accent #0891B2，transport 域第十三件，四臂对角 armRoots(±0.15)→armEnds(±0.8) + 旋翼 12 边形环 + 交叉桨叶 + sky-eye 吊杆云台 + far-talk 天线顶球 + 起落腿×1.2 外撇）/ galaxy（The Star City，accent #9333EA，space 域第十三件，对数螺线双臂 9 点 + armTwo 逐点取反 + 三环 24 段 + heart-light 双球 0.13/0.06 嵌套 + hidden-hold r1.55 + halo 8 散点 + starCloud 15 球）/ geothermal（The Earth Heat House，accent #C2410C，power 域第十三件，双井剖面 4 壁杆 + heatRocks 5 球 + 门洞厂房 7 杆框架 + turning-wheel + 三节冷却塔）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] dict +3 词条：drone /droʊn/ 无人机 · galaxy /ˈɡæləksi/ 星系；银河系 · geyser /ˈɡaɪzər/ 间歇泉（dict span 复数映射 geysers→geyser，同 bridge ropes→rope 先例）；词典 193→196（无重复键）、分词 215→218
+- [x] flow sentenceRef 全单件步：drone 2,3,4,7,11 / galaxy 2,3,5,7,11 / geothermal 1,3,5,7,9（修复后值，见下 pi 修复行）；单出：drone power-pocket、far-talk / galaxy dust-rivers、old-star-groups / geothermal heat-rocks、steam-hall
+- [x] finish 三色齐：sky-eye·heart-light·heat-rocks 红 / spin-blades·turning-arms·deep-holes 钛白 / fly-box·flat-wheel·steam-hall 外壳灰，warning 各 1 配额内
+- [x] 亲审（tmp/b17-claude-review.md）：零偏离——数据逐字节对齐、注册纯追加、几何全核验（Rod 链全 slice(0,-1)+模块级原数组，b16 崩溃类零复现；depthWrite 疑点裁定为 SketchMesh 内建非偏离）；五闸门全绿 56/196/218/755/0；浏览器矩阵全过零异常（tmp/shots17/ 12 截图——词→物 3/3 word-active+3D 高亮、dict 卡 3/3 含 geysers→geyser 复数映射、flow 15/15 caption 逐字 + STEP 计数全对）；测试手法修正 2 处记录（跨行 span 用 getClientRects()[0] 首片段中心点击；HOW IT WORKS 大写匹配）均非产品缺陷
+- [x] pi 独立验证（2026-09-11，tmp/b17-pi-report.md，判定**有条件通过——1 HIGH + 2 LOW + INFO，修复后全绿**）：五闸门独立重跑全绿（56 · 词典 196 · 分词 218 / build 755 / oxlint 0）；结构断言全过 + Munroe 四通道第二实现 12 句抽样 offender 0（geyser 实走 dict 通道，简报"够 ORIG 表"归因有误已勘正）；Rod 链审计 0 零长段（drone 22 / galaxy 104 / geothermal 27 Rod）；几何 4/4 断言过；浏览器三页 forensic 零 exceptionThrown；git 前后一致零仓库变更。**🔴 HIGH：flow sentenceRef 系统性 off-by-one 15/15 步**（三路互证：简报 1-based 编号直抄进 0-based 字段 / caption↔ref−1 逐句配对 / 全库 56 件惯例对照唯一 match=0）——五闸门对此类语义错位全盲区，唯 pi 对抗层抓出
+- [x] pi 发现终审修复（claude 裁定 + 应用 + 五闸门复跑全绿 + 运行时复验 15/15 高亮句==sentenceRef 句且含部件 span，tmp/b17-fix.mjs / b17-highlight-check.mjs）：① 15 refs 各 −1（ref==span 句索引，后期批次惯例）② galaxy "two thirds"→"about half way out"（太阳距银心 ~26k ly / 盘径 100k ly ≈ 52%，与自身数字自洽）+ hereRing 几何 0.68R→0.53R 跨层一致 ③ galaxy "five times"→"more than ten times"（DM:恒星 ≈ 12–25×；pi 建议 "stuff" 未采纳——DM 与星系内普通物质之比亦 ~15×，5× 仅为含星系外气体的宇宙口径）④ geothermal "by the north sea"→"far out in the cold sea"（冰岛在北大西洋）⑤ INFO 项不修（drone "hundreds of turns a second" 竞速级可达 / "stay up for days" 太阳能机先例 / galaxy "hundreds of balls" 可辩护简化）
+- [x] 闸门硬化：validate-data.mjs 新增 flow sentenceRef 系统性 off-by-one 检查（整件 100% 步 ref==span+1 且 n≥3 报错；正测 56 件零误报——curiosity-rover 5/6、refrigerator 2/5 等"ref 指向功能句"混合惯例不触发；负测人为回退 drone refs 正确报错）；caption↔ref 内容词重合度审计原型（tmp/caption-ref-audit.mjs）全库 27 处微弱边际噪声，不采纳为闸门
+- [x] 类别平衡达成：56 件 = home 17 / transport 13 / space 13 / power 13
+- [x] 流程事件：pi 首轮 session 因 b16 像素取证残留 128k 耗尽未启动验证（零产出；Escape 破 compact 死循环 + /new 重开 session）；二轮简报增补铁律 6 禁像素深挖 / 7 工具输出瘦身 / 8 数字自洽审计，81.3% 水位收束令降载后全节完成；流程教训落档：pi 简报下批起改分段派发，产线简报新增 span 编号与 sentenceRef 统一 0-based 记法条款
 
 ### 实施备注（与规格的已知偏差）
 

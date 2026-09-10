@@ -25,7 +25,39 @@ for (const thing of things) {
     }
   }
 
-  // 2. keyExpressions partId 检查
+  // 2. flow sentenceRef 系统性 off-by-one 检查（b17 教训：简报 1-based 编号被
+  //    逐字转写进 0-based 字段，整件每步 ref == span 句索引 + 1）
+  //    判据：整件 100% 步 off+1（n≥3）才报错。早期批次存在合法的"ref 指向
+  //    功能句"惯例（curiosity-rover 5/6、refrigerator 2/5 混合模式），不触发。
+  {
+    let offByOne = 0
+    let withSpan = 0
+    for (const step of thing.flow) {
+      const pid = step.partIds[0]
+      let idx = 0
+      let spanIdx = -1
+      for (const para of thing.article) {
+        for (const sentence of para.sentences) {
+          for (const seg of sentence) {
+            if (typeof seg !== 'string' && seg.part === pid && spanIdx === -1) spanIdx = idx
+          }
+          idx++
+        }
+      }
+      if (spanIdx !== -1) {
+        withSpan++
+        if (step.sentenceRef === spanIdx + 1) offByOne++
+      }
+    }
+    if (withSpan >= 3 && offByOne === withSpan) {
+      console.error(
+        `✗ ${label} flow sentenceRef 系统性 off-by-one：${offByOne}/${withSpan} 步 ref == span 句索引 + 1（sentenceRef 为 0-based，勿把 1-based 编号直接填入；b17 教训）`,
+      )
+      errors++
+    }
+  }
+
+  // 3. keyExpressions partId 检查
   for (const [i, expr] of thing.keyExpressions.entries()) {
     if (expr.partId && !thing.parts.some(p => p.id === expr.partId)) {
       console.error(`✗ ${label} keyExpressions[${i}] partId "${expr.partId}" 不存在`)
@@ -33,7 +65,7 @@ for (const thing of things) {
     }
   }
 
-  // 3. 文中 dict 标注 → dictionary 闭环
+  // 4. 文中 dict 标注 → dictionary 闭环
   let dictMarks = 0
   let partMarks = 0
   for (const para of thing.article) {
@@ -58,7 +90,7 @@ for (const thing of things) {
     }
   }
 
-  // 4. 每个部件至少被文中标注一次 + finish 枚举
+  // 5. 每个部件至少被文中标注一次 + finish 枚举
   const markedParts = new Set(
     thing.article.flatMap(p => p.sentences.flat())
       .filter(s => typeof s !== 'string' && s.part)
@@ -87,7 +119,7 @@ for (const thing of things) {
   )
 }
 
-// 5. dictionary 词条的基本字段
+// 6. dictionary 词条的基本字段
 for (const [key, entry] of Object.entries(dictionary)) {
   if (!entry.word || !entry.phonetic || !entry.pos || !entry.meaning) {
     console.error(`✗ 词条 "${key}" 字段不全`, entry)

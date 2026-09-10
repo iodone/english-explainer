@@ -52,6 +52,9 @@ import ElectricMotorSketch from './electric-motor'
 import BridgeSketch from './bridge'
 import EarthSketch from './earth'
 import AtomSketch from './atom'
+import DroneSketch from './drone'
+import GalaxySketch from './galaxy'
+import GeothermalSketch from './geothermal'
 
 /**
  * thing.id → 几何体分发表。
@@ -112,6 +115,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'bridge': BridgeSketch,
   'earth': EarthSketch,
   'atom': AtomSketch,
+  'drone': DroneSketch,
+  'galaxy': GalaxySketch,
+  'geothermal': GeothermalSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
