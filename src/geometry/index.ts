@@ -13,6 +13,9 @@ import VacuumCleanerSketch from './vacuum-cleaner'
 import ToiletSketch from './toilet'
 import SpeakerSketch from './speaker'
 import DrillSketch from './drill'
+import CameraSketch from './camera'
+import BatterySketch from './battery'
+import ZipperSketch from './zipper'
 
 /**
  * thing.id → 几何体分发表。
@@ -34,6 +37,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   toilet: ToiletSketch,
   speaker: SpeakerSketch,
   drill: DrillSketch,
+  camera: CameraSketch,
+  battery: BatterySketch,
+  zipper: ZipperSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

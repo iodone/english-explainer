@@ -46,7 +46,10 @@ clock = turning-heart+tick-stopper 红 / time-face 钛白 / 余冷灰；
 vacuum-cleaner = air-puller 红 / dust-bag 外壳灰 / 余冷灰；
 toilet = water-door 红 / water-bowl 钛白 / 余冷灰（water-tank 顶置）；
 speaker = wire-ring 红 / sound-paper 钛白 / box-body 外壳灰（余冷灰）；
-drill = go-button 红 / speed-changer 钛白 / 余冷灰。
+drill = go-button 红 / speed-changer 钛白 / 余冷灰；
+camera = light-door 红 / light-catcher 钛白 / dark-box 外壳灰（余冷灰）；
+battery = top-cap 红 / second-metal 钛白 / steel-skin 外壳灰（余冷灰）；
+zipper = walker-box 红 / teeth-rows 钛白 / 余冷灰。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -355,6 +358,16 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 词典 121 词条；validate-data 14 thing 全通过
 - [x] 浏览器回归（CDP 硬刷新流）：3 新 thing 阅读态渲染完整零错误 / 词→图高亮（water tank / sound wire / power box 实测）/ flow 多部件步（toilet 05/05 float ball+fill pipe 双亮、speaker 02/05 wire ring+still magnet 双亮、drill 03/05 speed-changer 齿轮组）/ dict 悬停卡（toilet /ˈtɔɪlət/、speaker /ˈspiːkər/、drill /drɪl/ 实测）/ Home 14/14 卡片
 - [x] 构建链：tsc / build（271ms）/ validate-data / 闸门 / oxlint 新增代码零输出 exit 0
+
+### 验收对照 · production line 第四批 3 thing（2026-09-10 第九轮，光学/电化学/微型机械三新域）
+
+- [x] 3 新 thing 全链路：camera（Light Catcher Box，accent teal #2DD4BF，光学汇聚与倒像）/ battery（Power Can，accent 烧橙 #EA580C，power 域第二件，电化学缓释交换）/ zipper（Teeth Catcher，accent cyan #22D3EE，微型机械互锁）——各 6-7 部件 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 几何探索三型：camera 左视光路图（镜筒三层圆柱 + 6 条淡墨光线过镜心交叉铺到感光板，倒像原理图）/ battery 同轴分层沿 x 炸开（碳棒→隔膜→电解膏→锌层→钢壳，顶帽按钮在钢壳顶 + 外电路方框线绕行）/ zipper 正视图（13×2 开口齿 + 左段互扣加厚 + 滑块前探劈齿墙 + Y 形通道淡墨）
+- [x] 预检工作流升级：动笔前对闸门双表（xkcd 原表 + SIMPLE_WORDS 合并表）批量预 grep 生僻词（四轮约 130 词，含 motor 等 batch 2/3 教训词）——camera 首跑零超纲，全批首跑仅 9 处（batch 3 为 24 处）
+- [x] Munroe 闸门 17 thing 全绿（新件 dict 豁免依赖：camera 2 = lens+upside（camera 一词本在 xkcd 表内，仍配词条供悬停卡）/ battery 7 = battery+trade+rod+paste+cap+apart+wire（apart 借核反应堆、wire 借音箱）/ zipper 4 = zipper+button+apart+cloth（button 借电钻））；概念词 5 个走词条（rod/paste/cap/cloth+trade/charge 等，dict 分词 143→154）、改写 4 处（hero→keeper、trick→idea、steel→metal、depends/stack）
+- [x] 词典 132 词条；validate-data 17 thing 全通过
+- [x] 浏览器回归（CDP 硬刷新流）：3 新 thing 零错误 / 词→图高亮（light bender / first metal 双处同亮 / teeth 实测）/ flow 多部件步（camera 05/05 picture keeper+back screen、battery 01/05 双金属、zipper 04/05 双止位块）/ dict 悬停卡（camera /ˈkæmərə/、battery /ˈbætri/、zipper /ˈzɪpər/ 实测）/ Home 17/17 卡片
+- [x] 构建链：tsc / build（283ms）/ validate-data / 闸门 / oxlint exit 0
 
 ### 实施备注（与规格的已知偏差）
 

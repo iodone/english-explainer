@@ -13,6 +13,9 @@ import { vacuumCleanerDict } from './dict/vacuum-cleaner'
 import { toiletDict } from './dict/toilet'
 import { speakerDict } from './dict/speaker'
 import { drillDict } from './dict/drill'
+import { cameraDict } from './dict/camera'
+import { batteryDict } from './dict/battery'
+import { zipperDict } from './dict/zipper'
 
 /**
  * 词典汇总层。
@@ -34,6 +37,9 @@ const sources: Record<string, DictEntry>[] = [
   toiletDict,
   speakerDict,
   drillDict,
+  cameraDict,
+  batteryDict,
+  zipperDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

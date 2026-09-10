@@ -13,6 +13,9 @@ import { vacuumCleaner } from './things/vacuum-cleaner'
 import { toilet } from './things/toilet'
 import { speaker } from './things/speaker'
 import { drill } from './things/drill'
+import { camera } from './things/camera'
+import { battery } from './things/battery'
+import { zipper } from './things/zipper'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -33,6 +36,9 @@ export const things: ThingData[] = [
   toilet,
   speaker,
   drill,
+  camera,
+  battery,
+  zipper,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
