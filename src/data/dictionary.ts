@@ -41,6 +41,9 @@ import { powerGridDict } from './dict/power-grid'
 import { escalatorDict } from './dict/escalator'
 import { blackHoleDict } from './dict/black-hole'
 import { sunDict } from './dict/sun'
+import { craneDict } from './dict/crane'
+import { marsDict } from './dict/mars'
+import { electricMotorDict } from './dict/electric-motor'
 
 /**
  * 词典汇总层。
@@ -90,6 +93,9 @@ const sources: Record<string, DictEntry>[] = [
   escalatorDict,
   blackHoleDict,
   sunDict,
+  craneDict,
+  marsDict,
+  electricMotorDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

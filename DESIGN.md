@@ -79,7 +79,10 @@ moon = dark-lands 红 / ring-mountains 钛白 / rock-ball 外壳灰（余冷灰�
 power-grid = long-wires 红 / iron-men 钛白 / night-windows 外壳灰（余冷灰）；
 escalator = step-chain 红 / moving-steps 钛白 / side-walls 外壳灰（余冷灰）；
 black-hole = hot-ring 红 / light-ring 钛白 / dark-heart 外壳灰（余冷灰）；
-sun = fire-heart 红 / slow-roads 钛白 / hot-face 外壳灰（余冷灰）。
+sun = fire-heart 红 / slow-roads 钛白 / hot-face 外壳灰（余冷灰）；
+crane = hook-line 红 / long-arm 钛白 / standing-tower 外壳灰（余冷灰）；
+mars = red-dust 红 / ice-caps 钛白 / thin-air 外壳灰（余冷灰）；
+electric-motor = spin-heart 红 / still-ring 钛白 / box-body 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -518,6 +521,19 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] pi 独立验证（2026-09-11，tmp/b14-pi-report.md，判定**可提交**，0 阻塞 4 建议）：五闸门独立重跑全绿（47 things·词典 176·分词 198 / build 728 / oxlint 0）且关键数字与交付声明逐项吻合；亲审 3 项裁定确认落盘；数据 27/27 通过（[3,4,4,3]、1:1 部件标注、warning 配额、flowRefs 严格递增、特殊归位 s12/s10/s6 逐句实证、弯引号、7 新词条含 IPA 逐字比对、分类 home 17/transport 10/space 10/power 10）；浏览器矩阵全绿（三页线框墨点 5.6–7.3 万 px + rAF 出帧、**词→图像素级 A/B：accent 静息 0 → 点击后 9184/10717/2719 px，且 warning 红被替换证高亮为换色非叠加**、图→词质心点击命中 .word-active、flow 15/15 句索引级同步 0 mismatch、dict 卡四张含 IPA+词性+中文且 glowing→glow / miles→mile 映射还原原形、console 0 错误）；几何源码级独立核算——**escalator 链线为两轮外公切线（垂直距 0.129692 = 轮半径 0.13，Rod 端点即切点，上下两段异侧构成平行输送带）** / **black-hole 倾斜盘极值 ±0.3595/±0.8032 与 rotation 自洽** / **sun 光路终点距地心 0.3413 vs r 0.35 落边缘 + 地球心恰落轨道弧上（2.75726 vs R 2.76）**；git 前后 IDENTICAL 验证方 0 改动
 - [x] pi 建议级 4 项终审裁定（2026-09-11，claude）：① 简报措辞"链线距轮心 ≈0"——**采纳记档**：实际垂直距 = 轮半径 0.13（外公切线关系），代码本就正确且比简报描述更强，教训为 🥔 简报几何契约措辞错误，下批简报改写"距离 = 轮半径" ② escalator 踏板 x=0.75 y=0.34 vs 链线公式 0.35（差 0.01 world ≈ 1 CSS px，其余 7/8 逐位吻合）——**驳回改动**：坐标为简报明文、codex 逐字转写无错，delta 0.0696 在 +0.075 偏移自然散布内（八块极差 0.0087），无可见影响 ③ read 态模型首屏外——承前技术债记账不修（batch 12 建议① 同源沿承）④ captureBeyondViewport 模板措辞——**已在 §6.3 落账**：viewport-only 为既定正确方法学（batch 10 复现 300×150 破坏），本批简报实际引用 viewport-only 参考脚本，无方法学变化
 
+### 验收对照 · production line 第十五批 3 thing（2026-09-11 第二十轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：crane（The Tall Arm，accent #38BDF8，transport 域第十一件，格构塔身 + 回转双臂 + 配重杠杆自平衡）/ mars（The Red World，accent #E11D48，space 域第十一件，锈色红尘 + 古河床水文 + 双小月逆行）/ electric-motor（The Spin Maker，accent #22D3EE，power 域第十一件，定子转子磁场博弈 + 换向器半转变向）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 词汇预检三轮通过（tmp/b15-vocab-check.mjs 四通道 + 屈折逆推 + er/est 守卫）：新增 11 词条——crane /kreɪn/ 起重机；吊车；鹤、concrete /ˈkɑːŋkriːt/ 混凝土、tower /ˈtaʊər/ 塔；塔楼、load /loʊd/ 负载；载荷、hook /hʊk/ 钩；吊钩、rust /rʌst/ 锈；铁锈、canyon /ˈkænjən/ 峡谷、robot /ˈroʊbɑːt/ 机器人、invisible /ɪnˈvɪzəbl/ 看不见的；无形的、fan /fæn/ 风扇；扇子、switch /swɪtʃ/ 开关；转换，词典 176→187 词条、198→209 分词；dict span 10 处：crane 4（loads→load 复数映射 b14 miles 先例、concrete、hook、tower）/ mars 3（rusted→rust -ed 屈折映射 b14 glowing 先例、canyon、robot）/ motor 3（invisible、fan、switch）
+- [x] 几何三型：crane 侧视（格构塔身 2 弦杆 + 8 横杆等差 0.32 + 7 之字斜杆节点闭合 + 双臂格构上下弦/竖杆/之字斜 + 臂尖小塔 + 配重三块 x -1.0/-1.18/-1.36 等距悬臂压重 + 吊钩系统小车/钢缆/滑轮箱/钩头 torus π·1.2 开口/载荷箱 + 司机室窗带 + **回转扫掠弧 4 段（25°–65° 五点连线）+ 汇于 65° 端点箭头** + 在建楼层 4 层 + 屋顶落点十字）/ mars 天体视图（行星球 r0.62 + 大气包层 r0.74 + 极冠双球 r0.16 @±0.56 伸出 0.10 + 火山锥贴面 |p|≈0.60 + 峡谷三杆折线 + 古河床四杆分支网络 + **双月贴轨道（近月 |(1.05,0.38)|≈1.117 vs r1.12 / 远月 |(1.27,-0.46)|≈1.351 vs r1.35，偏差均 <0.01）** + 轨道弧 5+3 段带箭头 + 左下火箭 45° 机身/尾翼/尾焰 + 航迹 4 dash + 5 背景星十字）/ motor 侧视剖切（主壳 + 双端盖 + **定子轭环 r0.36 包转子 r0.17（0.315>0.17）** + 双极靴 + 铁芯柱 + 三绕线环 r0.2 环包芯 + 换向器筒 r0.10 + 分割缝双杆 + **碳刷内缘 0.09 与筒半径 0.10 相贴** + 输出轴 + 键块 + 转向箭头上下弧各 4 段 + 三组磁感线（中极面双短段避铁芯遮蔽 + 左右环各 3 段）+ 墙上插座方框 + 地面线）
+- [x] flow sentenceRef 终态：crane 3,7,8,9,10（tower→cab→hook→[turn-ring+long-arm 双件步]→[back-arm+hold-stones 双件步]）/ mars 3,7,8,9,10（dust→rivers→air→caps→moons）/ motor 4,5,8,10,11（ring→heart→[changer+bridges 双件步]→stick→wires），全部单调递增；**crane 7/7 部件全入 flow（批次首例全覆盖）**；单出部件（不入 flow）：mars great-cut+dead-fire-mountain（风景件，b14 space-bend+star-dance 先例）/ motor box-body（容器件，b14 escalator side-walls 先例），均语义正确
+- [x] finish 模式：三件均三色齐（hook-line·red-dust·spin-heart 红 / long-arm·ice-caps·still-ring 钛白 / standing-tower·thin-air·box-body 外壳灰），warning 各 1 配额内
+- [x] 亲审记录（2026-09-11，claude 全量亲读 9 新文件 + 3 注册 diff + CDP 三页截图）：数据层与几何层逐字比对零未申报偏离；codex 唯一申报偏差（扫掠弧简报称"五段"实为 5 角度点 4 段——简报措辞自相矛盾，坐标零改动）裁定接受；附带记录 codex 报告笔误 turn-changer 句号 s7 误记 s8（实现正确）与简报设计取数瑕疵 mars great-cut 中点 |p|≈0.59 略低于贴面基准带 0.61（见下方裁定①）
+- [x] Munroe 闸门 50 thing 全绿；validate-data 50 thing 全通过（词典 187）；构建链 tsc / build（737 modules）/ validate-data / check-simple-words（3634/1283/209）/ oxlint 批内 0
+- [x] 类别平衡达成：50 件 = home 17 / transport 11 / space 11 / power 11
+- [x] pi 独立验证（2026-09-11，tmp/b15-pi-report.md，判定**可提交**，0 阻塞 5 建议）：五闸门独立重跑全绿（50 things·词典 187·分词 209 / build 737 / oxlint 0）且关键数字与交付声明逐项吻合；数据 40/40 断言通过（[3,4,4,3]、1:1 部件标注、finish 配额、flowRefs 严格递增、双件步 crane step4/5 + motor step3 逐句实证、motor s13 七部件纯文本列举、弯引号、11 新词条含 IPA 逐字比对、分类 home 17/transport 11/space 11/power 11、mars 全文无 "Mars" 正则零命中）；**Munroe 第二实现独立复算**（自写屈折规则与官方不同写法，2771 词次越界 0）；几何 37/38（格构节点闭合、钢缆 x=0.9 落臂、配重三块等距 0.18 悬臂压重、双月贴轨 Δ<0.01、碳刷相贴间隙恰 0.01、端盖落壳缘差 0.005、轭环包芯 0.315>0.17）；浏览器矩阵全绿（词→物 3/3、**accent 像素 0→8961/26526/37805 且 warning 红同时归零证替换式高亮**、flow 句索引级同步 MISMATCH=0、dict 卡 3/3 含 IPA+词性+中文、console 0 错误、rAF 25 帧/400ms）；git 前后 IDENTICAL 验证方 0 改动；18 截图留证（tmp/b15-pi-verify/）
+- [x] pi 建议级 5 项终审裁定（2026-09-11，claude）：① mars great-cut 首端 |p0|=0.6047 低于简报基准带 0.61、p1+杆半径 0.606 < 球半径 0.62——**驳回改动**：像素级复核（base 截图 zoom 裁剪）显示峡谷三段折线全程可见，"埋没不可见"推断不成立于本渲染模型——面材质 depthWrite=false（JX-7b 半透明面，pi §4.7 自证）不写深度不遮挡内杆；Δ0.0053 属简报设计容差级（b14 escalator 0.01 同驳先例）；记档教训：贴面基准带措辞应留可见性出口 ② 图→词反向直点被最外层包壳独占（mars 18/18=thin-air、motor 19/19=box-body、既有件 light-bulb 5/5 复现）——**记账不修**：系统性 SketchMesh 拾取模型属性（primitives.tsx 每 mesh onClick+stopPropagation、transparent 面光线投射实心，最外层恒胜），非本批回归；词→物主通道 21/21 全绿，用户仍可经文中词/flow 步进抵达；列为后续专项候选（包壳 raycast 透传 + dot 标记贴面）③ 简报措辞 2 处（火山坐标实为锥体中心非锥底、第三配重块 x=-1.36 悬臂无吊杆）——**记档**：简报精确化，无代码影响 ④ 首屏外模型（canvas 2012/2137/2347 ≫ 视口 799）——**承前技术债记账不修**（batch 12 同源沿承）⑤ viewport-only 截图——**已落账方法学**（§6.3，captureBeyondViewport 会破 R3F canvas 至 300×150，batch 10 复现），无变化
+
 ### 实施备注（与规格的已知偏差）
 
 - PracticePanel 关键表达 hover 的"微亮 40%"实现为全亮（复用 highlightPartId 通道，简化状态）
@@ -525,3 +541,4 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - 已修复：FlowPlayer 初版因内联回调引用触发 update-depth 循环，回调 ref 化后 effect 只依赖 stepIndex
 - 草稿化后 Part 高亮实现在 SketchMesh 子级 drei `<Edges>`（LineMaterial color/opacity/linewidth 每帧 lerp）
 - 图→词点击通道用 React context（PartClickContext）穿透 Canvas 独立 reconciler root：Provider 放 Canvas children 内，SketchMesh 深处 useContext 直达
+- 图→词直点在带包壳件上被最外层壳体独占（transparent 面不透射线、SketchMesh onClick+stopPropagation 最外层恒胜；2026-09-11 batch 15 pi 发现，mars 6/7、electric-motor 6/7 部件不可直点，light-bulb/submarine 等既有件同样）——候选专项：包壳件关闭拾取（raycast 透传）+ dot 标记贴面；词→物正向通道不受影响

@@ -46,6 +46,9 @@ import PowerGridSketch from './power-grid'
 import EscalatorSketch from './escalator'
 import BlackHoleSketch from './black-hole'
 import SunSketch from './sun'
+import CraneSketch from './crane'
+import MarsSketch from './mars'
+import ElectricMotorSketch from './electric-motor'
 
 /**
  * thing.id → 几何体分发表。
@@ -100,6 +103,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   escalator: EscalatorSketch,
   'black-hole': BlackHoleSketch,
   sun: SunSketch,
+  crane: CraneSketch,
+  mars: MarsSketch,
+  'electric-motor': ElectricMotorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

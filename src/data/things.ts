@@ -46,6 +46,9 @@ import { powerGrid } from './things/power-grid'
 import { escalator } from './things/escalator'
 import { blackHole } from './things/black-hole'
 import { sun } from './things/sun'
+import { crane } from './things/crane'
+import { mars } from './things/mars'
+import { electricMotor } from './things/electric-motor'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -99,6 +102,9 @@ export const things: ThingData[] = [
   escalator,
   blackHole,
   sun,
+  crane,
+  mars,
+  electricMotor,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
