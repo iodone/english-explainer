@@ -34,6 +34,9 @@ import { dam } from './things/dam'
 import { ship } from './things/ship'
 import { satellite } from './things/satellite'
 import { sunCatcher } from './things/sun-catcher'
+import { hotAirBalloon } from './things/hot-air-balloon'
+import { moonLander } from './things/moon-lander'
+import { waterWheel } from './things/water-wheel'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -75,6 +78,9 @@ export const things: ThingData[] = [
   ship,
   satellite,
   sunCatcher,
+  hotAirBalloon,
+  moonLander,
+  waterWheel,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

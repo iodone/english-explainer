@@ -34,6 +34,9 @@ import DamSketch from './dam'
 import ShipSketch from './ship'
 import SatelliteSketch from './satellite'
 import SunCatcherSketch from './sun-catcher'
+import HotAirBalloonSketch from './hot-air-balloon'
+import MoonLanderSketch from './moon-lander'
+import WaterWheelSketch from './water-wheel'
 
 /**
  * thing.id → 几何体分发表。
@@ -76,6 +79,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   ship: ShipSketch,
   satellite: SatelliteSketch,
   'sun-catcher': SunCatcherSketch,
+  'hot-air-balloon': HotAirBalloonSketch,
+  'moon-lander': MoonLanderSketch,
+  'water-wheel': WaterWheelSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

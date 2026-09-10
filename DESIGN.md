@@ -67,7 +67,10 @@ rocket = fire-heart 红 / fuel-rooms 钛白 / drop-tanks 外壳灰（余冷灰�
 dam = water-gate 红 / fall-pipes 钛白 / wall-body 外壳灰（余冷灰）；
 ship = push-foot 红 / push-room 钛白 / float-body 外壳灰（余冷灰）；
 satellite = sun-wings 红 / brain-box 钛白（余冷灰，无容器件——线框本体）；
-sun-catcher = light-plate 红 / light-changer 钛白 / back-board 外壳灰（余冷灰）。
+sun-catcher = light-plate 红 / light-changer 钛白 / back-board 外壳灰（余冷灰）；
+hot-air-balloon = fire-maker 红 / cloth-bag 钛白 / people-box 外壳灰（余冷灰）；
+moon-lander = landing-fire + up-engine 双红（产线首例双警示件）/ top-room 钛白 / bottom-room 外壳灰（余冷灰）；
+water-wheel = water-boards 红 / stone-pair 钛白 / big-wheel 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -454,6 +457,19 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] finish 模式：ship/sun-catcher 三色齐（红/钛白/外壳灰）；satellite 无容器件（线框本体，余冷灰）为产线首例，简报明示；修订 #1：back-board cold→hull（背板=保护性容器件，JX-7b 外壳语义）
 - [x] pi 独立验证（2026-09-10，tmp/batch10-verify-report.md，判定可提交）：五闸门独立重跑全绿（35 things / 词典 162 / 分词 184 / build 697 modules / oxlint 批内 0 告警）；数据完整性 12 类检查全过（段落 3-4-4-3、1:1 部件标注、warning 各 1、双标注恰 3 条、装饰纯 DraftLine）；浏览器矩阵全绿——三件静止态 accent 基线 0、词→图点亮 gains ship 20940 / satellite 8869 / sun-catcher 10111、图→词双向各 2 部件、词典卡片全量 true、双标注三件 click→高亮 + hover→词条卡两通道均 true、flow 5 步字幕/句/点亮全对（步点像素 4706~29335）、practice + keyExpressions 完整；Home 35 卡 + Move/Space/Power 各 6 正确入列；存量 8 件（helicopter/dam/windmill/train/rocket/submarine/telescope/light-bulb）零回归；控制台零新增错误（仅 THREE.Clock 既有告警）；54 截图留证（tmp/shots10/）；几何语义 satellite/sun-catcher 全符（sun-catcher 四层层序未倒置）、ship 7 项中 6 符
 - [x] 终审修订（claude，2026-09-10）：pi 建议级——push-room [0.7,0.38,0.5]@[0.95,−0.2] 水下仅 23.7%（s4 "under the water line" 要求大半浸没），落盘改为 [0.7,0.20,0.5]@[0.95,−0.325]：浸没率 62.5%、底边贴船底线不出包络、与压载龙骨（顶 −0.43）零重叠（机舱坐压载舱顶，符合真船构造），水线 −0.30 与 back-fin 半浸锁定不动，部件表锚点同步；五闸门 + oxlint 重跑全绿，截图目视复核（b10-ship-after-pushroom.png）。三项待复核由终审读图关闭：① 水线视觉正确（整船没水非悬空）② flow-1 accent 触底行系 flow UI 进度条非几何裁切 ③ viewport-only 截图方法论偏离沿 batch-9 先例记录在案
+
+### 验收对照 · production line 第十一批 3 thing（2026-09-10 第十六轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：hot-air-balloon（Hot Air Ball，accent orange #F97316——#FACC15 已被 light-bulb 占用改选橙红，火语义；transport 域第七件，热空气浮力 + 开顶收口 + 风层导航）/ moon-lander（Moon Jumper，accent #FBBF24，space 域第七件，两级构型 + 降落制动 + 抛级返航）/ water-wheel（Water Turner，accent #22C55E，power 域第七件，高位落水 + 齿轮变速 + 磨石制粉）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 候选查重前置：起草前 grep 全 35 slug，space telescope（telescope 已存在）/ Mars car（curiosity-rover 同题材）/ nuclear battery（battery 同题材）弃选，三新件无冲突
+- [x] 词汇预检**一轮收敛 FAIL 清零**（产线最快）；8 个 dict 依赖词全为既有词条 → **产线首例零新增词典批**（词典 162 词条 / 184 分词与 batch 10 完全一致，dictionary.ts 不动，批次 8 文件制：6 新 + 2 注册）；dict span 10 处：balloon fuel/cloth/balloon、lander float/fuel/ship、water gear（**s6 "gear wheels" part+dict 双标注**）/trade/speed/steam
+- [x] 亲审记录（2026-09-10，claude 全量亲读 8 文件 + 2 注册 diff）：数据层逐字比对**零偏离**（42 句 / 部件表 / flow / keyExpressions / funFacts / 配色 / 注册纯追加）；7 项裁定 6 项修复落盘——① 简报坐标错 ×3：balloon tie-lines 顶端悬空（改 mouth 缘四角 [±0.24,0.31,±0.24]）、water 水槽末端低于轮缘顶（抬升至 [-1.25,1.32,0]，末端 (-0.706,1.238) 全程高于轮缘，闸门/落水线随调）、lander 梯子陷入金箔八棱柱（径向 0.578 < 内切半径 0.61，改正面居中 face-on z0.68 双轨 6 踏）；② codex 偏离 ×2：风箭两层同向（s10 要求反向，低层翻转左指）、磨坊立柱画到地面线以下（改 y-0.5→-0.85）；③ codex 遗漏 ×1：gore 经线装饰（补 3 弧 φ=π/4,π/2,3π/4）；④ 追认裁量 ×1：spindle 竖杆直立于齿轮轴入下磨石（简报原写斜连石心，竖直更合磨坊构造）。修复后五闸门 + oxlint 独立重跑全绿，CDP 截图目视复核 6 项到位
+- [x] 几何三型：balloon 纵构图（倒雨滴 envelope 1.15 拉伸 + 3 gore 经线 + 微喇叭火口 + 燃烧器支柱 + 吊舱 + 舱内双燃料瓶 + 4 系绳 mouth 缘→吊舱角 + 高低两层反向风箭 + 火/云/地装饰）/ lander 侧视两级（八角金箔柱包下级 + 双窗上级 + 钟形降落喷管 + 顶置上升发动机 + 4 外张腿圆足垫 + 正面居中梯 + 月面弧/四星/地球弧线装饰）/ water-wheel 侧视（12 boards 径向均布 + 8 轮辐 + 双齿轮齿尖交错啮合（圆心距 0.426 ≈ 齿尖半径和 0.43）+ 双磨石叠置 + 水槽高位左上斜置 + 立闸提杆 + 3 落水线 + 磨坊轮廓 + 河面线波浪装饰）
+- [x] finish 模式：balloon/water-wheel 三色齐（红/钛白/外壳灰）；**moon-lander 双警示件 landing-fire + up-engine（warning 2 = 上限，产线首例）**，validate-data warning ≤2 规则内合法
+- [x] Munroe 闸门 38 thing 全绿；validate-data 38 thing 全通过；构建链 tsc / build（703 modules）/ validate-data / check-simple-words / oxlint exit 0
+- [x] flow sentenceRef 终态：balloon 2,3,6,8,10（cloth-bag 两现步 1/5，mouth→fire→box→door→bag 升空链）/ moon-lander 2,7,8,9,10（两室→落火→腿→梯→升火 任务链）/ water-wheel 3,4,5,6,11（road→gate→wheel→gears→stones 水力链），全部单调递增
+- [x] pi 独立验证（2026-09-10，tmp/batch11-verify-report.md，判定**可提交**，0 阻塞 3 建议）：五闸门独立重跑全绿（38 things / 词典 162·184 零新增核实 / build 703 modules / oxlint 批内 0 告警）；亲审 7 裁定 6 落盘修订**逐条确认** + 第 7 项一致；数据完整性全过（段落 3-4-4-3、1:1 部件标注、warning 配额、双标注恰 1、flowRefs 单调、曲撇 house style）；浏览器矩阵全绿（三件静息 accent 0、词→图双向各 2 部件、双标注 gear 两通道独立 true、flow 15 步 caption/句/部件全对——13 步高亮在可视画布内，余 2 步为整页自动滚动取景现象非高亮失效、practice + keyExpressions 完整）；Home 38 卡 + Move/Space/Power 各 7 正确入列；既有 11 件零回归；控制台仅 THREE.Clock 既有告警；几何方向/层序像素自检全对（风箭反向、落水线终点贴轮缘 y1.088≈1.09、lander 竖向层序单调、齿轮齿尖交错压深、金罩内切余量 0.022）；77 截图留证（tmp/shots11/）
+- [x] pi 建议级 3 项记录在案（不阻塞）：① 流程播放整页自动滚动（step5 水车 +452px）致部件出视口——UX 观察待后续统一处理；② 页头右上同色系静态发光污染 accent 统计——验证方法学；③ autoRotate 下细几何点击偶发落空——验证方法学（源码核对部件名一一对应，非产品缺陷）
 
 ### 实施备注（与规格的已知偏差）
 
