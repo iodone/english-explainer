@@ -82,7 +82,10 @@ black-hole = hot-ring 红 / light-ring 钛白 / dark-heart 外壳灰（余冷灰
 sun = fire-heart 红 / slow-roads 钛白 / hot-face 外壳灰（余冷灰）；
 crane = hook-line 红 / long-arm 钛白 / standing-tower 外壳灰（余冷灰）；
 mars = red-dust 红 / ice-caps 钛白 / thin-air 外壳灰（余冷灰）；
-electric-motor = spin-heart 红 / still-ring 钛白 / box-body 外壳灰（余冷灰）。
+electric-motor = spin-heart 红 / still-ring 钛白 / box-body 外壳灰（余冷灰）；
+bridge = great-lines 红 / hold-towers 钛白 / road-way 外壳灰（余冷灰）；
+earth = turning-heart 红 / power-field 钛白 / air-skin 外壳灰（余冷灰）；
+atom = heavy-heart 红 / near-road 钛白 / far-road 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -533,6 +536,18 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 类别平衡达成：50 件 = home 17 / transport 11 / space 11 / power 11
 - [x] pi 独立验证（2026-09-11，tmp/b15-pi-report.md，判定**可提交**，0 阻塞 5 建议）：五闸门独立重跑全绿（50 things·词典 187·分词 209 / build 737 / oxlint 0）且关键数字与交付声明逐项吻合；数据 40/40 断言通过（[3,4,4,3]、1:1 部件标注、finish 配额、flowRefs 严格递增、双件步 crane step4/5 + motor step3 逐句实证、motor s13 七部件纯文本列举、弯引号、11 新词条含 IPA 逐字比对、分类 home 17/transport 11/space 11/power 11、mars 全文无 "Mars" 正则零命中）；**Munroe 第二实现独立复算**（自写屈折规则与官方不同写法，2771 词次越界 0）；几何 37/38（格构节点闭合、钢缆 x=0.9 落臂、配重三块等距 0.18 悬臂压重、双月贴轨 Δ<0.01、碳刷相贴间隙恰 0.01、端盖落壳缘差 0.005、轭环包芯 0.315>0.17）；浏览器矩阵全绿（词→物 3/3、**accent 像素 0→8961/26526/37805 且 warning 红同时归零证替换式高亮**、flow 句索引级同步 MISMATCH=0、dict 卡 3/3 含 IPA+词性+中文、console 0 错误、rAF 25 帧/400ms）；git 前后 IDENTICAL 验证方 0 改动；18 截图留证（tmp/b15-pi-verify/）
 - [x] pi 建议级 5 项终审裁定（2026-09-11，claude）：① mars great-cut 首端 |p0|=0.6047 低于简报基准带 0.61、p1+杆半径 0.606 < 球半径 0.62——**驳回改动**：像素级复核（base 截图 zoom 裁剪）显示峡谷三段折线全程可见，"埋没不可见"推断不成立于本渲染模型——面材质 depthWrite=false（JX-7b 半透明面，pi §4.7 自证）不写深度不遮挡内杆；Δ0.0053 属简报设计容差级（b14 escalator 0.01 同驳先例）；记档教训：贴面基准带措辞应留可见性出口 ② 图→词反向直点被最外层包壳独占（mars 18/18=thin-air、motor 19/19=box-body、既有件 light-bulb 5/5 复现）——**记账不修**：系统性 SketchMesh 拾取模型属性（primitives.tsx 每 mesh onClick+stopPropagation、transparent 面光线投射实心，最外层恒胜），非本批回归；词→物主通道 21/21 全绿，用户仍可经文中词/flow 步进抵达；列为后续专项候选（包壳 raycast 透传 + dot 标记贴面）③ 简报措辞 2 处（火山坐标实为锥体中心非锥底、第三配重块 x=-1.36 悬臂无吊杆）——**记档**：简报精确化，无代码影响 ④ 首屏外模型（canvas 2012/2137/2347 ≫ 视口 799）——**承前技术债记账不修**（batch 12 同源沿承）⑤ viewport-only 截图——**已落账方法学**（§6.3，captureBeyondViewport 会破 R3F canvas 至 300×150，batch 10 复现），无变化
+
+### 验收对照 · production line 第十六批 3 thing（2026-09-11 第二十一轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：bridge（The High Road，accent #EA580C，transport 域第十二件，悬链主缆 17 节点 + 9 吊杆逐节点对齐 + 双塔格构 + 锚碇 + 加劲桁架）/ earth（The Blue World，accent #0EA5E9，space 域第十二件，洋葱嵌套五层 + 海陆贴面 + 偶极场线 + 月亮贴轨）/ atom（The Tiny Piece，accent #8B5CF6，power 域第十二件，核子六点阵 + 双壳层 + 电子精确落壳 + 跃迁光子）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 词汇预检（tmp/b16-vocab-check.mjs 四通道 + 屈折逆推，93 文本单元）：新增 7 词条——bridge /brɪdʒ/ 桥、cable /ˈkeɪbl/ 缆索、steel /stiːl/ 钢、rope /roʊp/ 绳、planet /ˈplænɪt/ 行星（与 telescopeDict 重复键，先到先得合并不增唯一 key，简报设计瑕疵既成事实裁定接受）、ocean /ˈoʊʃən/ 海洋、atom /ˈætəm/ 原子；词典 187→193、分词 209→215；dict span 7 处：bridge 4（bridge、steel、cable、ropes→rope 复数映射）/ earth 2（planets→planet 复数映射、ocean）/ atom 1（atom）
+- [x] flow sentenceRef：bridge 3,4,5,8,10（step4 road-way+under-bones 双件步）/ earth 4,5,6,9,10 / atom 3,4,7,8,9（step2 push-points+still-points、step4 near-road+far-road 双件步；7 部件全入 flow）；单出：bridge water-legs（基础件）/ earth blue-water+dry-lands（景面件，b14 先例）
+- [x] finish 模式：三件均三色齐（great-lines·turning-heart·heavy-heart 红 / hold-towers·power-field·near-road 钛白 / road-way·air-skin·far-road 外壳灰），warning 各 1 配额内
+- [x] 亲审（tmp/b16-claude-review.md）：数据层 93 文本单元逐字节对齐、注册纯追加 18 行 0 删、earth/atom 几何零偏离；**bridge.tsx 塔身之字 map 第三参越界崩溃 bug（tsc 盲区——五闸门全绿但页面白屏）由 🥔 终审两轮修复**——towerDiagonals 模板提升模块级 + slice(0,-1) + to 引用原数组（本文件 mainCablePoints 习语；第一轮只加 slice 仍引 map 第三参为错误修复）；取证方法论教训落档：只查 DOM 会假阴性（后台节流 tab R3F 挂载延迟），页面级验证必须带 Runtime.exceptionThrown 监听（tmp/b16-forensic.mjs）；codex 4 项申报偏离全裁为简报错误（dict 导出类型 / 词典 194→193 / 分词 216→215 / build 740→746）
+- [x] Munroe 闸门 53 thing 全绿；validate-data 53 件（词典 193）；构建链 tsc 0 / build 746 modules / check-simple-words 分词 215 / oxlint 批内 0
+- [x] 类别平衡达成：53 件 = home 17 / transport 12 / space 12 / power 12
+- [x] pi 独立验证（2026-09-11，tmp/b16-pi-report.md + tmp/b16-pi-verify/ 39 截图全证据链，判定**通过（4 处内容修复后）**）：五闸门独立重跑全绿（53·词典 193·分词 215 / build 746 / oxlint 0）；数据 85 断言 + 几何 58 断言全过（括号平衡解析器直读 tsx 杜绝转录误差——悬链步长递减 0.16→0.03、海洋球 |p|+r∈(0.62,0.80)、月亮贴轨 Δ0.0008、电子落壳 Δ<1e-3、核子六点交错 60°）；**Munroe 四通道第二实现独立复算 3001 词次 offender 0**（pi 自曝勘误：其首轮漏 -ily→-y 屈折规则产假阳性，补规则归零——官方闸门语义正确）；浏览器矩阵：词→物 21/21 word-active 全命中、物→词 21/21 词激活正确（pi 自设"居中句/位移"二级观测对多部件同屏情形失真为方法学局限非产品缺陷；earth turning-heart 激活点像素未检出 = 洋葱包层遮挡同因）；pi §4-§6 叙述因 128k 上下文 compact 失败未落盘，证据完整存 tmp/b16-pi-verify/，由 🥔 终审合成
+- [x] pi 数字自洽审计 4 项终审裁定（claude，修复已应用 + 三闸门复跑全绿）：① bridge s3 主缆 "100,000 thin steel wires" 与 funFact1 "more than 25,000" 同物自相矛盾（金门实况 27,572 根/缆）——**修复**：s3 改 "more than 25,000 thin steel wires" ② earth funFact1 外核单独小于火星（r 2,260 vs 3,390 km），仅核球+外核合计 3,480 才略大——**修复**："the sea of flowing iron around it a little bigger" 改 "ball and sea together a little bigger" ③ earth s5 地幔厚 "2,000 miles"（实 ~1,800）——**修复**：改 "1,800 miles" ④ atom funFact1 "99 parts of every 100"（实况空隙率 10^-15 量级，方向保守但数字为假）——**修复**：删错误数字，playing field/dust 类比自承载尺度；教训：数字不在词汇闸门管辖，产线简报新增"数字自洽预检"条款（下批起执行）
 
 ### 实施备注（与规格的已知偏差）
 

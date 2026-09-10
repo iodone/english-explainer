@@ -49,6 +49,9 @@ import SunSketch from './sun'
 import CraneSketch from './crane'
 import MarsSketch from './mars'
 import ElectricMotorSketch from './electric-motor'
+import BridgeSketch from './bridge'
+import EarthSketch from './earth'
+import AtomSketch from './atom'
 
 /**
  * thing.id → 几何体分发表。
@@ -106,6 +109,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   crane: CraneSketch,
   mars: MarsSketch,
   'electric-motor': ElectricMotorSketch,
+  'bridge': BridgeSketch,
+  'earth': EarthSketch,
+  'atom': AtomSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

@@ -44,6 +44,9 @@ import { sunDict } from './dict/sun'
 import { craneDict } from './dict/crane'
 import { marsDict } from './dict/mars'
 import { electricMotorDict } from './dict/electric-motor'
+import { bridgeDict } from './dict/bridge'
+import { earthDict } from './dict/earth'
+import { atomDict } from './dict/atom'
 
 /**
  * 词典汇总层。
@@ -96,6 +99,9 @@ const sources: Record<string, DictEntry>[] = [
   craneDict,
   marsDict,
   electricMotorDict,
+  bridgeDict,
+  earthDict,
+  atomDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

@@ -49,6 +49,9 @@ import { sun } from './things/sun'
 import { crane } from './things/crane'
 import { mars } from './things/mars'
 import { electricMotor } from './things/electric-motor'
+import { bridge } from './things/bridge'
+import { earth } from './things/earth'
+import { atom } from './things/atom'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -105,6 +108,9 @@ export const things: ThingData[] = [
   crane,
   mars,
   electricMotor,
+  bridge,
+  earth,
+  atom,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
