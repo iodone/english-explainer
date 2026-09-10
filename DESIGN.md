@@ -55,7 +55,10 @@ scissors = middle-screw 红 / blade-pair 钛白 / 余冷灰；
 pencil = rub-end 红 / black-heart 钛白 / wood-case 外壳灰（余冷灰）；
 iron = heat-maker 红 / hot-bottom 钛白 / water-room 外壳灰（余冷灰）；
 glasses = turn-screws 红 / bender-pair 钛白 / 余冷灰；
-faucet = hand-turner 红 / turn-doors 钛白 / tap-body 外壳灰（余冷灰）。
+faucet = hand-turner 红 / turn-doors 钛白 / tap-body 外壳灰（余冷灰）；
+light-bulb = touch-point 红 / light-wire 钛白 / glass-ball 外壳灰（余冷灰）；
+stapler = push-head 红 / bend-plate 钛白 / pin-room 外壳灰（余冷灰）；
+submarine = water-pusher 红 / water-rooms 钛白 / hard-skin 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -394,6 +397,17 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] validate-data 23 thing 全通过；构建链 tsc / build（330ms）/ validate-data / 闸门 / oxlint exit 0
 - [x] flow sentenceRef 终态（caption↔滚动句逐句核对）：iron 0,3,9,11,12 / glasses 3,4,6,7,9 / faucet 1,3,6,7,8，全部单调递增
 - [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零错误（WebGL 均 288 clears）/ 词→图高亮（iron 红 724→6,558 / glasses indigo 718→4,436 / faucet 蓝 384→2,166 像素实测）/ dict 悬停卡（iron /ˈaɪərn/、glasses 末段 focus /ˈfoʊkəs/、faucet /ˈfɔːsɪt/）/ flow 字幕↔句子各 5/5 强匹配 / 多部件步（iron 步 3 water-room+steam-holes、步 5 heat-maker+power-wire；glasses 步 5 side-arms+ear-bends+turn-screws 三部件；faucet 步 2 hand-turner+turning-screw）/ Home 23/23 卡片 + "23 THINGS LOADED"
+
+### 验收对照 · production line 第七批 3 thing（2026-09-10 第十二轮，灯/钉/艇三域各一，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：light-bulb（Light Maker，accent yellow #FACC15，power 域第三件，白炽发光 + 惰气保护）/ stapler（Pin Presser，accent purple #A855F7，杠杆击发 + 弯板折脚）/ submarine（Under-Water Boat，accent green #10B981，transport 域第四件，压载沉浮 + 声呐视觉化）——部件 7/6/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 几何探索三型：light-bulb 竖直剖视（低分段玻球 + 三环灯丝螺线 + 双托举杆 + 中央双引线 + 五气体环 + 螺纹圆柱 + 底触点球 + 放射光线——glow 被词表禁用，几何替词说话）/ stapler 侧视击发定格（长臂微抬 + 铰点圆柱 + 推头 + 弹仓三 U 针 + 四环弹簧 + V 槽弯板 + 纸组 + mid-strike 针 + 下压箭头）/ submarine 侧视悬停（主筒双球 + 帆 + 双鞍形水舱 + 三瓶气簇 + 三叶桨 + 水平翼 + 潜望镜 + 艏声呐球 + 三道声波弧 + 左段水面虚线 + 下潜箭头）
+- [x] 亲审 1 处修复：段落形态 4-4-4-2 → 3-4-4-3（全站节律统一；🥔 简报上游错误，🍆 忠实转写并如实上报）。纯段落边界移动，句序/flow refs/标注零变化；重组后 P2 语义收拢为机构核心段（bulb 灯丝故事 / stapler 完整击发循环 / submarine 完整沉浮循环）。转写保真度：42 句逐句零误差；codex 两处裁量合理——撇号归一弯引号（house style）、装饰元素归一淡墨 DraftLine（拒绝简报 accent 着色过-spec）
+- [x] 词汇改写大批——本批禁词 38 个（glow/shine/fold/tight/tilt/steer/purpose/whenever/level/height/neither/aside/dips/hammer/tool/whales/echo/squeeze/liquid/melt/needle/thread/sewed/sewn/enemy/blink/candles/oil/base/bump/flap/glide/glued/loaded/oceans/trick 等）：预检三轮收敛，FAIL 终态仅 3 新词条（+复数）；关键改名 light-wire（glow 表外）/ tip-wings（复用 pencil 的 tip 词条）/ Pin Presser（pinch 表外）；简报字段契约纠偏 3 处（accent→color、DictEntry[]→Record<string, DictEntry>、sketchMap→GEOMETRY，codex 按代码库实际契约自纠）
+- [x] Munroe 闸门 26 thing 全绿；词典 145→148 词条（新 3：bulb / stapler / submarine）、dict 分词 167→170；dict 豁免依赖 light-bulb 5 = bulb+wire+gas+screw+flow、stapler 4 = stapler+pin+lever+iron、submarine 4 = submarine+tip+tube+football（pi 复核 13 个豁免词全部真实词条、仅 3 新增——无堆词条绕闸门）
+- [x] validate-data 26 thing 全通过；构建链 tsc / build（307ms）/ validate-data / 闸门 / oxlint exit 0
+- [x] flow sentenceRef 终态（caption↔滚动句逐句核对）：light-bulb 4,7,8,9,10 / stapler 3,4,5,6,7 / submarine 4,5,7,8,10，全部单调递增（pi 15 条 caption 逐条语义对应确认）；submarine 的 hard-skin / long-eye 不进 flow（结构件与观察件，承 faucet 部件不全覆盖先例）
+- [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零 error（12 条消息全为既有 THREE.Clock warning 基线）/ Home 182/182 字段（26 卡 × 7）逐项对齐数据源，末三卡 Light Maker #FACC15 / Pin Presser #A855F7 / Under-Water Boat #10B981 / 词→图高亮像素实测（静息 accent=0 → 点击后 20668 / 18953 / 16927，证明真实高亮无 stray）/ 图→文各命中 ≥2 部件 / flow 5/5 步点亮 / dict 悬停卡恰为本批 3 新词条（bulb /bʌlb/、stapler /ˈsteɪplər/、submarine /ˌsʌbməˈriːn/）/ 38 张截图留证（tmp/screens/b7-*.png）；pi 判定可提交（0 blocker / 0 major，4 条 minor 观察均不阻塞）
 
 ### 实施备注（与规格的已知偏差）
 

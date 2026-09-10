@@ -22,6 +22,9 @@ import PencilSketch from './pencil'
 import IronSketch from './iron'
 import GlassesSketch from './glasses'
 import FaucetSketch from './faucet'
+import LightBulbSketch from './light-bulb'
+import StaplerSketch from './stapler'
+import SubmarineSketch from './submarine'
 
 /**
  * thing.id → 几何体分发表。
@@ -52,6 +55,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   iron: IronSketch,
   glasses: GlassesSketch,
   faucet: FaucetSketch,
+  'light-bulb': LightBulbSketch,
+  stapler: StaplerSketch,
+  submarine: SubmarineSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

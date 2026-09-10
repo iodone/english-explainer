@@ -22,6 +22,9 @@ import { pencilDict } from './dict/pencil'
 import { ironDict } from './dict/iron'
 import { glassesDict } from './dict/glasses'
 import { faucetDict } from './dict/faucet'
+import { lightBulbDict } from './dict/light-bulb'
+import { staplerDict } from './dict/stapler'
+import { submarineDict } from './dict/submarine'
 
 /**
  * 词典汇总层。
@@ -52,6 +55,9 @@ const sources: Record<string, DictEntry>[] = [
   ironDict,
   glassesDict,
   faucetDict,
+  lightBulbDict,
+  staplerDict,
+  submarineDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

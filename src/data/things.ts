@@ -22,6 +22,9 @@ import { pencil } from './things/pencil'
 import { iron } from './things/iron'
 import { glasses } from './things/glasses'
 import { faucet } from './things/faucet'
+import { lightBulb } from './things/light-bulb'
+import { stapler } from './things/stapler'
+import { submarine } from './things/submarine'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -51,6 +54,9 @@ export const things: ThingData[] = [
   iron,
   glasses,
   faucet,
+  lightBulb,
+  stapler,
+  submarine,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
