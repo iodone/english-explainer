@@ -58,7 +58,10 @@ glasses = turn-screws 红 / bender-pair 钛白 / 余冷灰；
 faucet = hand-turner 红 / turn-doors 钛白 / tap-body 外壳灰（余冷灰）；
 light-bulb = touch-point 红 / light-wire 钛白 / glass-ball 外壳灰（余冷灰）；
 stapler = push-head 红 / bend-plate 钛白 / pin-room 外壳灰（余冷灰）；
-submarine = water-pusher 红 / water-rooms 钛白 / hard-skin 外壳灰（余冷灰）。
+submarine = water-pusher 红 / water-rooms 钛白 / hard-skin 外壳灰（余冷灰）；
+telescope = turn-bed 红 / far-glass 钛白 / long-tube 外壳灰（余冷灰）；
+space-suit = air-back 红 / glass-head 钛白 / soft-suit 外壳灰（余冷灰）；
+windmill = three-blades 红 / power-maker 钛白 / nose-box 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -408,6 +411,17 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] validate-data 26 thing 全通过；构建链 tsc / build（307ms）/ validate-data / 闸门 / oxlint exit 0
 - [x] flow sentenceRef 终态（caption↔滚动句逐句核对）：light-bulb 4,7,8,9,10 / stapler 3,4,5,6,7 / submarine 4,5,7,8,10，全部单调递增（pi 15 条 caption 逐条语义对应确认）；submarine 的 hard-skin / long-eye 不进 flow（结构件与观察件，承 faucet 部件不全覆盖先例）
 - [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零 error（12 条消息全为既有 THREE.Clock warning 基线）/ Home 182/182 字段（26 卡 × 7）逐项对齐数据源，末三卡 Light Maker #FACC15 / Pin Presser #A855F7 / Under-Water Boat #10B981 / 词→图高亮像素实测（静息 accent=0 → 点击后 20668 / 18953 / 16927，证明真实高亮无 stray）/ 图→文各命中 ≥2 部件 / flow 5/5 步点亮 / dict 悬停卡恰为本批 3 新词条（bulb /bʌlb/、stapler /ˈsteɪplər/、submarine /ˌsʌbməˈriːn/）/ 38 张截图留证（tmp/screens/b7-*.png）；pi 判定可提交（0 blocker / 0 major，4 条 minor 观察均不阻塞）
+
+### 验收对照 · production line 第八批 3 thing（2026-09-10 第十三轮，space×2 + power×1 类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：telescope（Sky Eye，accent orange #F97316，space 域第三件，折射成像 + 回望时间）/ space-suit（Space Clothes，accent rose #F43F5E，space 域第四件，软飞船生命维持系统）/ windmill（Wind Turner，accent cyan #06B6D4，power 域第四件，风能三级增速发电）——部件 6/7/6 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 几何探索三型：telescope 横置折射侧视（低分段镜筒 + 前镜片双环 + 目镜锥 + 顶部寻星镜 + 云台旋钮 + 三脚架 + 三线会聚入射光 + 十字星记 + 地面虚线）/ space-suit 正面立姿（头盔球 + 面窗环 + 躯干双臂双腿 + 颈环 + 内衬水冷盒三层墨线 + 背包 + 双段气路管 + 手套球对 + 靴对 + 太阳放射线 + 热反射线 + 星记）/ windmill 侧视转子朝前（三桨叶 120° + 轮毂球轴 + 机舱 + 齿轮对 torus + 发电机筒 + 双半径锥形塔 + 交叉撑杆 + 来风虚线 + 小屋剪影 + 五点折线电线）
+- [x] 亲审零修复：42 句转写零误差（连续第二批全对）；段落 3-4-4-3 从设计简报起即正确排布（第十二轮教训落地）；DraftLine 多点折线核实为原语原生支持（windmill 电线五点折线 + 小屋轮廓闭合折线）；风机塔架以 cylinderGeometry 双半径（0.1/0.22）实现锥形，优于简报规格（codex 合理裁量）；tsc / validate-data / check-simple-words 三道快闸门亲审后独立复核，与 codex 报告完全一致
+- [x] 词汇改写：本批禁词 19 个改述规避（altogether/boil/curve/curved/evenly/farms/fourteen/million/thousand/nine/sixty/nowhere/plane/practice/stream/weak/weather/web/upside），预检三轮收敛，FAIL 终态仅 5 新词条（+复数）；数字词系全表外（fourteen/thousand/million/nine/sixty 均改述：light older than the whole human story / half a hundred years ago / twenty times in a minute / Most of the new power machines）；色彩查重改锚（原选 #FB7185/#22D3EE 已被既有件占用 → rose-600 #F43F5E / cyan-500 #06B6D4）
+- [x] Munroe 闸门 29 thing 全绿；词典 148→153 词条（新 5：telescope / planet / balloon / windmill / gear）、dict 分词 170→175；dict 豁免依赖 telescope = telescope+planet+tube、space-suit = balloon+gas、windmill = windmill+gear+blade+cloth（pi 复核豁免词全部真实词条、零冲突）
+- [x] validate-data 29 thing 全通过；构建链 tsc / build（272ms）/ validate-data / 闸门 / oxlint exit 0
+- [x] flow sentenceRef 终态（caption↔滚动句逐句核对）：telescope 3,5,7,8,9（far-glass 两现：折焦 s3 + 集光 s9）/ space-suit 3,4,5,6,7（连续机构链）/ windmill 3,4,5,6,7（连续机构链），全部单调递增（pi 15 条 caption 逐条同构确认，含存疑项 telescope s9 "older light" ← "their light left them before there were any people on Earth" 判定匹配）；不入 flow 部件：telescope long-tube（容器）、space-suit soft-suit+moon-boots（结构/着装）、windmill nose-box（舱体），承 submarine 先例
+- [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零 error（12 条消息全为既有 THREE.Clock warning 基线，非本批引入）/ Home 29 卡片全字段对齐数据源（页脚/分类/过滤 29·4·4·4·17），末三卡 Sky Eye #F97316 / Space Clothes #F43F5E / Wind Turner #06B6D4 / 词→图高亮像素实测（静息 accent=0 → 点击后 12171 / 34932 / 14089，证明真实高亮无 stray）/ flow 5/5 步点亮 / dict 悬停卡本批 5 新词条全验（telescope /ˈtelɪskoʊp/、planet /ˈplænɪt/、balloon /bəˈluːn/、windmill /ˈwɪndmɪl/、gear /ɡɪər/）/ 装饰约束双向反证（几何文件零 hex 色 + 静息 accent 像素 0）/ 41 张截图留证（tmp/screens/b8-*.png）；pi 判定可提交（0 blocker / 0 major / 0 minor，两处疑似异常均为 pi 验收脚本自身缺陷已修正：mouseenter 需先移出目标、青色像素判别阈值漏混合色）
 
 ### 实施备注（与规格的已知偏差）
 

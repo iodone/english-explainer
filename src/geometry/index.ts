@@ -25,6 +25,9 @@ import FaucetSketch from './faucet'
 import LightBulbSketch from './light-bulb'
 import StaplerSketch from './stapler'
 import SubmarineSketch from './submarine'
+import TelescopeSketch from './telescope'
+import SpaceSuitSketch from './space-suit'
+import WindmillSketch from './windmill'
 
 /**
  * thing.id → 几何体分发表。
@@ -58,6 +61,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'light-bulb': LightBulbSketch,
   stapler: StaplerSketch,
   submarine: SubmarineSketch,
+  telescope: TelescopeSketch,
+  'space-suit': SpaceSuitSketch,
+  windmill: WindmillSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
