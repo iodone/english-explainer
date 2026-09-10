@@ -64,7 +64,10 @@ space-suit = air-back 红 / glass-head 钛白 / soft-suit 外壳灰（余冷灰�
 windmill = three-blades 红 / power-maker 钛白 / nose-box 外壳灰（余冷灰）；
 train = power-arm 红 / power-car 钛白 / people-cars 外壳灰（余冷灰）；
 rocket = fire-heart 红 / fuel-rooms 钛白 / drop-tanks 外壳灰（余冷灰）；
-dam = water-gate 红 / fall-pipes 钛白 / wall-body 外壳灰（余冷灰）。
+dam = water-gate 红 / fall-pipes 钛白 / wall-body 外壳灰（余冷灰）；
+ship = push-foot 红 / push-room 钛白 / float-body 外壳灰（余冷灰）；
+satellite = sun-wings 红 / brain-box 钛白（余冷灰，无容器件——线框本体）；
+sun-catcher = light-plate 红 / light-changer 钛白 / back-board 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -437,6 +440,20 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] validate-data 32 thing 全通过；构建链 tsc / build / validate-data / 闸门 / oxlint exit 0
 - [x] flow sentenceRef 终态：train 3,4,5,6,7（rail-lines 两现：s6 导引 + s7 滚动）/ rocket 3,4,6,8,9 / dam 3,4,6,7,8（wall→water→pipe→wheel→power 能量链），全部单调递增；不入 flow 部件：rocket fuel-rooms+people-room（容器/乘员）、dam water-gate+fish-way（安全阀/附属），承 batch 8 先例
 - [x] 浏览器回归（CDP 硬刷新流，pi 独立执行，123 张截图，目标 ≥30）：Home 32/32 卡（Move 5 / Space 5 / Power 5 分类正确）；三页静息 accent=0 → 词→图点亮 sky 像素 +2283 / +1244 / +16704，图→词回滚高亮，flow 5 步全亮（2.9k–61k px，0.75 alpha 混合阈值吻合）；鱼道专项：点 fish way → active=["fish way"]、sky 0→11091 px；既有件 helicopter / windmill / submarine 回归正常；两处异常根因定位均非本批缺陷（rocket flow 1–2 步取景伪影——scrollTo 决定性实验证实；右上角彩色簇为 batch-8 既有 sticky chrome）；pi 判定可提交（0 blocker / 0 major / 0 minor）
+
+### 验收对照 · production line 第十批 3 thing（2026-09-10 第十五轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：ship（Water Walker，accent blue #3B82F6，transport 域第六件，浮力支承 + 螺旋桨推进 + 压载稳性）/ satellite（Little Moon，accent indigo #4F46E5，space 域第六件，轨道下坠不落地 + 太阳翼供能 + 反作用轮姿态）/ sun-catcher（Sun Catcher，accent amber #D97706，power 域第六件，光伏效应 + 逆变 + 逐日支架）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 候选查重前置（batch 9 教训制度化）：起草前 grep things.ts 全 32 slug，space-ship 因与 batch 9 rocket 内容撞车（Saturn V 叙事已覆盖）弃选改 satellite；ship / satellite / sun-catcher 无冲突
+- [x] 词汇预检三轮收敛（历史最快）：本批改写 ~31 处（load→the more you put on it / hollow→empty inside / giant,king→the heaviest thing that ever walked on water / trick,secret→The answer is speed / brushes→pushes against it, a tiny touch at a time / steered on purpose→brought down on their last day / seasons→as the year turns / printed like a spider's net→drawn from edge to edge / repair room→dry room where ships are fixed 等），终态 FAIL 仅 3 计划词条 + 伪 token；预检脚本 false-pass bug（fin→fining 撞表）由真闸门兜底抓获并已修复（stem 列表移除废码 `"${w%ing}ing"`），check11.sh 起不再复现
+- [x] 亲审记录（2026-09-10，claude 全量亲读 12 文件 + 3 注册 diff）：42 句逐字比对一致（弯引号/破折号/段落 3-4-4-3、flow refs 3 组、keyExpressions 27 条、funFacts 9 条、parts 表 21 项、颜色 3 项全部符合简报）；注册纯追加、原站 5 件及既有 27 件未触碰。三处裁定：① codex 报告偏差——简报漏判 fin（预检脚本废码 `"${w%ing}ing"` 对非 -ing 词凭空造词 fin→fining，恰撞 xkcd 表 1045 行，false-pass；脚本已修复），codex 最小替换 wing 被否决（与 s5 螺旋桨 "turning wings" 隐喻冲突、正文与 3D 标签 Back Fin 不一致、舵非翼），终审改走 dict 词条通道：shipDict 增 fin /fɪn/ 鳍；尾翼，舵，s6 恢复 "back fin" 并挂 dict 双标注，caption 4 恢复 fin；② codex 未报告裁量——dish/net 两处 part+dict 双标注，经查 MarkedSeg 类型文档明示 "part 关联 和/或 词条"、渲染层点击/悬停两通道独立，裁定接受且 fin 统一同模式；③ 亲审新发现——ship 水线 y−0.44 画在船底（−0.425）之下，整船悬于水面，与 s4 "under the water line" 矛盾，修正水线至 −0.30（穿船体下部、机舱没水）、桨下移 −0.5 全浸、首波/尾流装饰随调。修正后五闸门 + oxlint 独立重跑全绿
+- [x] 几何三型：ship 侧视（船首收尖 + 船尾内部机舱 + 螺旋桨 3 叶 + 舵 + 双层驾驶楼 + 3 货舱口 + 纵贯压载龙骨 + 水线/首波/尾流装饰）/ satellite 立式（双侧太阳翼 + 格栅线 + 内部脑箱 + 双反作用轮 + 对地眼 + 顶置碟 + 星敏感器 + 四角推力器 + 信号弧/地球弧装饰）/ sun-catcher 斜置面板（glass→wire-net→light-plate→back-board 四层序 + A 形支架 + 枢轴 + 落地逆变器 + 太阳/光线/走线装饰）
+- [x] 词典 157→162 词条（新 5：ship /sat/ 轮船、fin 鳍；尾翼、satellite 卫星、dish 碟形天线、net 网）、dict 分词 179→184；ship 词-物锚定 span（s0 [ship|dict:ship]）沿 rocket/dam 先例，fin/dish/net 三处 part+dict 双标注为产线首用（MarkedSeg 类型设计内能力：点击→部件高亮、悬停→释义卡两通道独立）
+- [x] Munroe 闸门 35 thing 全绿；validate-data 35 thing 全通过；构建链 tsc / build / validate-data / check-simple-words / oxlint exit 0
+- [x] flow sentenceRef 终态：ship 3,4,5,6,7（body→room→foot→fin→watch 操纵链）/ satellite 3,4,5,6,8（wings→brain→eye→dish→wheels 能量-信息-姿态链）/ sun-catcher 3,5,7,8,9（plate→net→changer→turner→legs 光电链），全部单调递增
+- [x] finish 模式：ship/sun-catcher 三色齐（红/钛白/外壳灰）；satellite 无容器件（线框本体，余冷灰）为产线首例，简报明示；修订 #1：back-board cold→hull（背板=保护性容器件，JX-7b 外壳语义）
+- [x] pi 独立验证（2026-09-10，tmp/batch10-verify-report.md，判定可提交）：五闸门独立重跑全绿（35 things / 词典 162 / 分词 184 / build 697 modules / oxlint 批内 0 告警）；数据完整性 12 类检查全过（段落 3-4-4-3、1:1 部件标注、warning 各 1、双标注恰 3 条、装饰纯 DraftLine）；浏览器矩阵全绿——三件静止态 accent 基线 0、词→图点亮 gains ship 20940 / satellite 8869 / sun-catcher 10111、图→词双向各 2 部件、词典卡片全量 true、双标注三件 click→高亮 + hover→词条卡两通道均 true、flow 5 步字幕/句/点亮全对（步点像素 4706~29335）、practice + keyExpressions 完整；Home 35 卡 + Move/Space/Power 各 6 正确入列；存量 8 件（helicopter/dam/windmill/train/rocket/submarine/telescope/light-bulb）零回归；控制台零新增错误（仅 THREE.Clock 既有告警）；54 截图留证（tmp/shots10/）；几何语义 satellite/sun-catcher 全符（sun-catcher 四层层序未倒置）、ship 7 项中 6 符
+- [x] 终审修订（claude，2026-09-10）：pi 建议级——push-room [0.7,0.38,0.5]@[0.95,−0.2] 水下仅 23.7%（s4 "under the water line" 要求大半浸没），落盘改为 [0.7,0.20,0.5]@[0.95,−0.325]：浸没率 62.5%、底边贴船底线不出包络、与压载龙骨（顶 −0.43）零重叠（机舱坐压载舱顶，符合真船构造），水线 −0.30 与 back-fin 半浸锁定不动，部件表锚点同步；五闸门 + oxlint 重跑全绿，截图目视复核（b10-ship-after-pushroom.png）。三项待复核由终审读图关闭：① 水线视觉正确（整船没水非悬空）② flow-1 accent 触底行系 flow UI 进度条非几何裁切 ③ viewport-only 截图方法论偏离沿 batch-9 先例记录在案
 
 ### 实施备注（与规格的已知偏差）
 
