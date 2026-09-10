@@ -43,6 +43,9 @@ import SteamEngineSketch from './steam-engine'
 import CarSketch from './car'
 import MoonSketch from './moon'
 import PowerGridSketch from './power-grid'
+import EscalatorSketch from './escalator'
+import BlackHoleSketch from './black-hole'
+import SunSketch from './sun'
 
 /**
  * thing.id → 几何体分发表。
@@ -94,6 +97,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   car: CarSketch,
   moon: MoonSketch,
   'power-grid': PowerGridSketch,
+  escalator: EscalatorSketch,
+  'black-hole': BlackHoleSketch,
+  sun: SunSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

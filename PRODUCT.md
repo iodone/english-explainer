@@ -33,7 +33,7 @@
 
 | # | 能力 | 说明 | 状态 |
 |---|---|---|---|
-| C1 | 事物图解阅读 | 44 个 thing（2026-09-09/11 production line 十三批：batch 1 microwave / refrigerator / elevator，batch 2 bicycle / clock / vacuum-cleaner，batch 3 toilet / speaker / drill，batch 4 camera / battery / zipper，batch 5 lock / scissors / pencil，batch 6 iron / glasses / faucet，batch 7 light bulb / stapler / submarine，batch 8 telescope / space suit / windmill，batch 9 train / rocket / dam，batch 10 ship / satellite / sun-catcher，batch 11 hot air balloon / moon lander / water wheel，batch 12 airplane / comet / steam engine，batch 13 car / moon / power grid），每篇 simple-words 文章 + 3D 线框图 | 已实现 |
+| C1 | 事物图解阅读 | 47 个 thing（2026-09-09/11 production line 十四批：batch 1 microwave / refrigerator / elevator，batch 2 bicycle / clock / vacuum-cleaner，batch 3 toilet / speaker / drill，batch 4 camera / battery / zipper，batch 5 lock / scissors / pencil，batch 6 iron / glasses / faucet，batch 7 light bulb / stapler / submarine，batch 8 telescope / space suit / windmill，batch 9 train / rocket / dam，batch 10 ship / satellite / sun-catcher，batch 11 hot air balloon / moon lander / water wheel，batch 12 airplane / comet / steam engine，batch 13 car / moon / power grid，batch 14 escalator / black hole / sun），每篇 simple-words 文章 + 3D 线框图 | 已实现 |
 | C2 | 词-物双向关联 | 文中部件词点击 → 图中部件高亮；图中部件点击 → 文中词高亮 | 新增 |
 | C3 | 工作流程过程动画 | 部件按工作原理顺序点亮并配解说（如核反应堆：燃料→热水→蒸汽→轮子→电） | 新增 |
 | C4 | 单词释义 | 点击任意单词 → 弹出音标、词性、中文释义；复合词组（如 food-heating radio box）展示构词拆解 | 新增，词典数据源见未决项 |
@@ -171,6 +171,6 @@ interface ThingData {
 | # | 项 | 建议 |
 |---|---|---|
 | U1 | 单词释义词典数据源 | 用开源 ECDICT 筛出 5 篇文章实际用词（约 300-500 词），生成内置 JSON（音标/词性/中文） |
-| U2 | 文章正文来源 | 现有 44 篇均为原创 simple-words 改写；是否需要按原书内容逐篇替换/扩充（版权自担） |
+| U2 | 文章正文来源 | 现有 47 篇均为原创 simple-words 改写；是否需要按原书内容逐篇替换/扩充（版权自担） |
 | U3 | 词-物关联匹配粒度 | 词级匹配（"core" → 部件）还是短语级（"hot water box" → 部件）；建议短语级优先、词级兜底 |
 | U4 | 复述练习是否记录历史 | 建议本期仅会话内自评，不做持久化（P2 再说） |

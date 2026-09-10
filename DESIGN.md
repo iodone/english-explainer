@@ -76,7 +76,10 @@ comet = ice-heart 红 / dust-tail 钛白 / warm-coat 外壳灰（余冷灰）；
 steam-engine = fire-box 红 / spin-wheel 钛白 / water-room 外壳灰（余冷灰）；
 car = fire-rooms 红 / road-feet 钛白 / body-box 外壳灰（余冷灰）；
 moon = dark-lands 红 / ring-mountains 钛白 / rock-ball 外壳灰（余冷灰）；
-power-grid = long-wires 红 / iron-men 钛白 / night-windows 外壳灰（余冷灰）。
+power-grid = long-wires 红 / iron-men 钛白 / night-windows 外壳灰（余冷灰）；
+escalator = step-chain 红 / moving-steps 钛白 / side-walls 外壳灰（余冷灰）；
+black-hole = hot-ring 红 / light-ring 钛白 / dark-heart 外壳灰（余冷灰）；
+sun = fire-heart 红 / slow-roads 钛白 / hot-face 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -502,6 +505,18 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] Munroe 闸门 44 thing 全绿；validate-data 44 thing 全通过（词典 169）；构建链 tsc / build（719 modules）/ validate-data / check-simple-words（3634/1283/191）/ oxlint 批内 0
 - [x] pi 独立验证（2026-09-11，tmp/batch13-verify-report.md，判定**可提交**，0 阻塞 3 建议）：五闸门独立重跑全绿（44 things·词典 169·分词 191 / build 719 / oxlint 0）；亲审 8 项裁定逐条确认落盘；数据完整性全过（段落 3-4-4-3、1:1 部件标注、warning 配额、flowRefs 单调、grid s4 双 part span 与简报一致、弯引号 house style、GEOMETRY 三键）；浏览器矩阵全绿（静息 accent 0、词→图点亮 n 15103/2069 类/7706、**图→词对细杆/自转模型确立「accent 质心回点」法**——均匀网格扫描只可作存在性证据、tides→tide 词形归一生效、flow 15 步句句对齐、practice 完整、console error 0）；Home 44 卡 {ALL 44 / POWER 9 / MOVE 9 / SPACE 9 / HOME 17} + steam-engine/comet 回归零异常；几何源码级核算——**car 四轮相切误差 0.0000** / **moon 远面 -x 半球数学成立 + 轨道弧过月心 2.7166≈2.72 且月心恰在弧段中央 ±40°** / **grid 山弧与线/塔最小距离 0.3728/0.0800 无相交**；46 截图留证（tmp/shots13/）
 - [x] pi 建议级 3 项终审裁定（2026-09-11，claude）：① 最左塔 sag 顶点落塔轴（相位不一致）——**采纳修复**：复核发现系 🥔 简报坐标系统性错误（两挂点落塔轴、两臂尖反被压至 sag 高度），codex 重设 10 段链（挂点全落真臂尖 ±0.3、sag 仅塔间中点 0.22、塔臂跨直连 0.32），tsc/oxlint 复跑 0 + 🥔 delta 截图复核相位一致 ② car/moon 各 2 部件不入 flow——**驳回**：刹车/容器部件语义不属动力链，batch 10–12 各批均有 1–3 个单出部件先例 ③ read 态模型首屏外/flow 自动滚动/gizmo 污染——承前技术债记账不修；**§6.3 视口内截图法确认**（captureBeyondViewport 会破 R3F canvas 至 300×150，batch 10 已复现，viewport-only 为既定正确方法学）
+
+### 验收对照 · production line 第十四批 3 thing（2026-09-11 第十九轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：escalator（Moving Steps，accent #34D399，transport 域第十件，环链循环 + 弯轨翻转 + 藏于地板下机房）/ black-hole（The Sky Trap，accent #8B5CF6，space 域第十件，视界单向 + 吸积盘发光 + 引力弯光弯时）/ sun（The Day Star，accent #FB923C，power 域第十件，压聚变 + 十万年慢路 + 八分钟直路）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 词汇预检一轮通过（tmp/b14-vocab-check.mjs 四通道 + 屈折逆推 + er/est 守卫）：新增 7 词条——motor /ˈmoʊtər/ 马达；电动机、trap /træp/ 陷阱；捕捉器、ray /reɪ/ 光线；射线、glow /ɡloʊ/ 发光；辉光、mile /maɪl/ 英里、boil /bɔɪl/ 沸腾；煮沸、bubble /ˈbʌbəl/ 气泡，词典 169→176 词条、191→198 分词；dict span 8 处：escalator 1（motor）/ black-hole 2（trap、ray）/ sun 5（glowing→glow -ing 映射、boils→boil、bubbles→bubble 同句双 dict + part 三标注 batch 13 grid s2 先例、miles→mile 复数映射 batch 12 tails 先例）
+- [x] 几何三型：escalator 侧视（双链轮 torus + 上行/回程双 Rod + **18 踏面板四段布阵（上行程 8 + 顶平 2 + 底平 2 + 回程 6，链线斜率 0.3593≈19.76°）** + bent-rails 6 杆 ±0.24 + motor-heart 箱/环/驱动杆 + under-room 双坑 + hand-rail 双 Rod 双小轮 + side-walls 双侧 5 杆框 + 双层地板刻度 + 上行箭头）/ black-hole 天体视图（暗球 r0.42 + no-return 环 r0.50 + 钛白光环 r0.58 + **倾斜吸积盘 r0.88 rotation [1.15,0,0]（y 极值 ±0.3595 / z 极值 ±0.8032）** + 双极喷流 4 箭 + 引力漏斗 3 环 8 径杆 + 5 星 S 轨道 + S 星轨道椭圆 20 段公式折线 + 光弯双弧 + 5 背景星）/ sun 洋葱剖视（火心 r0.18 + 钛白双壳 r0.34/0.50 + 光球面 r0.62 + 4 沸腾气泡半嵌面 + 日珥双半环 Math.PI + 风息 3+6 杆 + 光路 Rod + 双箭头翼 + 接收板 2 Box 2 支架 + 地球 16 段圆 + **轨道弧 60° 跨度地球居中（-34.2°→25.8°，地心方位 -4.16° 偏弧心 0.04°）** + 4 背景星）
+- [x] flow sentenceRef 终态：escalator 4,5,7,8,11（motor+chain 双件步→steps→rails→pit→handrail 循环链）/ black-hole 1,3,4,5,6（heart→edge→ring→light→jets 天体链）/ sun 3,4,5,6,9（heart→roads→road→face→catchers 光能链），全部单调递增；单出部件（不入 flow）：escalator side-walls / black-hole space-bend+star-dance / sun fire-arms+wind-breath，均语义正确（容器/背景效应/非链路环节，batch 10–13 单出先例沿承）
+- [x] finish 模式：三件均三色齐（step-chain·hot-ring·fire-heart 红 / moving-steps·light-ring·slow-roads 钛白 / side-walls·dark-heart·hot-face 外壳灰），warning 各 1 配额内
+- [x] 亲审记录（2026-09-11，claude 全量亲读 9 新文件 + 3 注册 diff + CDP 三页截图）：数据层逐字比对零未申报偏离；codex 3 项申报偏差全批准（新文件 9 非简报头误写 8——本批三件均有 dict 文件 / build 728=719+9 非简报误写 727 / escalator·black-hole 几何坐标数组补 tuple 类型标注，均简报笔误级无坐标漂移）；特殊 span 归位三处核验——escalator motor-heart 落 s12 避 s4 dict 嵌套（线性 segment 数组不支持嵌套）、escalator s12 同句双 part span、black-hole s10 相邻双 part span（stars fly around + dark middle）
+- [x] Munroe 闸门 47 thing 全绿；validate-data 47 thing 全通过（词典 176）；构建链 tsc / build（728 modules）/ validate-data / check-simple-words（3634/1283/198）/ oxlint 批内 0
+- [x] pi 独立验证（2026-09-11，tmp/b14-pi-report.md，判定**可提交**，0 阻塞 4 建议）：五闸门独立重跑全绿（47 things·词典 176·分词 198 / build 728 / oxlint 0）且关键数字与交付声明逐项吻合；亲审 3 项裁定确认落盘；数据 27/27 通过（[3,4,4,3]、1:1 部件标注、warning 配额、flowRefs 严格递增、特殊归位 s12/s10/s6 逐句实证、弯引号、7 新词条含 IPA 逐字比对、分类 home 17/transport 10/space 10/power 10）；浏览器矩阵全绿（三页线框墨点 5.6–7.3 万 px + rAF 出帧、**词→图像素级 A/B：accent 静息 0 → 点击后 9184/10717/2719 px，且 warning 红被替换证高亮为换色非叠加**、图→词质心点击命中 .word-active、flow 15/15 句索引级同步 0 mismatch、dict 卡四张含 IPA+词性+中文且 glowing→glow / miles→mile 映射还原原形、console 0 错误）；几何源码级独立核算——**escalator 链线为两轮外公切线（垂直距 0.129692 = 轮半径 0.13，Rod 端点即切点，上下两段异侧构成平行输送带）** / **black-hole 倾斜盘极值 ±0.3595/±0.8032 与 rotation 自洽** / **sun 光路终点距地心 0.3413 vs r 0.35 落边缘 + 地球心恰落轨道弧上（2.75726 vs R 2.76）**；git 前后 IDENTICAL 验证方 0 改动
+- [x] pi 建议级 4 项终审裁定（2026-09-11，claude）：① 简报措辞"链线距轮心 ≈0"——**采纳记档**：实际垂直距 = 轮半径 0.13（外公切线关系），代码本就正确且比简报描述更强，教训为 🥔 简报几何契约措辞错误，下批简报改写"距离 = 轮半径" ② escalator 踏板 x=0.75 y=0.34 vs 链线公式 0.35（差 0.01 world ≈ 1 CSS px，其余 7/8 逐位吻合）——**驳回改动**：坐标为简报明文、codex 逐字转写无错，delta 0.0696 在 +0.075 偏移自然散布内（八块极差 0.0087），无可见影响 ③ read 态模型首屏外——承前技术债记账不修（batch 12 建议① 同源沿承）④ captureBeyondViewport 模板措辞——**已在 §6.3 落账**：viewport-only 为既定正确方法学（batch 10 复现 300×150 破坏），本批简报实际引用 viewport-only 参考脚本，无方法学变化
 
 ### 实施备注（与规格的已知偏差）
 

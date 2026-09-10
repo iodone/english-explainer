@@ -43,6 +43,9 @@ import { steamEngine } from './things/steam-engine'
 import { car } from './things/car'
 import { moon } from './things/moon'
 import { powerGrid } from './things/power-grid'
+import { escalator } from './things/escalator'
+import { blackHole } from './things/black-hole'
+import { sun } from './things/sun'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -93,6 +96,9 @@ export const things: ThingData[] = [
   car,
   moon,
   powerGrid,
+  escalator,
+  blackHole,
+  sun,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
