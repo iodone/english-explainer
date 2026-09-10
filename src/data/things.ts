@@ -40,6 +40,9 @@ import { waterWheel } from './things/water-wheel'
 import { airplane } from './things/airplane'
 import { comet } from './things/comet'
 import { steamEngine } from './things/steam-engine'
+import { car } from './things/car'
+import { moon } from './things/moon'
+import { powerGrid } from './things/power-grid'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -87,6 +90,9 @@ export const things: ThingData[] = [
   airplane,
   comet,
   steamEngine,
+  car,
+  moon,
+  powerGrid,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

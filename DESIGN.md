@@ -73,7 +73,10 @@ moon-lander = landing-fire + up-engine 双红（产线首例双警示件）/ top
 water-wheel = water-boards 红 / stone-pair 钛白 / big-wheel 外壳灰（余冷灰）；
 airplane = jets 红 / wings 钛白 / body-room 外壳灰（余冷灰）；
 comet = ice-heart 红 / dust-tail 钛白 / warm-coat 外壳灰（余冷灰）；
-steam-engine = fire-box 红 / spin-wheel 钛白 / water-room 外壳灰（余冷灰）。
+steam-engine = fire-box 红 / spin-wheel 钛白 / water-room 外壳灰（余冷灰）；
+car = fire-rooms 红 / road-feet 钛白 / body-box 外壳灰（余冷灰）；
+moon = dark-lands 红 / ring-mountains 钛白 / rock-ball 外壳灰（余冷灰）；
+power-grid = long-wires 红 / iron-men 钛白 / night-windows 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -487,6 +490,18 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] flow sentenceRef 终态：airplane 1,3,4,7,10（wing→jets→body→tail→landing 巡航链）/ comet 2,4,5,7,10（heart→doors→coat→tails→path 彗发链）/ steam-engine 3,4,5,6,7（fire→water→door+stick→arm→wheel 热力链），全部单调递增
 - [x] pi 独立验证（2026-09-11，tmp/batch12-verify-report.md，判定**可提交**，0 阻塞 4 建议）：五闸门独立重跑全绿（41 things / 词典 165·187 / build 711 modules / oxlint 批内 0）；亲审 7 项裁定**逐条确认落盘**；数据完整性 15 类全过（段落 3-4-4-3、1:1 部件标注、warning 配额、双标注恰 1、flowRefs 单调、曲撇 house style、GEOMETRY 三键、注册表尾部序）；浏览器矩阵全绿（三件静息 accent 0、词→图点亮 gains 20222/12409/11113 + 火箭对照组证同机制、图→词命中 body room/gas doors/water room、双标注 jets hover 词条卡 true、flow 15 步 caption/句/部件全对、practice + keyExpressions 完整、console error 0）；Home 41 卡 + Move/Space/Power 各 8 正确入列；既有 3 件采样零回归；几何源码级核算——**彗尾四线段点积 -0.988~-1.000 严格反日**、曲柄销距轮心 0.283 在轮内、链连续；46 截图留证（tmp/shots12/）；**read 态首屏可见性 + gizmo 污染两条测量学陷阱在方法层修正**（scrollIntoView 后测量、对照组法）
 - [x] pi 建议级 4 项终审裁定（2026-09-11，claude）：① read 态 3D 模型首屏外（既有 UX 观察沿 batch 11 同源记录）② steam-engine 车轮悬空 0.10——**驳回**：spin-wheel realName 为 Flywheel，固定式蒸汽机飞轮装于 A 字架轴承座（架顶收敛于轮心下 0.03 即轴位），本就不落地；火箱落地为炉排高度，工程语义正确，文中无触地表述 ③ flow 整页自动滚动（既有同源）④ gizmo/warning 本色污染 accent 探测（既有同源，验证方法学）
+
+### 验收对照 · production line 第十三批 3 thing（2026-09-11 第十八轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：car（Road Horse，accent #F87171，transport 域第九件，燃烧膨胀 + 齿轮变速 + 轮地摩擦）/ moon（The Night Ball，accent #A5B4FC，space 域第九件，光照自转 + 引力潮汐 + 轨道日食）/ power-grid（The Long Wire，accent #FCD34D，power 域第九件，发电升压 + 塔线输送 + 降压入户）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 词汇预检两轮收敛 FAIL 清零（首检 48/49 处方落地：boils→"no water is turned to steam"、borrowed→second-hand、twelve→"12"、flag→"a small cloth on a standing stick"、steadies→holds us up、giants→shapes 等）；moon/power-grid 各增词条——orbit /ˈɔːbɪt/ 轨道、tide /taɪd/ 潮汐、eclipse /ɪˈklɪps/ 日食；月食、circuit /ˈsɜːkɪt/ 电路；回路，词典 165→169 词条、187→191 分词；car 零新词（fuel/spark/steam 全部复用既有词条，产线首件无 dict 文件 thing）；dict span 11 处：car 3（fuel/spark/steam）/ moon 3（tides 复数 span→单数 key tide、orbit、eclipse）/ power-grid 5（magnet/battery/wire/circuit/dam）
+- [x] 几何三型：car 侧视（车身箱 + 座舱 + 三缸体/活塞推杆 + 五段曲拐折线 throw 0.18 + 齿轮箱/齿圈 + 四轮 torus 双深度对 + 轮毂圆 + 刹车鞋 + **路面线 y-0.675 与四轮底精确相切（误差 0.0000）** + 车灯射线 + 尾运动线）/ moon 系统视图（月核 + **远面半球 phiStart 1.5π 长 π 即 -x 半边** + dark-lands 四扁球面 quaternion 径向贴面 + 环形山六环 + 尘壳 + 着陆器/旗 + 引力三箭 + 地球弧 120° + **轨道弧 r2.72 圆心过月心 2.7166（差 0.12%R）** + 145° 切向箭头 + 阳光四线 + 四星两线十字）/ power-grid 全景（厂房 + 水轮 + 三环升压器 + 三铁塔 A 腿/双臂/X 撑 + **10 段导线链 sag 相位修正（挂点全落真臂尖、下垂仅在塔间中点）** + 鸟坐 sag 段 + 小降压器 + 房屋/双亮窗/双壁插 + 山丘双弧避让 + 烟圈三 + 星二）
+- [x] flow sentenceRef 终态：car 1,2,3,4,5（fuel→steam→gear→wheel→stop 动力链）/ moon 4,5,6,7,10（light→turn→pull→tides→path 月地链）/ power-grid 1,3,4,6,10（make→tall→iron+wires 双件步→change→wall 输电链），全部单调递增；单出部件（不入 flow）：car stop-shoes+body-box / moon far-face+rock-ball / power-grid wall-doors，均语义正确（刹车/容器/插座非链路环节）
+- [x] finish 模式：三件均三色齐（fire-rooms·dark-lands·long-wires 红 / road-feet·ring-mountains·iron-men 钛白 / body-box·rock-ball·night-windows 外壳灰），warning 各 1 配额内
+- [x] 亲审记录（2026-09-11，claude 全量亲读 8 新文件 + 3 注册 diff + CDP 三页截图）：数据层逐字比对零未申报偏离；codex 6 项申报偏差全批准（**DraftLine 原语无 partId——long-wires 改 Rod 链**（🥔 简报错误，flow step3 高亮须可寻址）/ cold finish 固定 opacity 0.12 语义等价 / quaternion 贴面等价数学 / 星号两线按 comet 先例 / 水流线 3 段凑足 / 离散 radius 取值）；亲审另发现 2 项几何缺陷并命令修复——**moon 轨道箭头悬浮弧外 0.74 且方向错误**（重设三线于弧 145° 点 (0.072,1.362) 切向对齐；弃 160° 因弧入尘壳内）/ **power-grid 山丘弧 2 横穿小降压器盒体**（🥔 简报坐标自伤，五点左移至 x1.4–1.9）
+- [x] Munroe 闸门 44 thing 全绿；validate-data 44 thing 全通过（词典 169）；构建链 tsc / build（719 modules）/ validate-data / check-simple-words（3634/1283/191）/ oxlint 批内 0
+- [x] pi 独立验证（2026-09-11，tmp/batch13-verify-report.md，判定**可提交**，0 阻塞 3 建议）：五闸门独立重跑全绿（44 things·词典 169·分词 191 / build 719 / oxlint 0）；亲审 8 项裁定逐条确认落盘；数据完整性全过（段落 3-4-4-3、1:1 部件标注、warning 配额、flowRefs 单调、grid s4 双 part span 与简报一致、弯引号 house style、GEOMETRY 三键）；浏览器矩阵全绿（静息 accent 0、词→图点亮 n 15103/2069 类/7706、**图→词对细杆/自转模型确立「accent 质心回点」法**——均匀网格扫描只可作存在性证据、tides→tide 词形归一生效、flow 15 步句句对齐、practice 完整、console error 0）；Home 44 卡 {ALL 44 / POWER 9 / MOVE 9 / SPACE 9 / HOME 17} + steam-engine/comet 回归零异常；几何源码级核算——**car 四轮相切误差 0.0000** / **moon 远面 -x 半球数学成立 + 轨道弧过月心 2.7166≈2.72 且月心恰在弧段中央 ±40°** / **grid 山弧与线/塔最小距离 0.3728/0.0800 无相交**；46 截图留证（tmp/shots13/）
+- [x] pi 建议级 3 项终审裁定（2026-09-11，claude）：① 最左塔 sag 顶点落塔轴（相位不一致）——**采纳修复**：复核发现系 🥔 简报坐标系统性错误（两挂点落塔轴、两臂尖反被压至 sag 高度），codex 重设 10 段链（挂点全落真臂尖 ±0.3、sag 仅塔间中点 0.22、塔臂跨直连 0.32），tsc/oxlint 复跑 0 + 🥔 delta 截图复核相位一致 ② car/moon 各 2 部件不入 flow——**驳回**：刹车/容器部件语义不属动力链，batch 10–12 各批均有 1–3 个单出部件先例 ③ read 态模型首屏外/flow 自动滚动/gizmo 污染——承前技术债记账不修；**§6.3 视口内截图法确认**（captureBeyondViewport 会破 R3F canvas 至 300×150，batch 10 已复现，viewport-only 为既定正确方法学）
 
 ### 实施备注（与规格的已知偏差）
 
