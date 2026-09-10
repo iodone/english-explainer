@@ -70,7 +70,10 @@ satellite = sun-wings 红 / brain-box 钛白（余冷灰，无容器件——线
 sun-catcher = light-plate 红 / light-changer 钛白 / back-board 外壳灰（余冷灰）；
 hot-air-balloon = fire-maker 红 / cloth-bag 钛白 / people-box 外壳灰（余冷灰）；
 moon-lander = landing-fire + up-engine 双红（产线首例双警示件）/ top-room 钛白 / bottom-room 外壳灰（余冷灰）；
-water-wheel = water-boards 红 / stone-pair 钛白 / big-wheel 外壳灰（余冷灰）。
+water-wheel = water-boards 红 / stone-pair 钛白 / big-wheel 外壳灰（余冷灰）；
+airplane = jets 红 / wings 钛白 / body-room 外壳灰（余冷灰）；
+comet = ice-heart 红 / dust-tail 钛白 / warm-coat 外壳灰（余冷灰）；
+steam-engine = fire-box 红 / spin-wheel 钛白 / water-room 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -470,6 +473,20 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] flow sentenceRef 终态：balloon 2,3,6,8,10（cloth-bag 两现步 1/5，mouth→fire→box→door→bag 升空链）/ moon-lander 2,7,8,9,10（两室→落火→腿→梯→升火 任务链）/ water-wheel 3,4,5,6,11（road→gate→wheel→gears→stones 水力链），全部单调递增
 - [x] pi 独立验证（2026-09-10，tmp/batch11-verify-report.md，判定**可提交**，0 阻塞 3 建议）：五闸门独立重跑全绿（38 things / 词典 162·184 零新增核实 / build 703 modules / oxlint 批内 0 告警）；亲审 7 裁定 6 落盘修订**逐条确认** + 第 7 项一致；数据完整性全过（段落 3-4-4-3、1:1 部件标注、warning 配额、双标注恰 1、flowRefs 单调、曲撇 house style）；浏览器矩阵全绿（三件静息 accent 0、词→图双向各 2 部件、双标注 gear 两通道独立 true、flow 15 步 caption/句/部件全对——13 步高亮在可视画布内，余 2 步为整页自动滚动取景现象非高亮失效、practice + keyExpressions 完整）；Home 38 卡 + Move/Space/Power 各 7 正确入列；既有 11 件零回归；控制台仅 THREE.Clock 既有告警；几何方向/层序像素自检全对（风箭反向、落水线终点贴轮缘 y1.088≈1.09、lander 竖向层序单调、齿轮齿尖交错压深、金罩内切余量 0.022）；77 截图留证（tmp/shots11/）
 - [x] pi 建议级 3 项记录在案（不阻塞）：① 流程播放整页自动滚动（step5 水车 +452px）致部件出视口——UX 观察待后续统一处理；② 页头右上同色系静态发光污染 accent 统计——验证方法学；③ autoRotate 下细几何点击偶发落空——验证方法学（源码核对部件名一一对应，非产品缺陷）
+
+### 验收对照 · production line 第十二批 3 thing（2026-09-11 第十七轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：airplane（Metal Bird，accent sky #7DD3FC，transport 域第八件，机翼升力差 + 喷气反推 + 升降配平）/ comet（Sky Ice Ball，accent #67E8F9，space 域第八件，冰核升华 + 双尾反日 + 长轨回归）/ steam-engine（Steam Horse，accent red #DC2626，power 域第八件，闭箱汽压 + 往复转旋 + 飞轮储能）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 候选查重前置：起草前 grep 全 38 slug，三件无题材冲突（airplane vs helicopter/balloon 飞行域不撞叙事；comet vs rocket/satellite 航天域不撞；steam-engine vs train 只借"iron horses"一句收束）
+- [x] 词汇预检一轮收敛 FAIL 清零；wing 查得 xkcd 原表在列免立词条 → 仅新增 3 词条（jet / comet / tail），词典 162→165 词条、184→187 分词；dict span 13 处：airplane 7（float/difference/fuel/tube/tail/trade 纯 + **s3 jets part+dict 双标注**，产线第二个 part:dict 双标注批次件）/ comet 3（comet/gas/tails 复数 span→单数 key）/ steam-engine 3（steam/iron/rail）
+- [x] **预检保真度事故与修复（本批工艺教训，已制度化为预检脚本内注释）**：预检脚本 er/est 屈折循环漏抄 `endsWith` 守卫，对任意词生成幻影词干（bike→be / weighs→we / worth→wore，恰全为表内词）造成假放行——codex 真闸门拦下 4 处（bike×2→two-wheel machine / weighs→is heavier than / worth→of use），裁定批准；`scripts/check-simple-words.mjs:72` 原闸门本有守卫，预检复制时失真——**后续批次预检脚本以闸门源文件为唯一蓝本**
+- [x] 亲审记录（2026-09-11，claude 全量亲读 8 新文件 + 3 注册 diff + CDP 三页截图）：数据层逐字比对零未申报偏离；codex 7 项申报偏差全批准（4 词汇改写 + DraftLine 装饰解简报自相矛盾 + comet tuple 类型 + 711 modules 系简报算术误差 703+8）；几何解析核验——机头锥 +x 尖/尾锥 -x 细端、翼后掠 ∓0.3、曲柄销距轮心 0.283、炉门居中于火箱正面 z0.225
+- [x] 几何三型：airplane 侧俯视（机身圆柱 + 头/尾锥 + 双翼后掠 + 双喷气吊舱带撑杆 + 尾翼/垂尾 + 三点起落架 + 驾驶舱双窗/六客舱窗 + 云三朵 + 尾后速度线）/ comet 侧视（双核冰球 + 暗皮 + 暖云 + 三喷气孔杆 + **尘尾四条两段折线（凹面朝阳）/ 离子尾三条直线（严格反日）双尾物理** + 长轨两段断口于彗发 + 太阳八边 + 六射线 + 运动箭头 + 四星）/ steam-engine 侧视（火箱 + 炉门/双火苗 + 卧式锅炉 + 烟囱/三烟团 + 汽门 + 汽管 + 汽缸/活塞杆/十字头 + 双导轨 + 连杆 + 曲柄销 + **飞轮五辐条 + A 字架轴承座** + 汽 puff + 地面四刻度）
+- [x] finish 模式：三件均三色齐（红/钛白/外壳灰），warning 各 1（jets/ice-heart/fire-box）配额内
+- [x] Munroe 闸门 41 thing 全绿；validate-data 41 thing 全通过；构建链 tsc / build（711 modules）/ validate-data / check-simple-words / oxlint exit 0
+- [x] flow sentenceRef 终态：airplane 1,3,4,7,10（wing→jets→body→tail→landing 巡航链）/ comet 2,4,5,7,10（heart→doors→coat→tails→path 彗发链）/ steam-engine 3,4,5,6,7（fire→water→door+stick→arm→wheel 热力链），全部单调递增
+- [x] pi 独立验证（2026-09-11，tmp/batch12-verify-report.md，判定**可提交**，0 阻塞 4 建议）：五闸门独立重跑全绿（41 things / 词典 165·187 / build 711 modules / oxlint 批内 0）；亲审 7 项裁定**逐条确认落盘**；数据完整性 15 类全过（段落 3-4-4-3、1:1 部件标注、warning 配额、双标注恰 1、flowRefs 单调、曲撇 house style、GEOMETRY 三键、注册表尾部序）；浏览器矩阵全绿（三件静息 accent 0、词→图点亮 gains 20222/12409/11113 + 火箭对照组证同机制、图→词命中 body room/gas doors/water room、双标注 jets hover 词条卡 true、flow 15 步 caption/句/部件全对、practice + keyExpressions 完整、console error 0）；Home 41 卡 + Move/Space/Power 各 8 正确入列；既有 3 件采样零回归；几何源码级核算——**彗尾四线段点积 -0.988~-1.000 严格反日**、曲柄销距轮心 0.283 在轮内、链连续；46 截图留证（tmp/shots12/）；**read 态首屏可见性 + gizmo 污染两条测量学陷阱在方法层修正**（scrollIntoView 后测量、对照组法）
+- [x] pi 建议级 4 项终审裁定（2026-09-11，claude）：① read 态 3D 模型首屏外（既有 UX 观察沿 batch 11 同源记录）② steam-engine 车轮悬空 0.10——**驳回**：spin-wheel realName 为 Flywheel，固定式蒸汽机飞轮装于 A 字架轴承座（架顶收敛于轮心下 0.03 即轴位），本就不落地；火箱落地为炉排高度，工程语义正确，文中无触地表述 ③ flow 整页自动滚动（既有同源）④ gizmo/warning 本色污染 accent 探测（既有同源，验证方法学）
 
 ### 实施备注（与规格的已知偏差）
 

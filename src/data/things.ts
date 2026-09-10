@@ -37,6 +37,9 @@ import { sunCatcher } from './things/sun-catcher'
 import { hotAirBalloon } from './things/hot-air-balloon'
 import { moonLander } from './things/moon-lander'
 import { waterWheel } from './things/water-wheel'
+import { airplane } from './things/airplane'
+import { comet } from './things/comet'
+import { steamEngine } from './things/steam-engine'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -81,6 +84,9 @@ export const things: ThingData[] = [
   hotAirBalloon,
   moonLander,
   waterWheel,
+  airplane,
+  comet,
+  steamEngine,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
