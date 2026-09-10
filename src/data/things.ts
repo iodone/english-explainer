@@ -19,6 +19,9 @@ import { zipper } from './things/zipper'
 import { lock } from './things/lock'
 import { scissors } from './things/scissors'
 import { pencil } from './things/pencil'
+import { iron } from './things/iron'
+import { glasses } from './things/glasses'
+import { faucet } from './things/faucet'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -45,6 +48,9 @@ export const things: ThingData[] = [
   lock,
   scissors,
   pencil,
+  iron,
+  glasses,
+  faucet,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

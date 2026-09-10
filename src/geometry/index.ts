@@ -19,6 +19,9 @@ import ZipperSketch from './zipper'
 import LockSketch from './lock'
 import ScissorsSketch from './scissors'
 import PencilSketch from './pencil'
+import IronSketch from './iron'
+import GlassesSketch from './glasses'
+import FaucetSketch from './faucet'
 
 /**
  * thing.id → 几何体分发表。
@@ -46,6 +49,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   lock: LockSketch,
   scissors: ScissorsSketch,
   pencil: PencilSketch,
+  iron: IronSketch,
+  glasses: GlassesSketch,
+  faucet: FaucetSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

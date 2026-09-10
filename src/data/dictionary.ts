@@ -19,6 +19,9 @@ import { zipperDict } from './dict/zipper'
 import { lockDict } from './dict/lock'
 import { scissorsDict } from './dict/scissors'
 import { pencilDict } from './dict/pencil'
+import { ironDict } from './dict/iron'
+import { glassesDict } from './dict/glasses'
+import { faucetDict } from './dict/faucet'
 
 /**
  * 词典汇总层。
@@ -46,6 +49,9 @@ const sources: Record<string, DictEntry>[] = [
   lockDict,
   scissorsDict,
   pencilDict,
+  ironDict,
+  glassesDict,
+  faucetDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

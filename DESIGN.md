@@ -52,7 +52,10 @@ battery = top-cap 红 / second-metal 钛白 / steel-skin 外壳灰（余冷灰�
 zipper = walker-box 红 / teeth-rows 钛白 / 余冷灰；
 lock = door-bolt 红 / pin-stacks 钛白 / outer-body 外壳灰（余冷灰）；
 scissors = middle-screw 红 / blade-pair 钛白 / 余冷灰；
-pencil = rub-end 红 / black-heart 钛白 / wood-case 外壳灰（余冷灰）。
+pencil = rub-end 红 / black-heart 钛白 / wood-case 外壳灰（余冷灰）；
+iron = heat-maker 红 / hot-bottom 钛白 / water-room 外壳灰（余冷灰）；
+glasses = turn-screws 红 / bender-pair 钛白 / 余冷灰；
+faucet = hand-turner 红 / turn-doors 钛白 / tap-body 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -381,6 +384,16 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] validate-data 20 thing 全通过；构建链 tsc / build / validate-data / 闸门 / oxlint exit 0
 - [x] flow sentenceRef 修正后终态（caption↔滚动句逐句核对）：lock 5,6,8,9,11 / scissors 2,3,5,6,8 / pencil 1,6,8,10,11，全部单调递增；funFact 措辞稳健化（car-hours→步行一整日）
 - [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零错误 / 词→图高亮（pin groups 29k 琥珀 / blades 31k 玫红 / black heart 16k 青柠像素实测）/ flow 步进（scissors 双部件步 ×2、pencil rub-end+metal-ring）/ dict 悬停卡（lock /lɒk/、scissors /ˈsɪzərz/、pencil /ˈpensl/）/ Home 20/20 卡片 + "20 THINGS LOADED"
+
+### 验收对照 · production line 第六批 3 thing（2026-09-10 第十一轮，熨/镜/阀家居三件，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：iron（Cloth Presser，accent red #EF4444，热压塑形 + 汽蒸穿透）/ glasses（Eye Helpers，accent indigo #818CF8，光学域第二件，厚薄镜片折光回焦）/ faucet（Water Key，accent blue #60A5FA，螺纹增压 + 陶瓷双盘启闭）——部件 7/6/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 几何探索三型：iron 侧视剪影（布条双线 + 旧折痕锯齿 + 前尖楔底板 + 剖视热杆 + 5 蒸汽孔 + 十字调温盘 + 双段电源线，蒸汽波纹 + 热箭头）/ glasses 正视主图 + 下方光路小图（torus 镜圈 + 薄盘镜片；三平行光线经凸透镜剖面汇聚到后壁焦点、焦点后微发散——焦点 x 取 0.95 与后壁线对齐，简报 0.9 系笔误，实现取值光学更准）/ faucet 侧剖图（墙体砖纹 + 墙内水管 + 双盘阀孔标记 + 螺纹杆 + 十字把手 + 水路虚线 + 八边形气泡 + 接水碗）
+- [x] dsx 工序升级——全文定稿简报：🥔 简报直接给出 14 句逐句定稿（全局句序号 + 内联标注），🍆 codex 纯转录零改写（1h01m 五闸门全绿）；亲审零修复（batch 5 为 6 处）；🫑 pi 独立验证零缺陷可提交（六节全 pass + 19 截图）。三鲜互捕照常生效：词汇漏检 1 处（pole，codex Munroe 闸门自纠为 stick ×3）、dict 字段契约纠偏 1 处（简报 ipa 笔误 → phonetic/pos/meaning）、焦点坐标纠偏 1 处（见上）
+- [x] Munroe 闸门 23 thing 全绿（新件 dict 豁免依赖：iron 5 = iron+handle+cloth+steam+wire（cloth 借拉链、wire 借电池）、glasses 3 = apart+screw+focus（apart 借核反应堆、screw 借剪刀）、faucet 3 = faucet+pipe+screw（pipe 借马桶））；词典 142→145 词条（新 3：iron / focus / faucet）、dict 分词 164→167
+- [x] validate-data 23 thing 全通过；构建链 tsc / build（330ms）/ validate-data / 闸门 / oxlint exit 0
+- [x] flow sentenceRef 终态（caption↔滚动句逐句核对）：iron 0,3,9,11,12 / glasses 3,4,6,7,9 / faucet 1,3,6,7,8，全部单调递增
+- [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零错误（WebGL 均 288 clears）/ 词→图高亮（iron 红 724→6,558 / glasses indigo 718→4,436 / faucet 蓝 384→2,166 像素实测）/ dict 悬停卡（iron /ˈaɪərn/、glasses 末段 focus /ˈfoʊkəs/、faucet /ˈfɔːsɪt/）/ flow 字幕↔句子各 5/5 强匹配 / 多部件步（iron 步 3 water-room+steam-holes、步 5 heat-maker+power-wire；glasses 步 5 side-arms+ear-bends+turn-screws 三部件；faucet 步 2 hand-turner+turning-screw）/ Home 23/23 卡片 + "23 THINGS LOADED"
 
 ### 实施备注（与规格的已知偏差）
 
