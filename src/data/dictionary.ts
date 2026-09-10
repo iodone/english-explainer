@@ -28,6 +28,9 @@ import { submarineDict } from './dict/submarine'
 import { telescopeDict } from './dict/telescope'
 import { spaceSuitDict } from './dict/space-suit'
 import { windmillDict } from './dict/windmill'
+import { trainDict } from './dict/train'
+import { rocketDict } from './dict/rocket'
+import { damDict } from './dict/dam'
 
 /**
  * 词典汇总层。
@@ -64,6 +67,9 @@ const sources: Record<string, DictEntry>[] = [
   telescopeDict,
   spaceSuitDict,
   windmillDict,
+  trainDict,
+  rocketDict,
+  damDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

@@ -61,7 +61,10 @@ stapler = push-head 红 / bend-plate 钛白 / pin-room 外壳灰（余冷灰）�
 submarine = water-pusher 红 / water-rooms 钛白 / hard-skin 外壳灰（余冷灰）；
 telescope = turn-bed 红 / far-glass 钛白 / long-tube 外壳灰（余冷灰）；
 space-suit = air-back 红 / glass-head 钛白 / soft-suit 外壳灰（余冷灰）；
-windmill = three-blades 红 / power-maker 钛白 / nose-box 外壳灰（余冷灰）。
+windmill = three-blades 红 / power-maker 钛白 / nose-box 外壳灰（余冷灰）；
+train = power-arm 红 / power-car 钛白 / people-cars 外壳灰（余冷灰）；
+rocket = fire-heart 红 / fuel-rooms 钛白 / drop-tanks 外壳灰（余冷灰）；
+dam = water-gate 红 / fall-pipes 钛白 / wall-body 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -422,6 +425,18 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] validate-data 29 thing 全通过；构建链 tsc / build（272ms）/ validate-data / 闸门 / oxlint exit 0
 - [x] flow sentenceRef 终态（caption↔滚动句逐句核对）：telescope 3,5,7,8,9（far-glass 两现：折焦 s3 + 集光 s9）/ space-suit 3,4,5,6,7（连续机构链）/ windmill 3,4,5,6,7（连续机构链），全部单调递增（pi 15 条 caption 逐条同构确认，含存疑项 telescope s9 "older light" ← "their light left them before there were any people on Earth" 判定匹配）；不入 flow 部件：telescope long-tube（容器）、space-suit soft-suit+moon-boots（结构/着装）、windmill nose-box（舱体），承 submarine 先例
 - [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零 error（12 条消息全为既有 THREE.Clock warning 基线，非本批引入）/ Home 29 卡片全字段对齐数据源（页脚/分类/过滤 29·4·4·4·17），末三卡 Sky Eye #F97316 / Space Clothes #F43F5E / Wind Turner #06B6D4 / 词→图高亮像素实测（静息 accent=0 → 点击后 12171 / 34932 / 14089，证明真实高亮无 stray）/ flow 5/5 步点亮 / dict 悬停卡本批 5 新词条全验（telescope /ˈtelɪskoʊp/、planet /ˈplænɪt/、balloon /bəˈluːn/、windmill /ˈwɪndmɪl/、gear /ɡɪər/）/ 装饰约束双向反证（几何文件零 hex 色 + 静息 accent 像素 0）/ 41 张截图留证（tmp/screens/b8-*.png）；pi 判定可提交（0 blocker / 0 major / 0 minor，两处疑似异常均为 pi 验收脚本自身缺陷已修正：mouseenter 需先移出目标、青色像素判别阈值漏混合色）
+
+### 验收对照 · production line 第九批 3 thing（2026-09-10 第十四轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：train（Iron Road，accent lime #84CC16，transport 域第五件，钢轮钢轨低阻力 + 接触网供能系统）/ rocket（Space Fire Ship，accent violet #7C3AED，space 域第五件，反冲推进 + 分级抛离 + 逃逸塔）/ dam（Water Wall，accent sky #0EA5E9，power 域第五件，高差蓄能 + 水轮发电）——部件 6/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 候选修正记录：batch 8 收口稿原列 helicopter 为 batch 9 候选，起草时发现 helicopter 是原站 5 个初始 thing 之一（双重计数错误），以 dam 替换——类别分布 17/5/5/5 均衡；产线规约增补：候选起草前先 grep things.ts 查重
+- [x] 几何探索三型：train 侧视列车（机车+受电弓∧+通长接触网+3 客车+车钩+16 轮 8 轴位每车 2 轴位+双轨+轨枕/速度线/支柱装饰）/ rocket 立式堆叠（双级贮箱+级间环+双半径钟形喷管+双助推器+锥顶乘员舱+逃逸塔杆+120° 三尾翼+之字主焰/星十字/8 段折线月亮）/ dam 侧视剖面（三级阶梯坝体+上游水面薄板+斜穿引水管×2+厂房双水轮 torus+发电机+鱼道 4 级阶梯+溢洪之字/下游水面/输电线装饰）
+- [x] 亲审记录（2026-09-10，claude 全量亲读 9 文件 + 3 注册 diff）：42 句逐字比对一致（弯引号/破折号/段落 3-4-4-3、flow refs 3 组、keyExpressions 27 条、funFacts 9 条、parts 表 20 项、颜色 3 项全部符合简报）；注册纯追加 +18 行、原站 5 件未触碰。三处修正：① codex 报告的偏差——简报漏给 fish-way 正文标注（设计缺陷，validate-data 闸门要求每部件可点亮），codex 临时挂 s0 "the river" 属语义错误锚点，亲审撤销并改为 s6 尾部正式从句 "— while fish climb their own small fish way beside the wall."（新词 7 个全过 xkcd 原表）；② 亲审发现 codex 未报告——dam 鱼道阶梯方向朝下游爬升（物理反向），改为贴下游面从下游水面 (0.4,-0.7) 爬至库面下 (-0.35,0.5)；③ train 轮组 8 轴位 16 轮 vs 简报 5 轴位（简报笔误，codex 每车 2 轴位分布更合理，接受，pi 独立复核出同一矛盾）。修正后五闸门独立重跑全绿
+- [x] 词汇改写：本批禁词 40+ 改述规避（helicopter 批：apart/balance/bell/coal/costs/eighty/electric/exists/feathers/fog/frames/freedom/health/invisible/kilometers/loads/muscle/nine/patch/pillow/pole/price/science/sealed/sink/skid/smooth/square/stacked/steady/steering/sweeping/swimming/tail/tower/twin/warn → 弃用整篇；dam 批：base/height/lake/measured/melting/slopes/steep/swim 改述），预检五轮收敛，FAIL 终态仅 4 新词条（dam/rail/rocket/fuel + 复数）
+- [x] Munroe 闸门 32 thing 全绿；词典 153→157 词条（新 4：dam / rail / rocket / fuel）、dict 分词 175→179；dict 豁免依赖 train = iron+trade+wire+rail+speed+float+tube+fuel、rocket = rocket+gas+fuel+rod+cloth+speed、dam = dam+windmill+battery
+- [x] validate-data 32 thing 全通过；构建链 tsc / build / validate-data / 闸门 / oxlint exit 0
+- [x] flow sentenceRef 终态：train 3,4,5,6,7（rail-lines 两现：s6 导引 + s7 滚动）/ rocket 3,4,6,8,9 / dam 3,4,6,7,8（wall→water→pipe→wheel→power 能量链），全部单调递增；不入 flow 部件：rocket fuel-rooms+people-room（容器/乘员）、dam water-gate+fish-way（安全阀/附属），承 batch 8 先例
+- [x] 浏览器回归（CDP 硬刷新流，pi 独立执行，123 张截图，目标 ≥30）：Home 32/32 卡（Move 5 / Space 5 / Power 5 分类正确）；三页静息 accent=0 → 词→图点亮 sky 像素 +2283 / +1244 / +16704，图→词回滚高亮，flow 5 步全亮（2.9k–61k px，0.75 alpha 混合阈值吻合）；鱼道专项：点 fish way → active=["fish way"]、sky 0→11091 px；既有件 helicopter / windmill / submarine 回归正常；两处异常根因定位均非本批缺陷（rocket flow 1–2 步取景伪影——scrollTo 决定性实验证实；右上角彩色簇为 batch-8 既有 sticky chrome）；pi 判定可提交（0 blocker / 0 major / 0 minor）
 
 ### 实施备注（与规格的已知偏差）
 

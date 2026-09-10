@@ -28,6 +28,9 @@ import SubmarineSketch from './submarine'
 import TelescopeSketch from './telescope'
 import SpaceSuitSketch from './space-suit'
 import WindmillSketch from './windmill'
+import TrainSketch from './train'
+import RocketSketch from './rocket'
+import DamSketch from './dam'
 
 /**
  * thing.id → 几何体分发表。
@@ -64,6 +67,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   telescope: TelescopeSketch,
   'space-suit': SpaceSuitSketch,
   windmill: WindmillSketch,
+  train: TrainSketch,
+  rocket: RocketSketch,
+  dam: DamSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
