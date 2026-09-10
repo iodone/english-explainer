@@ -16,6 +16,9 @@ import { drill } from './things/drill'
 import { camera } from './things/camera'
 import { battery } from './things/battery'
 import { zipper } from './things/zipper'
+import { lock } from './things/lock'
+import { scissors } from './things/scissors'
+import { pencil } from './things/pencil'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -39,6 +42,9 @@ export const things: ThingData[] = [
   camera,
   battery,
   zipper,
+  lock,
+  scissors,
+  pencil,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

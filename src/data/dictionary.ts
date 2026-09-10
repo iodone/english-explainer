@@ -16,6 +16,9 @@ import { drillDict } from './dict/drill'
 import { cameraDict } from './dict/camera'
 import { batteryDict } from './dict/battery'
 import { zipperDict } from './dict/zipper'
+import { lockDict } from './dict/lock'
+import { scissorsDict } from './dict/scissors'
+import { pencilDict } from './dict/pencil'
 
 /**
  * 词典汇总层。
@@ -40,6 +43,9 @@ const sources: Record<string, DictEntry>[] = [
   cameraDict,
   batteryDict,
   zipperDict,
+  lockDict,
+  scissorsDict,
+  pencilDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

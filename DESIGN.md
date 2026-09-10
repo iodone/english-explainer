@@ -49,7 +49,10 @@ speaker = wire-ring 红 / sound-paper 钛白 / box-body 外壳灰（余冷灰）
 drill = go-button 红 / speed-changer 钛白 / 余冷灰；
 camera = light-door 红 / light-catcher 钛白 / dark-box 外壳灰（余冷灰）；
 battery = top-cap 红 / second-metal 钛白 / steel-skin 外壳灰（余冷灰）；
-zipper = walker-box 红 / teeth-rows 钛白 / 余冷灰。
+zipper = walker-box 红 / teeth-rows 钛白 / 余冷灰；
+lock = door-bolt 红 / pin-stacks 钛白 / outer-body 外壳灰（余冷灰）；
+scissors = middle-screw 红 / blade-pair 钛白 / 余冷灰；
+pencil = rub-end 红 / black-heart 钛白 / wood-case 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -368,6 +371,16 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 词典 132 词条；validate-data 17 thing 全通过
 - [x] 浏览器回归（CDP 硬刷新流）：3 新 thing 零错误 / 词→图高亮（light bender / first metal 双处同亮 / teeth 实测）/ flow 多部件步（camera 05/05 picture keeper+back screen、battery 01/05 双金属、zipper 04/05 双止位块）/ dict 悬停卡（camera /ˈkæmərə/、battery /ˈbætri/、zipper /ˈzɪpər/ 实测）/ Home 17/17 卡片
 - [x] 构建链：tsc / build（283ms）/ validate-data / 闸门 / oxlint exit 0
+
+### 验收对照 · production line 第五批 3 thing（2026-09-10 第十轮，锁/剪/笔机械三件，首批 dsx 三鲜流水线）
+
+- [x] 3 新 thing 全链路：lock（Key Turner，accent amber #F59E0B，弹子锁"销跨线卡中盘"）/ scissors（Two-Blade Cutter，accent rose #FB7185，剪切点行走 + 杠杆放大）/ pencil（Writing Stick，accent lime #A3E635，石墨落尘于纸面山谷）——各 6-7 部件 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] 几何探索三型：lock 正对锁芯剖面（外圈壳环 + 可转中盘 + 5 组销/弹簧错落 + 台阶钥匙 + 金属板门闩，切割线横贯）/ scissors X 交叉正视图（双臂双刃双环 + 修磨面 + 剪切点标记 + 纸分两片，切割竖线 + 行走路径）/ pencil 沿 x 装配分解（主轴杆件 + 下侧芯/漆皮/六边截面 exploded，左端纸面承接尘点 + 引线回装）
+- [x] 首批 dsx 三鲜流水线：🥔 claude 词汇三轮预检（约 150 词）+ 设计简报 + 亲审 12 文件 diff（修正 flow ref 错位 5 处、笔尖锥体朝向、底销错落、纸面边缘线）/ 🍆 codex 实现（闸门迭代 1h26m 全绿，9 处简报漏检词自纠：thousand→hundred、straddles→crosses、loops→rings、valleys→low spots、baked→made hard with fire 等）/ 🫑 pi 独立验证（闸门独立复跑 + 底销错落像素级复核 + CDP 六项回归 13 张截图，2 处 minor off-by-one 全采纳修复）
+- [x] Munroe 闸门 20 thing 全绿（新件 dict 豁免依赖：lock 2 = pin+bolt、scissors 8 = scissors+pivot+blade+handle+lever+screw+cloth+apart、pencil 6 = pencil+graphite+clay+tip+blade+float）；词典 132→142 词条（新 10：lock/pin/bolt、scissors/lever/pivot、pencil/graphite/eraser/clay）、dict 分词 154→164
+- [x] validate-data 20 thing 全通过；构建链 tsc / build / validate-data / 闸门 / oxlint exit 0
+- [x] flow sentenceRef 修正后终态（caption↔滚动句逐句核对）：lock 5,6,8,9,11 / scissors 2,3,5,6,8 / pencil 1,6,8,10,11，全部单调递增；funFact 措辞稳健化（car-hours→步行一整日）
+- [x] 浏览器回归（CDP 硬刷新流，pi 独立执行）：3 新 thing 零错误 / 词→图高亮（pin groups 29k 琥珀 / blades 31k 玫红 / black heart 16k 青柠像素实测）/ flow 步进（scissors 双部件步 ×2、pencil rub-end+metal-ring）/ dict 悬停卡（lock /lɒk/、scissors /ˈsɪzərz/、pencil /ˈpensl/）/ Home 20/20 卡片 + "20 THINGS LOADED"
 
 ### 实施备注（与规格的已知偏差）
 
