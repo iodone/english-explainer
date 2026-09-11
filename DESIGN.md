@@ -88,7 +88,10 @@ earth = turning-heart 红 / power-field 钛白 / air-skin 外壳灰（余冷灰�
 atom = heavy-heart 红 / near-road 钛白 / far-road 外壳灰（余冷灰）；
 drone = sky-eye 红 / spin-blades 钛白 / fly-box 外壳灰（余冷灰）；
 galaxy = heart-light 红 / turning-arms 钛白 / flat-wheel 外壳灰（余冷灰）；
-geothermal = heat-rocks 红 / deep-holes 钛白 / steam-hall 外壳灰（余冷灰）。
+geothermal = heat-rocks 红 / deep-holes 钛白 / steam-hall 外壳灰（余冷灰）；
+sailboat = main-sail 红 / deep-fin 钛白 / boat-body 外壳灰（余冷灰）；
+saturn = top-storm 红 / ring-plate 钛白 / round-body 外壳灰（余冷灰）；
+fusion = star-ring 红 / hold-hands 钛白 / ring-room 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -564,6 +567,18 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 闸门硬化：validate-data.mjs 新增 flow sentenceRef 系统性 off-by-one 检查（整件 100% 步 ref==span+1 且 n≥3 报错；正测 56 件零误报——curiosity-rover 5/6、refrigerator 2/5 等"ref 指向功能句"混合惯例不触发；负测人为回退 drone refs 正确报错）；caption↔ref 内容词重合度审计原型（tmp/caption-ref-audit.mjs）全库 27 处微弱边际噪声，不采纳为闸门
 - [x] 类别平衡达成：56 件 = home 17 / transport 13 / space 13 / power 13
 - [x] 流程事件：pi 首轮 session 因 b16 像素取证残留 128k 耗尽未启动验证（零产出；Escape 破 compact 死循环 + /new 重开 session）；二轮简报增补铁律 6 禁像素深挖 / 7 工具输出瘦身 / 8 数字自洽审计，81.3% 水位收束令降载后全节完成；流程教训落档：pi 简报下批起改分段派发，产线简报新增 span 编号与 sentenceRef 统一 0-based 记法条款
+
+### 验收对照 · production line 第十八批 3 thing（2026-09-11 第二十三轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：sailboat（The Wind Runner，accent #14B8A6，transport 域第十四件，船体 9 点闭合轮廓 8 段 + 双帆三角各 3 杆 + 龙骨双杆汇一点+压载球 + 舵杆舵板 + 波浪/风弧/太阳/飞鸟 decor）/ saturn（The Ringed World，accent #CA8A04，space 域第十四件，全球体 r0.55 + 纬线三环恰落球面（0.531²+0.142²=0.55²）+ 环系四圈 r0.72/0.82/1.05/1.15 + 卡西尼缝双圈 r0.90/0.95 + 正六边形风暴（边长=外接圆半径 0.17）+ Titan 球 + 六小卫星 moonSizes 平行数组）/ fusion（The Star Bottle，accent #C026D3，power 域第十四件，双 torus 躺平 π/2 + 16 点 D 形线圈 8 组绕轴 + 中心柱双盘圈 + 中性束斜杆 x/z 对称 + 偏滤器环 + 低温箱 cylinder+双沿圈）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] dict +8 词条：sail /seɪl/ 帆 · mast /mæst/ 桅杆 · boom /buːm/ 帆桁 · keel /kiːl/ 龙骨 · rudder /ˈrʌdər/ 船舵（sailboatDict 5）/ saturn /ˈsætərn/ 土星（saturnDict 1，span 大小写映射 Saturn→saturn）/ fusion /ˈfjuːʒən/ 核聚变 · plasma /ˈplæzmə/ 等离子体（fusionDict 2）；另有 magnet span 跨件复用 speaker.ts 既有词条（先例 rope→bridge 类）；dict span 合计 9 处（5+1+3）；词典 196→204（无重复键）、分词 218→226
+- [x] flow sentenceRef 全单件步：sailboat 3,4,5,7,8 / saturn 1,3,4,5,9 / fusion 3,4,5,7,8（亲审三路互证 0-based：b18-refs-check span 首现句比对 + 运行时 15/15 高亮句核验）；单出：sailboat front-sail、swing-arm / saturn big-moon、moon-family / fusion heat-guns、cold-box
+- [x] finish 三色齐：main-sail·top-storm·star-ring 红 / deep-fin·ring-plate·hold-hands 钛白 / boat-body·round-body·ring-room 外壳灰，warning 各 1 配额内
+- [x] 亲审：数据 6 文件与简报 block0-5 byte-identical（经 codex 漏转写 import 修复-撞车-自愈收敛——写竞争教训落档 memory：codex 完成信号 = task-worker 进程退出，src/ 静默期不可信）；几何 3 文件逐项核验全吻合（Rod 链全安全习语：slice(0,-1)+模块级/外层参数引用）；五闸门全绿 59/204/226/764/0；运行时 15/15 高亮句==sentenceRef 句且含部件 span + 0 JS 异常（检查脚本 slice(0,80) 截断伪影修正为 slice(0,200)——长句 span 假阴性）
+- [x] pi 独立验证（2026-09-11，tmp/b18-pi-report.md，判定**通过——未发现阻断级/功能性缺陷**）：五闸门独立重跑全绿（59 件 · 词典 204 · 分词 226 / build 764 / oxlint 0）；独立审计脚本 tmp/b18-pi-verify/data-audit.ts 导入真实模块字段级核验（类别 17/14/14/14 / refs 严格递增且==span 首现句 15/15 / dict span 9 处闭环含 saturn 大小写映射与 magnet 跨件复用 / 8 新词条 IPA 逐字 8/8 无错字）；数字自洽审计 20 项与物理实况交叉核对全部成立（sailboat 3 / saturn 10 / fusion 7——75 mph 对 Vestas Sailrocket 2 纪录、环径 273,550 km÷地球=21.5 对 "20 worlds"、ITER Q=10 与 EAST 1,066 s）；Rod 链 7 处静态安全（全文无三参 .map 回调，b16 TypeError 白屏风险不存在）；几何逐项吻合（纬线恰落球面偏差 0.12% / 正六边形边=外接圆半径 / 热枪 x↔z 互为镜像）；精简浏览器矩阵（sailboat h1 / #root 未卸载 / canvas 尺寸 / word-part 7 span 枚举与 parts 一致，运行时逐步矩阵亲审覆盖）；git 前后完全一致零仓库变更
+- [x] 终审合议（低危备注 3 项均裁定不修）：half a football field（美式场口径 45%≈almost half 成立 + 原文 "one of the biggest boats" 限定语；预审曾误用 FIFA 尺寸）/ colder than deep space（ITER 中央螺线管 1.8 K 确低于 CMB 2.7 K，官方通行说法）/ saturn "20 worlds" vs "almost 10"（分指环系与行星体，非矛盾）
+- [x] 流程事件：pi 派发修正为 herdr pane 通道（裸 `pi -p` 后台挂死——stdin unix socket 永不 EOF，落档 memory）；分段验证 + 增量落盘骨架报告 + 60s 水位监控，72.5% 收束令（优先级排序+亲审覆盖降级豁免）终态 81.2% 受控完成，零 compact 事故
+- [x] 类别平衡达成：59 件 = home 17 / transport 14 / space 14 / power 14
 
 ### 实施备注（与规格的已知偏差）
 

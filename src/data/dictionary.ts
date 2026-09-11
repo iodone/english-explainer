@@ -50,6 +50,9 @@ import { atomDict } from './dict/atom'
 import { droneDict } from './dict/drone'
 import { galaxyDict } from './dict/galaxy'
 import { geothermalDict } from './dict/geothermal'
+import { sailboatDict } from './dict/sailboat'
+import { saturnDict } from './dict/saturn'
+import { fusionDict } from './dict/fusion'
 
 /**
  * 词典汇总层。
@@ -108,6 +111,9 @@ const sources: Record<string, DictEntry>[] = [
   droneDict,
   galaxyDict,
   geothermalDict,
+  sailboatDict,
+  saturnDict,
+  fusionDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

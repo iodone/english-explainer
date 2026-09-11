@@ -55,6 +55,9 @@ import AtomSketch from './atom'
 import DroneSketch from './drone'
 import GalaxySketch from './galaxy'
 import GeothermalSketch from './geothermal'
+import SailboatSketch from './sailboat'
+import SaturnSketch from './saturn'
+import FusionSketch from './fusion'
 
 /**
  * thing.id → 几何体分发表。
@@ -118,6 +121,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'drone': DroneSketch,
   'galaxy': GalaxySketch,
   'geothermal': GeothermalSketch,
+  sailboat: SailboatSketch,
+  saturn: SaturnSketch,
+  fusion: FusionSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

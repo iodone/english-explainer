@@ -55,6 +55,9 @@ import { atom } from './things/atom'
 import { drone } from './things/drone'
 import { galaxy } from './things/galaxy'
 import { geothermal } from './things/geothermal'
+import { sailboat } from './things/sailboat'
+import { saturn } from './things/saturn'
+import { fusion } from './things/fusion'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -117,6 +120,9 @@ export const things: ThingData[] = [
   drone,
   galaxy,
   geothermal,
+  sailboat,
+  saturn,
+  fusion,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
