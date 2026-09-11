@@ -73,6 +73,9 @@ import { voyager } from './things/voyager'
 import { kettle } from './things/kettle'
 import { cableCar } from './things/cable-car'
 import { charger } from './things/charger'
+import { asteroid } from './things/asteroid'
+import { oilRig } from './things/oil-rig'
+import { bus } from './things/bus'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -153,6 +156,9 @@ export const things: ThingData[] = [
   kettle,
   cableCar,
   charger,
+  asteroid,
+  oilRig,
+  bus,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
