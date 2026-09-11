@@ -70,6 +70,9 @@ import { flywheel } from './things/flywheel'
 import { toaster } from './things/toaster'
 import { airship } from './things/airship'
 import { voyager } from './things/voyager'
+import { kettle } from './things/kettle'
+import { cableCar } from './things/cable-car'
+import { charger } from './things/charger'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -147,6 +150,9 @@ export const things: ThingData[] = [
   toaster,
   airship,
   voyager,
+  kettle,
+  cableCar,
+  charger,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

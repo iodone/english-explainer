@@ -70,6 +70,9 @@ import FlywheelSketch from './flywheel'
 import ToasterSketch from './toaster'
 import AirshipSketch from './airship'
 import VoyagerSketch from './voyager'
+import KettleSketch from './kettle'
+import CableCarSketch from './cable-car'
+import ChargerSketch from './charger'
 
 /**
  * thing.id → 几何体分发表。
@@ -148,6 +151,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   toaster: ToasterSketch,
   airship: AirshipSketch,
   voyager: VoyagerSketch,
+  kettle: KettleSketch,
+  'cable-car': CableCarSketch,
+  charger: ChargerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
