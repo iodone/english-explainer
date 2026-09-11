@@ -58,6 +58,9 @@ import { geothermal } from './things/geothermal'
 import { sailboat } from './things/sailboat'
 import { saturn } from './things/saturn'
 import { fusion } from './things/fusion'
+import { motorcycle } from './things/motorcycle'
+import { jupiter } from './things/jupiter'
+import { generator } from './things/generator'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -123,6 +126,9 @@ export const things: ThingData[] = [
   sailboat,
   saturn,
   fusion,
+  motorcycle,
+  jupiter,
+  generator,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

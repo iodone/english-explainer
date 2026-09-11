@@ -91,7 +91,10 @@ galaxy = heart-light 红 / turning-arms 钛白 / flat-wheel 外壳灰（余冷�
 geothermal = heat-rocks 红 / deep-holes 钛白 / steam-hall 外壳灰（余冷灰）；
 sailboat = main-sail 红 / deep-fin 钛白 / boat-body 外壳灰（余冷灰）；
 saturn = top-storm 红 / ring-plate 钛白 / round-body 外壳灰（余冷灰）；
-fusion = star-ring 红 / hold-hands 钛白 / ring-room 外壳灰（余冷灰）。
+fusion = star-ring 红 / hold-hands 钛白 / ring-room 外壳灰（余冷灰）；
+motorcycle = fire-heart 红 / ride-seat 钛白 / metal-bones 外壳灰（余冷灰）；
+jupiter = red-eye 红 / ice-moon 钛白 / big-ball 外壳灰（余冷灰）；
+generator = light-ball 红 / strong-magnet 钛白 / hold-shape 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -579,6 +582,18 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] 终审合议（低危备注 3 项均裁定不修）：half a football field（美式场口径 45%≈almost half 成立 + 原文 "one of the biggest boats" 限定语；预审曾误用 FIFA 尺寸）/ colder than deep space（ITER 中央螺线管 1.8 K 确低于 CMB 2.7 K，官方通行说法）/ saturn "20 worlds" vs "almost 10"（分指环系与行星体，非矛盾）
 - [x] 流程事件：pi 派发修正为 herdr pane 通道（裸 `pi -p` 后台挂死——stdin unix socket 永不 EOF，落档 memory）；分段验证 + 增量落盘骨架报告 + 60s 水位监控，72.5% 收束令（优先级排序+亲审覆盖降级豁免）终态 81.2% 受控完成，零 compact 事故
 - [x] 类别平衡达成：59 件 = home 17 / transport 14 / space 14 / power 14
+
+### 验收对照 · production line 第十九批 3 thing（2026-09-11 第二十四轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：motorcycle（The Two-Wheel Rider，accent #2563EB，transport 域第十五件，frameTriangle 模块级 4 点闭合 slice(0,-1) 3 杆 + 2 直管 = 5 杆车架 + Wheel 组件双轮复用（torus 0.26/0.03 + hub + 3 对辐条 Rod）+ 前叉双杆汇于 (0.58,−0.32) + decor 路面锯齿/速度线/太阳/飞鸟）/ jupiter（The Big Brother，accent #B91C1C，space 域第十五件，全球体 r0.60 + cloud-lines 五纬线环 y=±0.36/±0.18/0 恰落球面（y²+r²≈0.36）+ red-eye 双椭圆 @ z0.50 + glow-ring 双 torus r0.33 躺平 @ y±0.50（球面半径 0.3317）+ small-ring r0.95 + 火/冰双卫星 + 8 星 decor）/ generator（The Power Spinner，accent #059669，power 域第十五件，baseFrame 5 点闭合 4 杆 + 双立柱双轴承盒 + turn-wheel torus 0.42 + 3 辐条 60° + 曲柄臂端距轮心 0.6774 > 外线圈 0.64 + wire-rings 三环 r0.52/0.58/0.64 + power-line 135°/225° 引出 + light-ball 灯座 + 6 光芒杆 60° 步进）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] dict +5 词条：motorcycle /ˈmoʊtərsaɪkəl/ 摩托车 · brake /breɪk/ 刹车；制动器（motorcycleDict 2）/ Jupiter /ˈdʒuːpɪtər/ 木星（jupiterDict 1）/ generator /ˈdʒenəreɪtər/ 发电机 · coil /kɔɪl/ 线圈（generatorDict 2）；跨件复用 7 key（spark→microwave · chain→bicycle · ocean→earth · magnet→speaker · glow→sun · dam→dam.ts · motor→escalator）+ planet→telescope first-wins（earth/telescope 双定义同内容）；dict span 合计 13 处（4+3+6）；词典 204→209（无重复键）、分词 226→231
+- [x] flow sentenceRef 全单件步：motorcycle 2,3,5,6,7 / jupiter 0,3,4,8,9 / generator 3,4,5,7,8（运行时 15/15 高亮句核验）；单出：motorcycle turning-stick、smoke-pipe / jupiter small-ring、glow-ring / generator light-ball、power-line
+- [x] finish 三色齐：fire-heart·red-eye·light-ball 红 / ride-seat·ice-moon·strong-magnet 钛白 / metal-bones·big-ball·hold-shape 外壳灰，warning 各 1 配额内
+- [x] 词闸门拦截（b19.0→b19.1）：初稿 11 词失败（motorcycle frame/steer/racing · jupiter nowhere/bands · generator frame/weigh/rule/factories/trick/electric）——预检只扫 article 漏 flow caption/funFacts/部件 span 文本，教训入档；修复走先例复用（metal-bones/turning-stick 复用 bicycle 命名）+ 替换词预验（racing→fast engine 等）+ generator funFacts 三条重写（顺带消重）
+- [x] 亲审两处修正（b19.2）：generator s3 "a hold shape"→"the hold shape" 契约对齐；jupiter bandRings 解构序真 bug（`([radius, y])` 误读 [y, r] 序致云带全堆北半球 + 北极退化环）→ `([y, radius])`，简报补数组序显式声明；运行时 15/15 高亮句 + hover 卡 3/3（含跨件 magnet→speaker）+ 词→物点击 3/3 + 0 JS 异常
+- [x] pi 独立验证（2026-09-11，tmp/b19-pi-report.md，判定**通过——未发现阻断性缺陷**）：五闸门独立重跑零偏离（62 件 · 词典 209 · 分词 231 / build 773 modules / oxlint 0 含正控）；独立审计脚本 brief 契约对象与真实模块递归深度逐字比对（含字段序）142/142 断言全绿，span closed list 三件逐字逐序全等；Rod 链安全（.map ≤2 参、to= 全模块级/外层参数，3 处启发式误报内联复核排除）；几何数学独立重算（bandRings 修正生效、五纬线落球面、glow-ring 0.3317、曲柄 0.6774>0.64）；浏览器降级矩阵三页零异常 + hover 卡逐字 + flow Step3 caption/sentence-active 逐字；git 前后逐行全等零仓库变更；66% 提前收束令（重环节静态优先 + §4 文本断言降级）受控完成无死循环
+- [x] 终审合议（低危备注 3 项均裁定不修）：planet first-wins 双定义（earth/telescope 同内容 planet/行星，既有 11 处跳文件重键惯例，渲染无差）/ 简报侧笔误 2 处（magnet 音标漏 n、光芒"30°"应为 60°——实现侧均正确）/ hover 2s 延迟为既有设计
+- [x] 类别平衡达成：62 件 = home 17 / transport 15 / space 15 / power 15
 
 ### 实施备注（与规格的已知偏差）
 
