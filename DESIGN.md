@@ -94,7 +94,10 @@ saturn = top-storm 红 / ring-plate 钛白 / round-body 外壳灰（余冷灰）
 fusion = star-ring 红 / hold-hands 钛白 / ring-room 外壳灰（余冷灰）；
 motorcycle = fire-heart 红 / ride-seat 钛白 / metal-bones 外壳灰（余冷灰）；
 jupiter = red-eye 红 / ice-moon 钛白 / big-ball 外壳灰（余冷灰）；
-generator = light-ball 红 / strong-magnet 钛白 / hold-shape 外壳灰（余冷灰）。
+generator = light-ball 红 / strong-magnet 钛白 / hold-shape 外壳灰（余冷灰）；
+subway = power-rail 红 / deep-hole 钛白 / long-train 外壳灰（余冷灰）；
+space-shuttle = fire-sticks 红 / food-tank 钛白 / white-body 外壳灰（余冷灰）；
+wave-power = power-maker 红 / turn-pin 钛白 / sea-rider 外壳灰（余冷灰）。
 
 **环境（3D viewport = CAD 虚空工作区）**：
 - 地面：数字化三维透视网格（无限延伸的淡灰细线），与虚线中心轴并存
@@ -594,6 +597,19 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] pi 独立验证（2026-09-11，tmp/b19-pi-report.md，判定**通过——未发现阻断性缺陷**）：五闸门独立重跑零偏离（62 件 · 词典 209 · 分词 231 / build 773 modules / oxlint 0 含正控）；独立审计脚本 brief 契约对象与真实模块递归深度逐字比对（含字段序）142/142 断言全绿，span closed list 三件逐字逐序全等；Rod 链安全（.map ≤2 参、to= 全模块级/外层参数，3 处启发式误报内联复核排除）；几何数学独立重算（bandRings 修正生效、五纬线落球面、glow-ring 0.3317、曲柄 0.6774>0.64）；浏览器降级矩阵三页零异常 + hover 卡逐字 + flow Step3 caption/sentence-active 逐字；git 前后逐行全等零仓库变更；66% 提前收束令（重环节静态优先 + §4 文本断言降级）受控完成无死循环
 - [x] 终审合议（低危备注 3 项均裁定不修）：planet first-wins 双定义（earth/telescope 同内容 planet/行星，既有 11 处跳文件重键惯例，渲染无差）/ 简报侧笔误 2 处（magnet 音标漏 n、光芒"30°"应为 60°——实现侧均正确）/ hover 2s 延迟为既有设计
 - [x] 类别平衡达成：62 件 = home 17 / transport 15 / space 15 / power 15
+
+### 验收对照 · production line 第二十批 3 thing（2026-09-11 第二十五轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：subway（The Train Under the City，accent #0E7490，transport 域第十六件，5 隧道环 torus 0.42 @ y−0.25 顶 0.17/底 −0.67 与 stone-sides 上下壁杆精确吻合（rotation-y π/2 绕 x 轴环）+ 第三轨 z0.17 藏壁内（y−0.50 处壁半宽 0.337 > 0.184）+ 4 节长列车 + 轮轨几乎相切（−0.475/−0.478）+ 6 级扶梯带扶手 + 城市/土层剖面 decor）/ space-shuttle（The Space Plane，accent #EA580C，space 域第十六件，机身三段衔接（主箱 0.64@x0.08 + 机头 0.20@0.50 + 鼻尖球 @0.61）+ 外贮箱 0.55@y0.25 双半球封口 + 双助推器 z±0.21 侧挂嵌入 0.035 + fin/wings 闭合折线 slice(0,-1) 3 杆（wings 嵌套双层 map 内层 to= 引外层 points）+ 隔热瓦贴腹 + 机械臂 5 段链 + 起落架 + 烟尘/星 decor）/ wave-power（The Sea Swing，accent #0D9488，power 域第十六件，摆体球 r0.17 + 摆墙双板 + 铰链轴 rotation-x π/2 轴沿 z 长 0.52 双端帽封端 + 摆臂双斜杆下端 −0.60 == bed-plate 箱顶相接 + 发电机箱 + 电缆 4 点闭折 3 杆 + 海面 15 点/海床 13 点正弦 + 太阳/岩石/房/海鸥 decor）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] dict +5 词条：subway /ˈsʌbweɪ/ 地铁；地下铁道 · tunnel /ˈtʌnl/ 隧道；地道 · London /ˈlʌndən/ 伦敦（subwayDict 3）/ shuttle /ˈʃʌtl/ 航天飞机；往返班机 · shield /ʃiːld/ 护盾；防护板（spaceShuttleDict 2，shield 为 gate-only 词条——'heat shield' part span 文本过闸门用，全库既有 18 处同模式）；wave-power 无新词条（4 处 dict span 全跨件复用 float / over and over / dam / generator）；跨件复用 subway 页 rail·elevator / shuttle 页 rocket·hour·robot·telescope·umbrella；词典 209→214（无重复键）、分词 231→236
+- [x] flow sentenceRef 全单件步：subway 1,3,5,7,8 / space-shuttle 0,3,4,8,11 / wave-power 0,4,5,6,7（运行时 15/15 高亮句核验）
+- [x] finish 三色齐：power-rail·fire-sticks·power-maker 红 / deep-hole·food-tank·turn-pin 钛白 / long-train·white-body·sea-rider 外壳灰，warning 各 1 配额内
+- [x] 预检前移（b20 新能力，b19 教训落地）：简报 fenced 块提取（import type 行 tsx/esbuild 擦除可安全 strip）→ 真实闸门镜像全量四类文本预检，派发前抓出 2 个真 MISS——subway f3 dug（不规则过去式不逆推 dig）→ 改 cut/made；wave-power base 四通道全缺 → 部件改名 bed plate（bedplate 真实工程词，波及 6 处）而非加词条（词条无 span 即不可触达）→ b20.2 后 0 MISS + 内部一致性全绿（KE partId 校验自动抓出改名漏改一处）
+- [x] claude 亲审零修正通过：verbatim-check 脚本简报 vs 实仓 5 数据文件字节级全等 + 注册 3 处纯追加（+16/−0）+ 几何三文件逐项核验 + 五闸门复跑 + 运行时 15/15 高亮句 + hover 3/3（含跨件 generator→b19 词条；卡文本真格式实证：无空格连排 + pos 小写 n.，WordPopup JSX 无空白文本节点）+ 词→物点击 3/3 + home 65 卡
+- [x] pi 独立验证（2026-09-11，tmp/b20-pi-report.md，判定**PASS——无阻断性缺陷**）：五闸门独立重跑零偏离（65 件 · 词典 214 · 分词 236 / build 781 modules / oxlint 0 含正控）；data-audit.ts brief 契约与真实模块递归深比（含 key 序）62/62 断言全绿 + span closed list 逐字逐序全等（12/13/11）；Rod 链安全（.map 真实最大 2 参，初报 3/4 为解构逗号假阳性已排除）；几何数学独立重算全自洽（隧道环/第三轨藏壁/助推器嵌入 0.035/摆臂 −0.60==基座顶/铰链封端）；浏览器矩阵三页零异常 + subway hover 卡逐字（真格式）+ flow caption/sentence-active 对齐；git 前后逐行全等零仓库变更；64% 提前收束令受控完成（79% 峰值无死循环）
+- [x] 终审合议（低危备注均裁定不修）：仓库既有 11 组跨文件重复 dict key（push back/land/sit 等，均不涉 b20，first-wins 设计聚合 214 唯一键无渲染影响——另立专项不混批次）/ wave-power sunCircle 9 点 k=8 回绕与 k=1 重合重画首段（视觉 no-op）/ wave-power hover 首轮 null = 时序抖动（亲审 + pi 双页复现佐证机制正常）/ pi 降级诚实标注（无像素/性能探测）沿 b19 先例接受
+- [x] accent 撞色审计：#0E7490 与 #0D9488 全库唯一；#EA580C（外贮箱标志橙）复用 battery/bridge 既有 ×2（接受，已有 ×3 复用先例）
+- [x] 类别平衡达成：65 件 = home 17 / transport 16 / space 16 / power 16
 
 ### 实施备注（与规格的已知偏差）
 

@@ -61,6 +61,9 @@ import { fusion } from './things/fusion'
 import { motorcycle } from './things/motorcycle'
 import { jupiter } from './things/jupiter'
 import { generator } from './things/generator'
+import { subway } from './things/subway'
+import { spaceShuttle } from './things/space-shuttle'
+import { wavePower } from './things/wave-power'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -129,6 +132,9 @@ export const things: ThingData[] = [
   motorcycle,
   jupiter,
   generator,
+  subway,
+  spaceShuttle,
+  wavePower,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

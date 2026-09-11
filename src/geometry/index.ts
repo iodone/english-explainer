@@ -61,6 +61,9 @@ import FusionSketch from './fusion'
 import MotorcycleSketch from './motorcycle'
 import JupiterSketch from './jupiter'
 import GeneratorSketch from './generator'
+import SubwaySketch from './subway'
+import SpaceShuttleSketch from './space-shuttle'
+import WavePowerSketch from './wave-power'
 
 /**
  * thing.id → 几何体分发表。
@@ -130,6 +133,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   motorcycle: MotorcycleSketch,
   jupiter: JupiterSketch,
   generator: GeneratorSketch,
+  subway: SubwaySketch,
+  'space-shuttle': SpaceShuttleSketch,
+  'wave-power': WavePowerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
