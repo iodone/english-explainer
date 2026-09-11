@@ -76,6 +76,9 @@ import ChargerSketch from './charger'
 import AsteroidSketch from './asteroid'
 import OilRigSketch from './oil-rig'
 import BusSketch from './bus'
+import FanSketch from './fan'
+import NebulaSketch from './nebula'
+import SolarPanelSketch from './solar-panel'
 
 /**
  * thing.id → 几何体分发表。
@@ -160,6 +163,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   asteroid: AsteroidSketch,
   'oil-rig': OilRigSketch,
   bus: BusSketch,
+  fan: FanSketch,
+  nebula: NebulaSketch,
+  'solar-panel': SolarPanelSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

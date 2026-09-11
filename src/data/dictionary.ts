@@ -70,6 +70,9 @@ import { chargerDict } from './dict/charger'
 import { asteroidDict } from './dict/asteroid'
 import { oilRigDict } from './dict/oil-rig'
 import { busDict } from './dict/bus'
+import { fanDict } from './dict/fan'
+import { nebulaDict } from './dict/nebula'
+import { solarPanelDict } from './dict/solar-panel'
 
 /**
  * 词典汇总层。
@@ -148,6 +151,9 @@ const sources: Record<string, DictEntry>[] = [
   asteroidDict,
   oilRigDict,
   busDict,
+  fanDict,
+  nebulaDict,
+  solarPanelDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
