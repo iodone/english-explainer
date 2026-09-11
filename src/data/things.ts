@@ -67,6 +67,9 @@ import { wavePower } from './things/wave-power'
 import { fireTruck } from './things/fire-truck'
 import { spaceElevator } from './things/space-elevator'
 import { flywheel } from './things/flywheel'
+import { toaster } from './things/toaster'
+import { airship } from './things/airship'
+import { voyager } from './things/voyager'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -141,6 +144,9 @@ export const things: ThingData[] = [
   fireTruck,
   spaceElevator,
   flywheel,
+  toaster,
+  airship,
+  voyager,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

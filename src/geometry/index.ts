@@ -67,6 +67,9 @@ import WavePowerSketch from './wave-power'
 import FireTruckSketch from './fire-truck'
 import SpaceElevatorSketch from './space-elevator'
 import FlywheelSketch from './flywheel'
+import ToasterSketch from './toaster'
+import AirshipSketch from './airship'
+import VoyagerSketch from './voyager'
 
 /**
  * thing.id → 几何体分发表。
@@ -142,6 +145,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'fire-truck': FireTruckSketch,
   'space-elevator': SpaceElevatorSketch,
   flywheel: FlywheelSketch,
+  toaster: ToasterSketch,
+  airship: AirshipSketch,
+  voyager: VoyagerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
