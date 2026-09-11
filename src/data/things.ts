@@ -64,6 +64,9 @@ import { generator } from './things/generator'
 import { subway } from './things/subway'
 import { spaceShuttle } from './things/space-shuttle'
 import { wavePower } from './things/wave-power'
+import { fireTruck } from './things/fire-truck'
+import { spaceElevator } from './things/space-elevator'
+import { flywheel } from './things/flywheel'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -135,6 +138,9 @@ export const things: ThingData[] = [
   subway,
   spaceShuttle,
   wavePower,
+  fireTruck,
+  spaceElevator,
+  flywheel,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

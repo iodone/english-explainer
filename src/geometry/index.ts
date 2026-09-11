@@ -64,6 +64,9 @@ import GeneratorSketch from './generator'
 import SubwaySketch from './subway'
 import SpaceShuttleSketch from './space-shuttle'
 import WavePowerSketch from './wave-power'
+import FireTruckSketch from './fire-truck'
+import SpaceElevatorSketch from './space-elevator'
+import FlywheelSketch from './flywheel'
 
 /**
  * thing.id → 几何体分发表。
@@ -136,6 +139,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   subway: SubwaySketch,
   'space-shuttle': SpaceShuttleSketch,
   'wave-power': WavePowerSketch,
+  'fire-truck': FireTruckSketch,
+  'space-elevator': SpaceElevatorSketch,
+  flywheel: FlywheelSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

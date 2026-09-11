@@ -611,6 +611,19 @@ Munroe 闸门权威源 = vendored 原表 `scripts/data/xkcd-simple-writer-words.
 - [x] accent 撞色审计：#0E7490 与 #0D9488 全库唯一；#EA580C（外贮箱标志橙）复用 battery/bridge 既有 ×2（接受，已有 ×3 复用先例）
 - [x] 类别平衡达成：65 件 = home 17 / transport 16 / space 16 / power 16
 
+### 验收对照 · production line 第二十一批 3 thing（2026-09-11 第二十六轮，transport/space/power 各一类别平衡批，dsx 全文定稿工序）
+
+- [x] 3 新 thing 全链路：fire-truck（The Fire Fighting Car，accent #E63946，transport 域第十七件，6 轮嵌套 map（wheelXs×z±0.16 torus+hub π/2）+ 驾驶室双箱 + 挡风斜杆 ±0.14 + 床身不挂 part + 水箱/水泵尾列 + 水带 3 环 z0.18 侧挂 + 云梯双纵杆 6 横档 2 支撑立于水箱顶 + 水柱弧指向房屋 + 着火房屋/火舌/烟圈 9 点圆 decor）/ space-elevator（The Sky Rope，accent #5B8DEF，space 域第十七件，缆绳 (0.10,−0.34)→(0.10,0.77) 屋顶尖↔岩心双端咬合 + rockPath 六边形 7 点 slice(0,-1) 6 杆 + 2 坑 + 地球 sphere+赤道环 + 地面站/闭合屋顶/门 + 攀爬车 4 抓轮 + 空间站 torus+双舱 + 光炮/炮管 + beamSegs 3 段光束 + 星×3/月/自转弧箭头 decor）/ flywheel（The Spinning Battery，accent #F5B301，power 域第十七件，真空箱 + 重轮 torus+轮毂+4 辐条 45° 精确接缘（偏移 ±0.17 → r0.2404==轮缘 0.24）+ 公共轴 0.52 不挂 part + 磁浮环 2 @ z±0.23 + 电机/联轴 + 真空泵/泵管 + 输电线 3 折 + 4 A 字腿 + motionArcs 3 段 r0.280 速度弧（轮缘 0.275 外）decor）——部件 7/7/7 / 14 句 / flow 5 步 / keyExpressions 9
+- [x] dict +11 词条：fire-truck 8（station 车站；站；台 / force 力；力量 / engine 发动机；引擎 / smoke 烟 / pump 泵；抽水机 / hose 软管；水龙带 / ladder 梯子 / horn 喇叭；警报器——其中 **pump/hose/ladder/horn 4 处双标注 span**（part+dict 同 span：点击高亮部件 + 悬停 2s 弹释义卡兼得，.word-part 类承载，b12 airplane jets 同模式首次四连用）；station/force/engine/smoke 与 xkcd 原表冗余（31/214 既有先例，hover 卡教学职能保留））/ space-elevator 1（beam 光束；（横）梁）/ flywheel 2（cheap adj. 便宜的；廉价的 / top 陀螺；顶端）；pump 词条通道③全库放行 flywheel KE 正文（跨件非 span 复用）；跨件复用 span：space-elevator 页 fuel·steel·grip / flywheel 页 battery·spin；词典 214→225（无重复键）、分词 236→247
+- [x] flow sentenceRef 全单件步：fire-truck 1,3,4,5,6 / space-elevator 1,2,4,5,6 / flywheel 3,4,5,6,8（pi 运行时 Step2 caption↔flow[1].caption 逐字 3/3 + .sentence-active 指向 s3/s2/s4）
+- [x] finish 三色齐：pump-heart·light-gun·spin-motor 红 / water-tank·great-rope·heavy-wheel 钛白 / driver-room·sky-station·air-free-box 外壳灰，warning 各 1 配额内
+- [x] 预检前移：b21.1 首轮 65 MISS 预排雷 → b21.2 二十余处 Munroe 式改写（steers→drives / folded→closed up short and flat / kilometers→100,000,000 meters / hums→sings / steady→rising without a stop 等）+ 4 核心具象名词词条化升格双标注 → 0 MISS；闸门探针两轮 ~110 词建档（被闸词弹药库：tap/fold/park/bump/warning/belt/siren/bell/aim/burst/buzz/toy）
+- [x] claude 亲审一处修正 + 一流程发现：三数据文件缺 color 必填字段（b21.2 简报 fenced 块设计层遗漏，codex 忠实转写）→ 亲审补入 #E63946/#5B8DEF/#F5B301 + 简报 fenced 同步（verbatim 6/6 保持）+ pi 简报同步；**根 tsconfig 为 solution 文件（files:[]+references），裸 tsc --noEmit 空转假绿——gate1 改 tsc -b（b18-b20 同空转，build 闸门 tsc -b 兜底故无缺陷入库，本批起修正并入流程记忆）**；几何三件逐项核验 + 浏览器 27/27（home 68 卡 + 三页 h1/canvas/#root/.word-part=7/.word-new=4 + 双标注 hover 'pump heart' 弹 pump 卡 + 词→物点击 3/3 + 0 JS 异常）
+- [x] pi 独立验证（2026-09-11，tmp/b21-pi-report.md，判定**PASS——无阻断级、无功能性缺陷**）：五闸门独立重跑零偏离（tsc -b 0 · 68 件/词典 225/分词 247 · build 790 modules · oxlint 0 含正控）；data-audit 递归深比（含 key 序）67/70 断言绿——3 failed 均简报侧/断言侧（§2.2 span 表漏 ground-house 行致表头 11 vs 表体 10 不自洽、全库 color 唯一断言过严），**实现零缺陷**；新词条 11 IPA/词性/中文逐字全等；跨件复用 key 源文件核对（fuel→rocket·steel→bridge·grip→drill·battery·spin）；Rod 链 .map 真实 ≤2 参（对象/元组解构假阳性排除）；浏览器矩阵三页零异常 + hover 3/3 逐字（fire-truck 首次 flake 重试命中）+ flow Step2 逐字 3/3；git 前后逐行全等 0 仓库改动（tmp/ 产物 gitignore 0 泄漏）；85% 收束令受控完成（§3.2 几何数学降级亲审覆盖，残余风险如实标注）
+- [x] 终审合议（低危 6 项）：简报 §2.2 表漏行 + 节头旧 accent 值（#991B1B/#4338CA/#A16207，全库命中 0）+ §0.5 假绿闸门名——**契约侧本轮回填修正**（补行 + 节头同步 + tsc -b 改正）；既有 11 组跨件重复 dict key + 全库 12 处 accent 撞色——均不涉 b21，沿 b20 裁定另立专项；hover flake（HOVER_DICT_MS≈2s 时序）/ CDP 合成 click 需 element.click()——工具侧非产品
+- [x] accent 撞色审计：#E63946 / #5B8DEF / #F5B301 全库唯一（pi 复核各出现恰 1 次）
+- [x] 类别平衡达成：68 件 = home 17 / transport 17 / space 17 / power 17（**四类齐 17 里程碑**）
+
 ### 实施备注（与规格的已知偏差）
 
 - PracticePanel 关键表达 hover 的"微亮 40%"实现为全亮（复用 highlightPartId 通道，简化状态）
