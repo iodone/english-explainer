@@ -79,6 +79,9 @@ import { bus } from './things/bus'
 import { fan } from './things/fan'
 import { nebula } from './things/nebula'
 import { solarPanel } from './things/solar-panel'
+import { excavator } from './things/excavator'
+import { piano } from './things/piano'
+import { supernova } from './things/supernova'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -165,6 +168,9 @@ export const things: ThingData[] = [
   fan,
   nebula,
   solarPanel,
+  excavator,
+  piano,
+  supernova,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

@@ -79,6 +79,9 @@ import BusSketch from './bus'
 import FanSketch from './fan'
 import NebulaSketch from './nebula'
 import SolarPanelSketch from './solar-panel'
+import ExcavatorSketch from './excavator'
+import PianoSketch from './piano'
+import SupernovaSketch from './supernova'
 
 /**
  * thing.id → 几何体分发表。
@@ -166,6 +169,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   fan: FanSketch,
   nebula: NebulaSketch,
   'solar-panel': SolarPanelSketch,
+  excavator: ExcavatorSketch,
+  piano: PianoSketch,
+  supernova: SupernovaSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

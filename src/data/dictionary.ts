@@ -73,6 +73,9 @@ import { busDict } from './dict/bus'
 import { fanDict } from './dict/fan'
 import { nebulaDict } from './dict/nebula'
 import { solarPanelDict } from './dict/solar-panel'
+import { excavatorDict } from './dict/excavator'
+import { pianoDict } from './dict/piano'
+import { supernovaDict } from './dict/supernova'
 
 /**
  * 词典汇总层。
@@ -154,6 +157,9 @@ const sources: Record<string, DictEntry>[] = [
   fanDict,
   nebulaDict,
   solarPanelDict,
+  excavatorDict,
+  pianoDict,
+  supernovaDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
