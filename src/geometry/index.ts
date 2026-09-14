@@ -124,6 +124,9 @@ import PowerOutletSketch from './power-outlet'
 import SpaceLabSketch from './space-lab'
 import IceMakerSketch from './ice-maker'
 import PowerMeterSketch from './power-meter'
+import SpaceWelderSketch from './space-welder'
+import FoodWarmerSketch from './food-warmer'
+import BatteryPackSketch from './battery-pack'
 
 /**
  * thing.id → 几何体分发表。
@@ -256,6 +259,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-lab': SpaceLabSketch,
   'ice-maker': IceMakerSketch,
   'power-meter': PowerMeterSketch,
+  'space-welder': SpaceWelderSketch,
+  'food-warmer': FoodWarmerSketch,
+  'battery-pack': BatteryPackSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

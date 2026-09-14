@@ -124,6 +124,9 @@ import { powerOutlet } from './things/power-outlet'
 import { spaceLab } from './things/space-lab'
 import { iceMaker } from './things/ice-maker'
 import { powerMeter } from './things/power-meter'
+import { spaceWelder } from './things/space-welder'
+import { foodWarmer } from './things/food-warmer'
+import { batteryPack } from './things/battery-pack'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -255,6 +258,9 @@ export const things: ThingData[] = [
   spaceLab,
   iceMaker,
   powerMeter,
+  spaceWelder,
+  foodWarmer,
+  batteryPack,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
