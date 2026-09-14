@@ -85,6 +85,9 @@ import { supernova } from './things/supernova'
 import { transformer } from './things/transformer'
 import { sewingMachine } from './things/sewing-machine'
 import { hovercraft } from './things/hovercraft'
+import { spaceFarm } from './things/space-farm'
+import { spaceFood } from './things/space-food'
+import { spaceRobot } from './things/space-robot'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -177,6 +180,9 @@ export const things: ThingData[] = [
   transformer,
   sewingMachine,
   hovercraft,
+  spaceFarm,
+  spaceFood,
+  spaceRobot,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

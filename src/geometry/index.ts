@@ -85,6 +85,9 @@ import SupernovaSketch from './supernova'
 import TransformerSketch from './transformer'
 import SewingMachineSketch from './sewing-machine'
 import HovercraftSketch from './hovercraft'
+import SpaceFarmSketch from './space-farm'
+import SpaceFoodSketch from './space-food'
+import SpaceRobotSketch from './space-robot'
 
 /**
  * thing.id → 几何体分发表。
@@ -178,6 +181,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   transformer: TransformerSketch,
   'sewing-machine': SewingMachineSketch,
   hovercraft: HovercraftSketch,
+  'space-farm': SpaceFarmSketch,
+  'space-food': SpaceFoodSketch,
+  'space-robot': SpaceRobotSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
