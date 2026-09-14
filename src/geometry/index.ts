@@ -154,6 +154,9 @@ import PowerSocketSketch from './power-socket'
 import SpaceGpsSketch from './space-gps'
 import ToothBrushSketch from './tooth-brush'
 import PowerFuseSketch from './power-fuse'
+import SpaceFoodHeaterSketch from './space-food-heater'
+import HomeAlarmSketch from './home-alarm'
+import PowerControllerSketch from './power-controller'
 
 /**
  * thing.id → 几何体分发表。
@@ -316,6 +319,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-gps': SpaceGpsSketch,
   'tooth-brush': ToothBrushSketch,
   'power-fuse': PowerFuseSketch,
+  'space-food-heater': SpaceFoodHeaterSketch,
+  'home-alarm': HomeAlarmSketch,
+  'power-controller': PowerControllerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

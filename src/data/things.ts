@@ -154,6 +154,9 @@ import { powerSocket } from './things/power-socket'
 import { spaceGps } from './things/space-gps'
 import { toothBrush } from './things/tooth-brush'
 import { powerFuse } from './things/power-fuse'
+import { spaceFoodHeater } from './things/space-food-heater'
+import { homeAlarm } from './things/home-alarm'
+import { powerController } from './things/power-controller'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -315,6 +318,9 @@ export const things: ThingData[] = [
   spaceGps,
   toothBrush,
   powerFuse,
+  spaceFoodHeater,
+  homeAlarm,
+  powerController,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

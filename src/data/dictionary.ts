@@ -148,6 +148,9 @@ import { powerSocketDict } from './dict/power-socket'
 import { spaceGpsDict } from './dict/space-gps'
 import { toothBrushDict } from './dict/tooth-brush'
 import { powerFuseDict } from './dict/power-fuse'
+import { spaceFoodHeaterDict } from './dict/space-food-heater'
+import { homeAlarmDict } from './dict/home-alarm'
+import { powerControllerDict } from './dict/power-controller'
 
 /**
  * 词典汇总层。
@@ -304,6 +307,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceGpsDict,
   toothBrushDict,
   powerFuseDict,
+  spaceFoodHeaterDict,
+  homeAlarmDict,
+  powerControllerDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
