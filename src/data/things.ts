@@ -223,6 +223,9 @@ import { powerChoke } from './things/power-choke'
 import { spaceVentValve } from './things/space-vent-valve'
 import { homeIron } from './things/home-iron'
 import { powerThermistor } from './things/power-thermistor'
+import { spaceHandrail } from './things/space-handrail'
+import { homePeeler } from './things/home-peeler'
+import { powerVaristor } from './things/power-varistor'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -453,6 +456,9 @@ export const things: ThingData[] = [
   spaceVentValve,
   homeIron,
   powerThermistor,
+  spaceHandrail,
+  homePeeler,
+  powerVaristor,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
