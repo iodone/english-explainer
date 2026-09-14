@@ -256,6 +256,9 @@ import PowerIsolatorSketch from './power-isolator'
 import SpaceSolarArraySketch from './space-solar-array'
 import HomeMandolineSketch from './home-mandoline'
 import PowerGroundingSketch from './power-grounding'
+import SpaceManipulatorArmSketch from './space-manipulator-arm'
+import HomeMortarSketch from './home-mortar'
+import PowerHeatSinkSketch from './power-heat-sink'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -526,6 +529,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-solar-array': SpaceSolarArraySketch,
   'home-mandoline': HomeMandolineSketch,
   'power-grounding': PowerGroundingSketch,
+  'space-manipulator-arm': SpaceManipulatorArmSketch,
+  'home-mortar': HomeMortarSketch,
+  'power-heat-sink': PowerHeatSinkSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

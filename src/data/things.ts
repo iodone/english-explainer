@@ -256,6 +256,9 @@ import { powerIsolator } from './things/power-isolator'
 import { spaceSolarArray } from './things/space-solar-array'
 import { homeMandoline } from './things/home-mandoline'
 import { powerGrounding } from './things/power-grounding'
+import { spaceManipulatorArm } from './things/space-manipulator-arm'
+import { homeMortar } from './things/home-mortar'
+import { powerHeatSink } from './things/power-heat-sink'
 import { spaceCargoBag } from './things/space-cargo-bag'
 import { homeWhisk } from './things/home-whisk'
 import { powerInductor } from './things/power-inductor'
@@ -525,6 +528,9 @@ export const things: ThingData[] = [
   spaceSolarArray,
   homeMandoline,
   powerGrounding,
+  spaceManipulatorArm,
+  homeMortar,
+  powerHeatSink,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
