@@ -163,6 +163,9 @@ import PowerBatterySketch from './power-battery'
 import SpaceLadderSketch from './space-ladder'
 import HomeTableSketch from './home-table'
 import PowerLightSketch from './power-light'
+import SpacePipeSketch from './space-pipe'
+import HomeBedSketch from './home-bed'
+import PowerHeaterSketch from './power-heater'
 
 /**
  * thing.id → 几何体分发表。
@@ -334,6 +337,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-ladder': SpaceLadderSketch,
   'home-table': HomeTableSketch,
   'power-light': PowerLightSketch,
+  'space-pipe': SpacePipeSketch,
+  'home-bed': HomeBedSketch,
+  'power-heater': PowerHeaterSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

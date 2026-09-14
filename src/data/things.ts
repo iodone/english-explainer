@@ -163,6 +163,9 @@ import { powerBattery } from './things/power-battery'
 import { spaceLadder } from './things/space-ladder'
 import { homeTable } from './things/home-table'
 import { powerLight } from './things/power-light'
+import { spacePipe } from './things/space-pipe'
+import { homeBed } from './things/home-bed'
+import { powerHeater } from './things/power-heater'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -333,6 +336,9 @@ export const things: ThingData[] = [
   spaceLadder,
   homeTable,
   powerLight,
+  spacePipe,
+  homeBed,
+  powerHeater,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

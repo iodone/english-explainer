@@ -157,6 +157,9 @@ import { powerBatteryDict } from './dict/power-battery'
 import { spaceLadderDict } from './dict/space-ladder'
 import { homeTableDict } from './dict/home-table'
 import { powerLightDict } from './dict/power-light'
+import { spacePipeDict } from './dict/space-pipe'
+import { homeBedDict } from './dict/home-bed'
+import { powerHeaterDict } from './dict/power-heater'
 
 /**
  * 词典汇总层。
@@ -322,6 +325,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceLadderDict,
   homeTableDict,
   powerLightDict,
+  spacePipeDict,
+  homeBedDict,
+  powerHeaterDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
