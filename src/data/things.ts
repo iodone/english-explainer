@@ -229,6 +229,9 @@ import { powerVaristor } from './things/power-varistor'
 import { spaceFilter } from './things/space-filter'
 import { homeStrainer } from './things/home-strainer'
 import { powerDinRail } from './things/power-din-rail'
+import { spaceCargoNet } from './things/space-cargo-net'
+import { homeRollingPin } from './things/home-rolling-pin'
+import { powerEnclosure } from './things/power-enclosure'
 import { spaceCargoBag } from './things/space-cargo-bag'
 import { homeWhisk } from './things/home-whisk'
 import { powerInductor } from './things/power-inductor'
@@ -471,6 +474,9 @@ export const things: ThingData[] = [
   spaceFilter,
   homeStrainer,
   powerDinRail,
+  spaceCargoNet,
+  homeRollingPin,
+  powerEnclosure,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
