@@ -142,6 +142,9 @@ import { powerTool } from './things/power-tool'
 import { spaceLander } from './things/space-lander'
 import { doorLock } from './things/door-lock'
 import { windPower } from './things/wind-power'
+import { spaceJunk } from './things/space-junk'
+import { doorBell } from './things/door-bell'
+import { powerBank } from './things/power-bank'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -291,6 +294,9 @@ export const things: ThingData[] = [
   spaceLander,
   doorLock,
   windPower,
+  spaceJunk,
+  doorBell,
+  powerBank,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

@@ -142,6 +142,9 @@ import PowerToolSketch from './power-tool'
 import SpaceLanderSketch from './space-lander'
 import DoorLockSketch from './door-lock'
 import WindPowerSketch from './wind-power'
+import SpaceJunkSketch from './space-junk'
+import DoorBellSketch from './door-bell'
+import PowerBankSketch from './power-bank'
 
 /**
  * thing.id → 几何体分发表。
@@ -292,6 +295,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-lander': SpaceLanderSketch,
   'door-lock': DoorLockSketch,
   'wind-power': WindPowerSketch,
+  'space-junk': SpaceJunkSketch,
+  'door-bell': DoorBellSketch,
+  'power-bank': PowerBankSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
