@@ -184,6 +184,9 @@ import { powerTransistorDict } from './dict/power-transistor'
 import { spaceCalculatorDict } from './dict/space-calculator'
 import { homeWindowDict } from './dict/home-window'
 import { powerAmplifierDict } from './dict/power-amplifier'
+import { spaceTugDict } from './dict/space-tug'
+import { homeSinkDict } from './dict/home-sink'
+import { powerTransformerDict } from './dict/power-transformer'
 
 /**
  * 词典汇总层。
@@ -376,6 +379,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceCalculatorDict,
   homeWindowDict,
   powerAmplifierDict,
+  spaceTugDict,
+  homeSinkDict,
+  powerTransformerDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
