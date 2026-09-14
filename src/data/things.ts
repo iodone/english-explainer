@@ -196,6 +196,9 @@ import { powerTransformer } from './things/power-transformer'
 import { spaceAirlock } from './things/space-airlock'
 import { homeGarage } from './things/home-garage'
 import { powerRegulator } from './things/power-regulator'
+import { spaceCapsule } from './things/space-capsule'
+import { homeOven } from './things/home-oven'
+import { powerTurbine } from './things/power-turbine'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -399,6 +402,9 @@ export const things: ThingData[] = [
   spaceAirlock,
   homeGarage,
   powerRegulator,
+  spaceCapsule,
+  homeOven,
+  powerTurbine,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
