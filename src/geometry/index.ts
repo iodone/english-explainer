@@ -130,6 +130,9 @@ import BatteryPackSketch from './battery-pack'
 import SpaceAntennaSketch from './space-antenna'
 import WaterCoolerSketch from './water-cooler'
 import SolarHeaterSketch from './solar-heater'
+import SpaceTelescopeSketch from './space-telescope'
+import DishWasherSketch from './dish-washer'
+import PowerPlantSketch from './power-plant'
 
 /**
  * thing.id → 几何体分发表。
@@ -268,6 +271,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-antenna': SpaceAntennaSketch,
   'water-cooler': WaterCoolerSketch,
   'solar-heater': SolarHeaterSketch,
+  'space-telescope': SpaceTelescopeSketch,
+  'dish-washer': DishWasherSketch,
+  'power-plant': PowerPlantSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
