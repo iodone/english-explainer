@@ -151,6 +151,9 @@ import { powerCable } from './things/power-cable'
 import { spacePlant } from './things/space-plant'
 import { doorHandle } from './things/door-handle'
 import { powerSocket } from './things/power-socket'
+import { spaceGps } from './things/space-gps'
+import { toothBrush } from './things/tooth-brush'
+import { powerFuse } from './things/power-fuse'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -309,6 +312,9 @@ export const things: ThingData[] = [
   spacePlant,
   doorHandle,
   powerSocket,
+  spaceGps,
+  toothBrush,
+  powerFuse,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
