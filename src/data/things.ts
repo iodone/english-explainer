@@ -181,6 +181,9 @@ import { powerCord } from './things/power-cord'
 import { spaceCompass } from './things/space-compass'
 import { homeMat } from './things/home-mat'
 import { powerAdapter } from './things/power-adapter'
+import { spaceSignal } from './things/space-signal'
+import { homeCurtain } from './things/home-curtain'
+import { powerRelay } from './things/power-relay'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -369,6 +372,9 @@ export const things: ThingData[] = [
   spaceCompass,
   homeMat,
   powerAdapter,
+  spaceSignal,
+  homeCurtain,
+  powerRelay,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

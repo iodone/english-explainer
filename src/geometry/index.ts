@@ -181,6 +181,9 @@ import PowerCordSketch from './power-cord'
 import SpaceCompassSketch from './space-compass'
 import HomeMatSketch from './home-mat'
 import PowerAdapterSketch from './power-adapter'
+import SpaceSignalSketch from './space-signal'
+import HomeCurtainSketch from './home-curtain'
+import PowerRelaySketch from './power-relay'
 
 /**
  * thing.id → 几何体分发表。
@@ -370,6 +373,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-compass': SpaceCompassSketch,
   'home-mat': HomeMatSketch,
   'power-adapter': PowerAdapterSketch,
+  'space-signal': SpaceSignalSketch,
+  'home-curtain': HomeCurtainSketch,
+  'power-relay': PowerRelaySketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

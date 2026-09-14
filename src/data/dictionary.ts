@@ -175,6 +175,9 @@ import { powerCordDict } from './dict/power-cord'
 import { spaceCompassDict } from './dict/space-compass'
 import { homeMatDict } from './dict/home-mat'
 import { powerAdapterDict } from './dict/power-adapter'
+import { spaceSignalDict } from './dict/space-signal'
+import { homeCurtainDict } from './dict/home-curtain'
+import { powerRelayDict } from './dict/power-relay'
 
 /**
  * 词典汇总层。
@@ -358,6 +361,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceCompassDict,
   homeMatDict,
   powerAdapterDict,
+  spaceSignalDict,
+  homeCurtainDict,
+  powerRelayDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
