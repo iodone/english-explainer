@@ -205,6 +205,9 @@ import { powerRectifierDict } from './dict/power-rectifier'
 import { spaceDockingPortDict } from './dict/space-docking-port'
 import { homeTowelDict } from './dict/home-towel'
 import { powerCapacitorDict } from './dict/power-capacitor'
+import { spaceManipulatorDict } from './dict/space-manipulator'
+import { homeBucketDict } from './dict/home-bucket'
+import { powerOscillatorDict } from './dict/power-oscillator'
 
 /**
  * 词典汇总层。
@@ -418,6 +421,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceDockingPortDict,
   homeTowelDict,
   powerCapacitorDict,
+  spaceManipulatorDict,
+  homeBucketDict,
+  powerOscillatorDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

@@ -211,6 +211,9 @@ import { powerRectifier } from './things/power-rectifier'
 import { spaceDockingPort } from './things/space-docking-port'
 import { homeTowel } from './things/home-towel'
 import { powerCapacitor } from './things/power-capacitor'
+import { spaceManipulator } from './things/space-manipulator'
+import { homeBucket } from './things/home-bucket'
+import { powerOscillator } from './things/power-oscillator'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -429,6 +432,9 @@ export const things: ThingData[] = [
   spaceDockingPort,
   homeTowel,
   powerCapacitor,
+  spaceManipulator,
+  homeBucket,
+  powerOscillator,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
