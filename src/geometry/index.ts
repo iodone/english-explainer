@@ -157,6 +157,9 @@ import PowerFuseSketch from './power-fuse'
 import SpaceFoodHeaterSketch from './space-food-heater'
 import HomeAlarmSketch from './home-alarm'
 import PowerControllerSketch from './power-controller'
+import SpaceGymSketch from './space-gym'
+import HomeFanSketch from './home-fan'
+import PowerBatterySketch from './power-battery'
 
 /**
  * thing.id → 几何体分发表。
@@ -322,6 +325,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-food-heater': SpaceFoodHeaterSketch,
   'home-alarm': HomeAlarmSketch,
   'power-controller': PowerControllerSketch,
+  'space-gym': SpaceGymSketch,
+  'home-fan': HomeFanSketch,
+  'power-battery': PowerBatterySketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

@@ -157,6 +157,9 @@ import { powerFuse } from './things/power-fuse'
 import { spaceFoodHeater } from './things/space-food-heater'
 import { homeAlarm } from './things/home-alarm'
 import { powerController } from './things/power-controller'
+import { spaceGym } from './things/space-gym'
+import { homeFan } from './things/home-fan'
+import { powerBattery } from './things/power-battery'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -321,6 +324,9 @@ export const things: ThingData[] = [
   spaceFoodHeater,
   homeAlarm,
   powerController,
+  spaceGym,
+  homeFan,
+  powerBattery,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
