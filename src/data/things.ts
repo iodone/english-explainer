@@ -280,6 +280,9 @@ import { powerCurrentSensor } from './things/power-current-sensor'
 import { spaceSignalDish } from './things/space-signal-dish'
 import { homeNutCracker } from './things/home-nut-cracker'
 import { powerBatteryFuse } from './things/power-battery-fuse'
+import { spaceStarTracker } from './things/space-star-tracker'
+import { homeIceCreamScoop } from './things/home-ice-cream-scoop'
+import { powerVoltageRegulator } from './things/power-voltage-regulator'
 import { spaceCargoBag } from './things/space-cargo-bag'
 import { homeWhisk } from './things/home-whisk'
 import { powerInductor } from './things/power-inductor'
@@ -573,6 +576,9 @@ export const things: ThingData[] = [
   spaceSignalDish,
   homeNutCracker,
   powerBatteryFuse,
+  spaceStarTracker,
+  homeIceCreamScoop,
+  powerVoltageRegulator,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

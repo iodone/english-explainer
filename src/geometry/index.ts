@@ -280,6 +280,9 @@ import PowerCurrentSensorSketch from './power-current-sensor'
 import SpaceSignalDishSketch from './space-signal-dish'
 import HomeNutCrackerSketch from './home-nut-cracker'
 import PowerBatteryFuseSketch from './power-battery-fuse'
+import SpaceStarTrackerSketch from './space-star-tracker'
+import HomeIceCreamScoopSketch from './home-ice-cream-scoop'
+import PowerVoltageRegulatorSketch from './power-voltage-regulator'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -574,6 +577,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-signal-dish': SpaceSignalDishSketch,
   'home-nut-cracker': HomeNutCrackerSketch,
   'power-battery-fuse': PowerBatteryFuseSketch,
+  'space-star-tracker': SpaceStarTrackerSketch,
+  'home-ice-cream-scoop': HomeIceCreamScoopSketch,
+  'power-voltage-regulator': PowerVoltageRegulatorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
