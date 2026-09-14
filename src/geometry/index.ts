@@ -250,6 +250,9 @@ import PowerBusbarSketch from './power-busbar'
 import SpaceRadiatorSketch from './space-radiator'
 import HomeGraterSketch from './home-grater'
 import PowerContactorSketch from './power-contactor'
+import SpaceThrusterSketch from './space-thruster'
+import HomeColanderSketch from './home-colander'
+import PowerIsolatorSketch from './power-isolator'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -514,6 +517,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-radiator': SpaceRadiatorSketch,
   'home-grater': HomeGraterSketch,
   'power-contactor': PowerContactorSketch,
+  'space-thruster': SpaceThrusterSketch,
+  'home-colander': HomeColanderSketch,
+  'power-isolator': PowerIsolatorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
