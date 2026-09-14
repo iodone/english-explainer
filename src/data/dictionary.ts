@@ -253,6 +253,9 @@ import { powerGroundingDict } from './dict/power-grounding'
 import { spaceManipulatorArmDict } from './dict/space-manipulator-arm'
 import { homeMortarDict } from './dict/home-mortar'
 import { powerHeatSinkDict } from './dict/power-heat-sink'
+import { spaceAirFilterDict } from './dict/space-air-filter'
+import { homePepperMillDict } from './dict/home-pepper-mill'
+import { powerBusDuctDict } from './dict/power-bus-duct'
 import { spaceCargoBagDict } from './dict/space-cargo-bag'
 import { homeWhiskDict } from './dict/home-whisk'
 import { powerInductorDict } from './dict/power-inductor'
@@ -520,6 +523,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceManipulatorArmDict,
   homeMortarDict,
   powerHeatSinkDict,
+  spaceAirFilterDict,
+  homePepperMillDict,
+  powerBusDuctDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
