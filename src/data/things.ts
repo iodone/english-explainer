@@ -115,6 +115,9 @@ import { batteryCharger } from './things/battery-charger'
 import { spaceRover } from './things/space-rover'
 import { eggCooker } from './things/egg-cooker'
 import { gasStove } from './things/gas-stove'
+import { spaceHabitat } from './things/space-habitat'
+import { airConditioner } from './things/air-conditioner'
+import { powerSwitch } from './things/power-switch'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -237,6 +240,9 @@ export const things: ThingData[] = [
   spaceRover,
   eggCooker,
   gasStove,
+  spaceHabitat,
+  airConditioner,
+  powerSwitch,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

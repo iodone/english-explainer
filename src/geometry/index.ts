@@ -115,6 +115,9 @@ import BatteryChargerSketch from './battery-charger'
 import SpaceRoverSketch from './space-rover'
 import EggCookerSketch from './egg-cooker'
 import GasStoveSketch from './gas-stove'
+import SpaceHabitatSketch from './space-habitat'
+import AirConditionerSketch from './air-conditioner'
+import PowerSwitchSketch from './power-switch'
 
 /**
  * thing.id → 几何体分发表。
@@ -238,6 +241,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-rover': SpaceRoverSketch,
   'egg-cooker': EggCookerSketch,
   'gas-stove': GasStoveSketch,
+  'space-habitat': SpaceHabitatSketch,
+  'air-conditioner': AirConditionerSketch,
+  'power-switch': PowerSwitchSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
