@@ -283,6 +283,9 @@ import { powerGroundFaultDict } from './dict/power-ground-fault'
 import { spaceCargoBagDict } from './dict/space-cargo-bag'
 import { homeWhiskDict } from './dict/home-whisk'
 import { powerInductorDict } from './dict/power-inductor'
+import { spaceGyroscopeDict } from './dict/space-gyroscope'
+import { homeVegetablePeelerDict } from './dict/home-vegetable-peeler'
+import { powerSurgeProtectorDict } from './dict/power-surge-protector'
 
 /**
  * 词典汇总层。
@@ -574,6 +577,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceSunSensorDict,
   homeCorkOpenerDict,
   powerGroundFaultDict,
+  spaceGyroscopeDict,
+  homeVegetablePeelerDict,
+  powerSurgeProtectorDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

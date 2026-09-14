@@ -289,6 +289,9 @@ import PowerGroundFaultSketch from './power-ground-fault'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
+import SpaceGyroscopeSketch from './space-gyroscope'
+import HomeVegetablePeelerSketch from './home-vegetable-peeler'
+import PowerSurgeProtectorSketch from './power-surge-protector'
 
 /**
  * thing.id → 几何体分发表。
@@ -586,6 +589,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-sun-sensor': SpaceSunSensorSketch,
   'home-cork-opener': HomeCorkOpenerSketch,
   'power-ground-fault': PowerGroundFaultSketch,
+  'space-gyroscope': SpaceGyroscopeSketch,
+  'home-vegetable-peeler': HomeVegetablePeelerSketch,
+  'power-surge-protector': PowerSurgeProtectorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
