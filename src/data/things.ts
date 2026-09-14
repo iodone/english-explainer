@@ -298,6 +298,9 @@ import { powerArcFaultDetector } from './things/power-arc-fault-detector'
 import { spaceRadiometer } from './things/space-radiometer'
 import { homeAppleCorer } from './things/home-apple-corer'
 import { powerLoadBreakSwitch } from './things/power-load-break-switch'
+import { spaceSpectrometer } from './things/space-spectrometer'
+import { homeAvocadoSlicer } from './things/home-avocado-slicer'
+import { powerDisconnectSwitch } from './things/power-disconnect-switch'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -603,6 +606,9 @@ export const things: ThingData[] = [
   spaceRadiometer,
   homeAppleCorer,
   powerLoadBreakSwitch,
+  spaceSpectrometer,
+  homeAvocadoSlicer,
+  powerDisconnectSwitch,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

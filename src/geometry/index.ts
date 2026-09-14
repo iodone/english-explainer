@@ -298,6 +298,9 @@ import PowerArcFaultDetectorSketch from './power-arc-fault-detector'
 import SpaceRadiometerSketch from './space-radiometer'
 import HomeAppleCorerSketch from './home-apple-corer'
 import PowerLoadBreakSwitchSketch from './power-load-break-switch'
+import SpaceSpectrometerSketch from './space-spectrometer'
+import HomeAvocadoSlicerSketch from './home-avocado-slicer'
+import PowerDisconnectSwitchSketch from './power-disconnect-switch'
 
 /**
  * thing.id → 几何体分发表。
@@ -604,6 +607,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-radiometer': SpaceRadiometerSketch,
   'home-apple-corer': HomeAppleCorerSketch,
   'power-load-break-switch': PowerLoadBreakSwitchSketch,
+  'space-spectrometer': SpaceSpectrometerSketch,
+  'home-avocado-slicer': HomeAvocadoSlicerSketch,
+  'power-disconnect-switch': PowerDisconnectSwitchSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
