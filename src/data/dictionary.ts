@@ -127,6 +127,9 @@ import { solarHeaterDict } from './dict/solar-heater'
 import { spaceTelescopeDict } from './dict/space-telescope'
 import { dishWasherDict } from './dict/dish-washer'
 import { powerPlantDict } from './dict/power-plant'
+import { spaceCraftDict } from './dict/space-craft'
+import { trashCanDict } from './dict/trash-can'
+import { electricWireDict } from './dict/electric-wire'
 
 /**
  * 词典汇总层。
@@ -262,6 +265,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceTelescopeDict,
   dishWasherDict,
   powerPlantDict,
+  spaceCraftDict,
+  trashCanDict,
+  electricWireDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

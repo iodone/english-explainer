@@ -133,6 +133,9 @@ import { solarHeater } from './things/solar-heater'
 import { spaceTelescope } from './things/space-telescope'
 import { dishWasher } from './things/dish-washer'
 import { powerPlant } from './things/power-plant'
+import { spaceCraft } from './things/space-craft'
+import { trashCan } from './things/trash-can'
+import { electricWire } from './things/electric-wire'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -273,6 +276,9 @@ export const things: ThingData[] = [
   spaceTelescope,
   dishWasher,
   powerPlant,
+  spaceCraft,
+  trashCan,
+  electricWire,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
