@@ -133,6 +133,9 @@ import { electricWireDict } from './dict/electric-wire'
 import { spaceRocketDict } from './dict/space-rocket'
 import { bookShelfDict } from './dict/book-shelf'
 import { powerToolDict } from './dict/power-tool'
+import { spaceLanderDict } from './dict/space-lander'
+import { doorLockDict } from './dict/door-lock'
+import { windPowerDict } from './dict/wind-power'
 
 /**
  * 词典汇总层。
@@ -274,6 +277,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceRocketDict,
   bookShelfDict,
   powerToolDict,
+  spaceLanderDict,
+  doorLockDict,
+  windPowerDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

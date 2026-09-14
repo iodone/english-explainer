@@ -139,6 +139,9 @@ import { electricWire } from './things/electric-wire'
 import { spaceRocket } from './things/space-rocket'
 import { bookShelf } from './things/book-shelf'
 import { powerTool } from './things/power-tool'
+import { spaceLander } from './things/space-lander'
+import { doorLock } from './things/door-lock'
+import { windPower } from './things/wind-power'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -285,6 +288,9 @@ export const things: ThingData[] = [
   spaceRocket,
   bookShelf,
   powerTool,
+  spaceLander,
+  doorLock,
+  windPower,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
