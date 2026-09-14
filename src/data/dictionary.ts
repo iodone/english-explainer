@@ -208,6 +208,9 @@ import { powerCapacitorDict } from './dict/power-capacitor'
 import { spaceManipulatorDict } from './dict/space-manipulator'
 import { homeBucketDict } from './dict/home-bucket'
 import { powerOscillatorDict } from './dict/power-oscillator'
+import { spaceLabModuleDict } from './dict/space-lab-module'
+import { homeShutterDict } from './dict/home-shutter'
+import { powerFuseBoxDict } from './dict/power-fuse-box'
 
 /**
  * 词典汇总层。
@@ -424,6 +427,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceManipulatorDict,
   homeBucketDict,
   powerOscillatorDict,
+  spaceLabModuleDict,
+  homeShutterDict,
+  powerFuseBoxDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

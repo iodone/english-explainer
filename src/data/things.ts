@@ -214,6 +214,9 @@ import { powerCapacitor } from './things/power-capacitor'
 import { spaceManipulator } from './things/space-manipulator'
 import { homeBucket } from './things/home-bucket'
 import { powerOscillator } from './things/power-oscillator'
+import { spaceLabModule } from './things/space-lab-module'
+import { homeShutter } from './things/home-shutter'
+import { powerFuseBox } from './things/power-fuse-box'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -435,6 +438,9 @@ export const things: ThingData[] = [
   spaceManipulator,
   homeBucket,
   powerOscillator,
+  spaceLabModule,
+  homeShutter,
+  powerFuseBox,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

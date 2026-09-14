@@ -214,6 +214,9 @@ import PowerCapacitorSketch from './power-capacitor'
 import SpaceManipulatorSketch from './space-manipulator'
 import HomeBucketSketch from './home-bucket'
 import PowerOscillatorSketch from './power-oscillator'
+import SpaceLabModuleSketch from './space-lab-module'
+import HomeShutterSketch from './home-shutter'
+import PowerFuseBoxSketch from './power-fuse-box'
 
 /**
  * thing.id → 几何体分发表。
@@ -436,6 +439,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-manipulator': SpaceManipulatorSketch,
   'home-bucket': HomeBucketSketch,
   'power-oscillator': PowerOscillatorSketch,
+  'space-lab-module': SpaceLabModuleSketch,
+  'home-shutter': HomeShutterSketch,
+  'power-fuse-box': PowerFuseBoxSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
