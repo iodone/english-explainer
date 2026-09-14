@@ -118,6 +118,9 @@ import GasStoveSketch from './gas-stove'
 import SpaceHabitatSketch from './space-habitat'
 import AirConditionerSketch from './air-conditioner'
 import PowerSwitchSketch from './power-switch'
+import SpaceMiningSketch from './space-mining'
+import CoffeeMakerSketch from './coffee-maker'
+import PowerOutletSketch from './power-outlet'
 
 /**
  * thing.id → 几何体分发表。
@@ -244,6 +247,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-habitat': SpaceHabitatSketch,
   'air-conditioner': AirConditionerSketch,
   'power-switch': PowerSwitchSketch,
+  'space-mining': SpaceMiningSketch,
+  'coffee-maker': CoffeeMakerSketch,
+  'power-outlet': PowerOutletSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

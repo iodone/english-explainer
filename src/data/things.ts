@@ -118,6 +118,9 @@ import { gasStove } from './things/gas-stove'
 import { spaceHabitat } from './things/space-habitat'
 import { airConditioner } from './things/air-conditioner'
 import { powerSwitch } from './things/power-switch'
+import { spaceMining } from './things/space-mining'
+import { coffeeMaker } from './things/coffee-maker'
+import { powerOutlet } from './things/power-outlet'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -243,6 +246,9 @@ export const things: ThingData[] = [
   spaceHabitat,
   airConditioner,
   powerSwitch,
+  spaceMining,
+  coffeeMaker,
+  powerOutlet,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
