@@ -193,6 +193,9 @@ import { powerAmplifier } from './things/power-amplifier'
 import { spaceTug } from './things/space-tug'
 import { homeSink } from './things/home-sink'
 import { powerTransformer } from './things/power-transformer'
+import { spaceAirlock } from './things/space-airlock'
+import { homeGarage } from './things/home-garage'
+import { powerRegulator } from './things/power-regulator'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -393,6 +396,9 @@ export const things: ThingData[] = [
   spaceTug,
   homeSink,
   powerTransformer,
+  spaceAirlock,
+  homeGarage,
+  powerRegulator,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

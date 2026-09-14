@@ -193,6 +193,9 @@ import PowerAmplifierSketch from './power-amplifier'
 import SpaceTugSketch from './space-tug'
 import HomeSinkSketch from './home-sink'
 import PowerTransformerSketch from './power-transformer'
+import SpaceAirlockSketch from './space-airlock'
+import HomeGarageSketch from './home-garage'
+import PowerRegulatorSketch from './power-regulator'
 
 /**
  * thing.id → 几何体分发表。
@@ -394,6 +397,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-tug': SpaceTugSketch,
   'home-sink': HomeSinkSketch,
   'power-transformer': PowerTransformerSketch,
+  'space-airlock': SpaceAirlockSketch,
+  'home-garage': HomeGarageSketch,
+  'power-regulator': PowerRegulatorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

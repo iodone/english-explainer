@@ -187,6 +187,9 @@ import { powerAmplifierDict } from './dict/power-amplifier'
 import { spaceTugDict } from './dict/space-tug'
 import { homeSinkDict } from './dict/home-sink'
 import { powerTransformerDict } from './dict/power-transformer'
+import { spaceAirlockDict } from './dict/space-airlock'
+import { homeGarageDict } from './dict/home-garage'
+import { powerRegulatorDict } from './dict/power-regulator'
 
 /**
  * 词典汇总层。
@@ -382,6 +385,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceTugDict,
   homeSinkDict,
   powerTransformerDict,
+  spaceAirlockDict,
+  homeGarageDict,
+  powerRegulatorDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
