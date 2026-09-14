@@ -112,6 +112,9 @@ import WaterPumpSketch from './water-pump'
 import SpaceCameraSketch from './space-camera'
 import WaterFilterSketch from './water-filter'
 import BatteryChargerSketch from './battery-charger'
+import SpaceRoverSketch from './space-rover'
+import EggCookerSketch from './egg-cooker'
+import GasStoveSketch from './gas-stove'
 
 /**
  * thing.id → 几何体分发表。
@@ -232,6 +235,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-camera': SpaceCameraSketch,
   'water-filter': WaterFilterSketch,
   'battery-charger': BatteryChargerSketch,
+  'space-rover': SpaceRoverSketch,
+  'egg-cooker': EggCookerSketch,
+  'gas-stove': GasStoveSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
