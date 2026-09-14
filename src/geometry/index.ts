@@ -217,6 +217,9 @@ import PowerOscillatorSketch from './power-oscillator'
 import SpaceLabModuleSketch from './space-lab-module'
 import HomeShutterSketch from './home-shutter'
 import PowerFuseBoxSketch from './power-fuse-box'
+import SpaceFoodPacketSketch from './space-food-packet'
+import HomeCeilingFanSketch from './home-ceiling-fan'
+import PowerChokeSketch from './power-choke'
 
 /**
  * thing.id → 几何体分发表。
@@ -442,6 +445,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-lab-module': SpaceLabModuleSketch,
   'home-shutter': HomeShutterSketch,
   'power-fuse-box': PowerFuseBoxSketch,
+  'space-food-packet': SpaceFoodPacketSketch,
+  'home-ceiling-fan': HomeCeilingFanSketch,
+  'power-choke': PowerChokeSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
