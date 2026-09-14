@@ -265,6 +265,9 @@ import { powerBusDuct } from './things/power-bus-duct'
 import { spaceDustFilter } from './things/space-dust-filter'
 import { homeGarlicPress } from './things/home-garlic-press'
 import { powerSlipRing } from './things/power-slip-ring'
+import { spaceParticleShield } from './things/space-particle-shield'
+import { homePizzaCutter } from './things/home-pizza-cutter'
+import { powerFaultRelay } from './things/power-fault-relay'
 import { spaceCargoBag } from './things/space-cargo-bag'
 import { homeWhisk } from './things/home-whisk'
 import { powerInductor } from './things/power-inductor'
@@ -543,6 +546,9 @@ export const things: ThingData[] = [
   spaceDustFilter,
   homeGarlicPress,
   powerSlipRing,
+  spaceParticleShield,
+  homePizzaCutter,
+  powerFaultRelay,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
