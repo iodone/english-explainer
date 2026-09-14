@@ -94,6 +94,9 @@ import { powerInverter } from './things/power-inverter'
 import { blender } from './things/blender'
 import { tram } from './things/tram'
 import { spaceship } from './things/spaceship'
+import { dishwasher } from './things/dishwasher'
+import { wagon } from './things/wagon'
+import { waterHeater } from './things/water-heater'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -195,6 +198,9 @@ export const things: ThingData[] = [
   blender,
   tram,
   spaceship,
+  dishwasher,
+  wagon,
+  waterHeater,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

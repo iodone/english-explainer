@@ -94,6 +94,9 @@ import PowerInverterSketch from './power-inverter'
 import BlenderSketch from './blender'
 import TramSketch from './tram'
 import SpaceshipSketch from './spaceship'
+import DishwasherSketch from './dishwasher'
+import WagonSketch from './wagon'
+import WaterHeaterSketch from './water-heater'
 
 /**
  * thing.id → 几何体分发表。
@@ -196,6 +199,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   blender: BlenderSketch,
   tram: TramSketch,
   spaceship: SpaceshipSketch,
+  dishwasher: DishwasherSketch,
+  wagon: WagonSketch,
+  'water-heater': WaterHeaterSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
