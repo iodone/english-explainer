@@ -97,6 +97,9 @@ import SpaceshipSketch from './spaceship'
 import DishwasherSketch from './dishwasher'
 import WagonSketch from './wagon'
 import WaterHeaterSketch from './water-heater'
+import SpaceProbeSketch from './space-probe'
+import StethoscopeSketch from './stethoscope'
+import MonorailSketch from './monorail'
 
 /**
  * thing.id → 几何体分发表。
@@ -202,6 +205,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   dishwasher: DishwasherSketch,
   wagon: WagonSketch,
   'water-heater': WaterHeaterSketch,
+  'space-probe': SpaceProbeSketch,
+  stethoscope: StethoscopeSketch,
+  monorail: MonorailSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

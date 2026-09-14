@@ -97,6 +97,9 @@ import { spaceship } from './things/spaceship'
 import { dishwasher } from './things/dishwasher'
 import { wagon } from './things/wagon'
 import { waterHeater } from './things/water-heater'
+import { spaceProbe } from './things/space-probe'
+import { stethoscope } from './things/stethoscope'
+import { monorail } from './things/monorail'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -201,6 +204,9 @@ export const things: ThingData[] = [
   dishwasher,
   wagon,
   waterHeater,
+  spaceProbe,
+  stethoscope,
+  monorail,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
