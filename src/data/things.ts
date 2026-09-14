@@ -178,6 +178,9 @@ import { powerPlug } from './things/power-plug'
 import { spaceClamp } from './things/space-clamp'
 import { homeBroom } from './things/home-broom'
 import { powerCord } from './things/power-cord'
+import { spaceCompass } from './things/space-compass'
+import { homeMat } from './things/home-mat'
+import { powerAdapter } from './things/power-adapter'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -363,6 +366,9 @@ export const things: ThingData[] = [
   spaceClamp,
   homeBroom,
   powerCord,
+  spaceCompass,
+  homeMat,
+  powerAdapter,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
