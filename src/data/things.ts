@@ -145,6 +145,9 @@ import { windPower } from './things/wind-power'
 import { spaceJunk } from './things/space-junk'
 import { doorBell } from './things/door-bell'
 import { powerBank } from './things/power-bank'
+import { spaceMirror } from './things/space-mirror'
+import { windowBlind } from './things/window-blind'
+import { powerCable } from './things/power-cable'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -297,6 +300,9 @@ export const things: ThingData[] = [
   spaceJunk,
   doorBell,
   powerBank,
+  spaceMirror,
+  windowBlind,
+  powerCable,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
