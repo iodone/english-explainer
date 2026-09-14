@@ -205,6 +205,9 @@ import { powerStrip } from './things/power-strip'
 import { spaceFlare } from './things/space-flare'
 import { homeKey } from './things/home-key'
 import { powerSolenoid } from './things/power-solenoid'
+import { spaceBeacon } from './things/space-beacon'
+import { homeMirror } from './things/home-mirror'
+import { powerRectifier } from './things/power-rectifier'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -417,6 +420,9 @@ export const things: ThingData[] = [
   spaceFlare,
   homeKey,
   powerSolenoid,
+  spaceBeacon,
+  homeMirror,
+  powerRectifier,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

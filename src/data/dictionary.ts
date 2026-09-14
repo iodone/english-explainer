@@ -199,6 +199,9 @@ import { powerStripDict } from './dict/power-strip'
 import { spaceFlareDict } from './dict/space-flare'
 import { homeKeyDict } from './dict/home-key'
 import { powerSolenoidDict } from './dict/power-solenoid'
+import { spaceBeaconDict } from './dict/space-beacon'
+import { homeMirrorDict } from './dict/home-mirror'
+import { powerRectifierDict } from './dict/power-rectifier'
 
 /**
  * 词典汇总层。
@@ -406,6 +409,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceFlareDict,
   homeKeyDict,
   powerSolenoidDict,
+  spaceBeaconDict,
+  homeMirrorDict,
+  powerRectifierDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

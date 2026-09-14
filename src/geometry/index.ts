@@ -205,6 +205,9 @@ import PowerStripSketch from './power-strip'
 import SpaceFlareSketch from './space-flare'
 import HomeKeySketch from './home-key'
 import PowerSolenoidSketch from './power-solenoid'
+import SpaceBeaconSketch from './space-beacon'
+import HomeMirrorSketch from './home-mirror'
+import PowerRectifierSketch from './power-rectifier'
 
 /**
  * thing.id → 几何体分发表。
@@ -418,6 +421,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-flare': SpaceFlareSketch,
   'home-key': HomeKeySketch,
   'power-solenoid': PowerSolenoidSketch,
+  'space-beacon': SpaceBeaconSketch,
+  'home-mirror': HomeMirrorSketch,
+  'power-rectifier': PowerRectifierSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
