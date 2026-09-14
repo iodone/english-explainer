@@ -268,6 +268,9 @@ import { powerSlipRing } from './things/power-slip-ring'
 import { spaceParticleShield } from './things/space-particle-shield'
 import { homePizzaCutter } from './things/home-pizza-cutter'
 import { powerFaultRelay } from './things/power-fault-relay'
+import { spaceCoolantLoop } from './things/space-coolant-loop'
+import { homeCanOpener } from './things/home-can-opener'
+import { powerSignalTransformer } from './things/power-signal-transformer'
 import { spaceCargoBag } from './things/space-cargo-bag'
 import { homeWhisk } from './things/home-whisk'
 import { powerInductor } from './things/power-inductor'
@@ -549,6 +552,9 @@ export const things: ThingData[] = [
   spaceParticleShield,
   homePizzaCutter,
   powerFaultRelay,
+  spaceCoolantLoop,
+  homeCanOpener,
+  powerSignalTransformer,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

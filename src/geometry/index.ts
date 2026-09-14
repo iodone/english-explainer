@@ -268,6 +268,9 @@ import PowerSlipRingSketch from './power-slip-ring'
 import SpaceParticleShieldSketch from './space-particle-shield'
 import HomePizzaCutterSketch from './home-pizza-cutter'
 import PowerFaultRelaySketch from './power-fault-relay'
+import SpaceCoolantLoopSketch from './space-coolant-loop'
+import HomeCanOpenerSketch from './home-can-opener'
+import PowerSignalTransformerSketch from './power-signal-transformer'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -550,6 +553,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-particle-shield': SpaceParticleShieldSketch,
   'home-pizza-cutter': HomePizzaCutterSketch,
   'power-fault-relay': PowerFaultRelaySketch,
+  'space-coolant-loop': SpaceCoolantLoopSketch,
+  'home-can-opener': HomeCanOpenerSketch,
+  'power-signal-transformer': PowerSignalTransformerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
