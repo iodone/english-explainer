@@ -220,6 +220,9 @@ import { powerFuseBox } from './things/power-fuse-box'
 import { spaceFoodPacket } from './things/space-food-packet'
 import { homeCeilingFan } from './things/home-ceiling-fan'
 import { powerChoke } from './things/power-choke'
+import { spaceVentValve } from './things/space-vent-valve'
+import { homeIron } from './things/home-iron'
+import { powerThermistor } from './things/power-thermistor'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -447,6 +450,9 @@ export const things: ThingData[] = [
   spaceFoodPacket,
   homeCeilingFan,
   powerChoke,
+  spaceVentValve,
+  homeIron,
+  powerThermistor,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

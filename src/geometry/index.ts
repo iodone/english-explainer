@@ -220,6 +220,9 @@ import PowerFuseBoxSketch from './power-fuse-box'
 import SpaceFoodPacketSketch from './space-food-packet'
 import HomeCeilingFanSketch from './home-ceiling-fan'
 import PowerChokeSketch from './power-choke'
+import SpaceVentValveSketch from './space-vent-valve'
+import HomeIronSketch from './home-iron'
+import PowerThermistorSketch from './power-thermistor'
 
 /**
  * thing.id → 几何体分发表。
@@ -448,6 +451,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-food-packet': SpaceFoodPacketSketch,
   'home-ceiling-fan': HomeCeilingFanSketch,
   'power-choke': PowerChokeSketch,
+  'space-vent-valve': SpaceVentValveSketch,
+  'home-iron': HomeIronSketch,
+  'power-thermistor': PowerThermistorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
