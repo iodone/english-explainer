@@ -283,6 +283,9 @@ import { powerBatteryFuse } from './things/power-battery-fuse'
 import { spaceStarTracker } from './things/space-star-tracker'
 import { homeIceCreamScoop } from './things/home-ice-cream-scoop'
 import { powerVoltageRegulator } from './things/power-voltage-regulator'
+import { spaceSunSensor } from './things/space-sun-sensor'
+import { homeCorkOpener } from './things/home-cork-opener'
+import { powerGroundFault } from './things/power-ground-fault'
 import { spaceCargoBag } from './things/space-cargo-bag'
 import { homeWhisk } from './things/home-whisk'
 import { powerInductor } from './things/power-inductor'
@@ -579,6 +582,9 @@ export const things: ThingData[] = [
   spaceStarTracker,
   homeIceCreamScoop,
   powerVoltageRegulator,
+  spaceSunSensor,
+  homeCorkOpener,
+  powerGroundFault,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
