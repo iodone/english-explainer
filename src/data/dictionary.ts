@@ -103,6 +103,9 @@ import { trolleyDict } from './dict/trolley'
 import { spaceBootDict } from './dict/space-boot'
 import { breadMakerDict } from './dict/bread-maker'
 import { waterPumpDict } from './dict/water-pump'
+import { spaceCameraDict } from './dict/space-camera'
+import { waterFilterDict } from './dict/water-filter'
+import { batteryChargerDict } from './dict/battery-charger'
 
 /**
  * 词典汇总层。
@@ -214,6 +217,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceBootDict,
   breadMakerDict,
   waterPumpDict,
+  spaceCameraDict,
+  waterFilterDict,
+  batteryChargerDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

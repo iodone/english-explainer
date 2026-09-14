@@ -109,6 +109,9 @@ import { trolley } from './things/trolley'
 import { spaceBoot } from './things/space-boot'
 import { breadMaker } from './things/bread-maker'
 import { waterPump } from './things/water-pump'
+import { spaceCamera } from './things/space-camera'
+import { waterFilter } from './things/water-filter'
+import { batteryCharger } from './things/battery-charger'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -225,6 +228,9 @@ export const things: ThingData[] = [
   spaceBoot,
   breadMaker,
   waterPump,
+  spaceCamera,
+  waterFilter,
+  batteryCharger,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

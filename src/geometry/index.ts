@@ -109,6 +109,9 @@ import TrolleySketch from './trolley'
 import SpaceBootSketch from './space-boot'
 import BreadMakerSketch from './bread-maker'
 import WaterPumpSketch from './water-pump'
+import SpaceCameraSketch from './space-camera'
+import WaterFilterSketch from './water-filter'
+import BatteryChargerSketch from './battery-charger'
 
 /**
  * thing.id → 几何体分发表。
@@ -226,6 +229,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-boot': SpaceBootSketch,
   'bread-maker': BreadMakerSketch,
   'water-pump': WaterPumpSketch,
+  'space-camera': SpaceCameraSketch,
+  'water-filter': WaterFilterSketch,
+  'battery-charger': BatteryChargerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
