@@ -136,6 +136,9 @@ import { powerPlant } from './things/power-plant'
 import { spaceCraft } from './things/space-craft'
 import { trashCan } from './things/trash-can'
 import { electricWire } from './things/electric-wire'
+import { spaceRocket } from './things/space-rocket'
+import { bookShelf } from './things/book-shelf'
+import { powerTool } from './things/power-tool'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -279,6 +282,9 @@ export const things: ThingData[] = [
   spaceCraft,
   trashCan,
   electricWire,
+  spaceRocket,
+  bookShelf,
+  powerTool,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
