@@ -202,6 +202,9 @@ import { powerTurbine } from './things/power-turbine'
 import { spaceParachute } from './things/space-parachute'
 import { homeShoe } from './things/home-shoe'
 import { powerStrip } from './things/power-strip'
+import { spaceFlare } from './things/space-flare'
+import { homeKey } from './things/home-key'
+import { powerSolenoid } from './things/power-solenoid'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -411,6 +414,9 @@ export const things: ThingData[] = [
   spaceParachute,
   homeShoe,
   powerStrip,
+  spaceFlare,
+  homeKey,
+  powerSolenoid,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

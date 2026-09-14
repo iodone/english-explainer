@@ -202,6 +202,9 @@ import PowerTurbineSketch from './power-turbine'
 import SpaceParachuteSketch from './space-parachute'
 import HomeShoeSketch from './home-shoe'
 import PowerStripSketch from './power-strip'
+import SpaceFlareSketch from './space-flare'
+import HomeKeySketch from './home-key'
+import PowerSolenoidSketch from './power-solenoid'
 
 /**
  * thing.id → 几何体分发表。
@@ -412,6 +415,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-parachute': SpaceParachuteSketch,
   'home-shoe': HomeShoeSketch,
   'power-strip': PowerStripSketch,
+  'space-flare': SpaceFlareSketch,
+  'home-key': HomeKeySketch,
+  'power-solenoid': PowerSolenoidSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
