@@ -244,6 +244,9 @@ import PowerChokeCoilSketch from './power-choke-coil'
 import SpaceLaserCommunicatorSketch from './space-laser-communicator'
 import HomeDehumidifierSketch from './home-dehumidifier'
 import PowerCapacitorBankSketch from './power-capacitor-bank'
+import SpaceDockingRingSketch from './space-docking-ring'
+import HomeFoodProcessorSketch from './home-food-processor'
+import PowerBusbarSketch from './power-busbar'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -502,6 +505,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-laser-communicator': SpaceLaserCommunicatorSketch,
   'home-dehumidifier': HomeDehumidifierSketch,
   'power-capacitor-bank': PowerCapacitorBankSketch,
+  'space-docking-ring': SpaceDockingRingSketch,
+  'home-food-processor': HomeFoodProcessorSketch,
+  'power-busbar': PowerBusbarSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
