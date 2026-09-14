@@ -226,6 +226,9 @@ import PowerThermistorSketch from './power-thermistor'
 import SpaceHandrailSketch from './space-handrail'
 import HomePeelerSketch from './home-peeler'
 import PowerVaristorSketch from './power-varistor'
+import SpaceCargoBagSketch from './space-cargo-bag'
+import HomeWhiskSketch from './home-whisk'
+import PowerInductorSketch from './power-inductor'
 
 /**
  * thing.id → 几何体分发表。
@@ -460,6 +463,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-handrail': SpaceHandrailSketch,
   'home-peeler': HomePeelerSketch,
   'power-varistor': PowerVaristorSketch,
+  'space-cargo-bag': SpaceCargoBagSketch,
+  'home-whisk': HomeWhiskSketch,
+  'power-inductor': PowerInductorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

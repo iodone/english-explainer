@@ -220,6 +220,9 @@ import { powerThermistorDict } from './dict/power-thermistor'
 import { spaceHandrailDict } from './dict/space-handrail'
 import { homePeelerDict } from './dict/home-peeler'
 import { powerVaristorDict } from './dict/power-varistor'
+import { spaceCargoBagDict } from './dict/space-cargo-bag'
+import { homeWhiskDict } from './dict/home-whisk'
+import { powerInductorDict } from './dict/power-inductor'
 
 /**
  * 词典汇总层。
@@ -448,6 +451,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceHandrailDict,
   homePeelerDict,
   powerVaristorDict,
+  spaceCargoBagDict,
+  homeWhiskDict,
+  powerInductorDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
