@@ -115,6 +115,9 @@ import { powerSwitchDict } from './dict/power-switch'
 import { spaceMiningDict } from './dict/space-mining'
 import { coffeeMakerDict } from './dict/coffee-maker'
 import { powerOutletDict } from './dict/power-outlet'
+import { spaceLabDict } from './dict/space-lab'
+import { iceMakerDict } from './dict/ice-maker'
+import { powerMeterDict } from './dict/power-meter'
 
 /**
  * 词典汇总层。
@@ -238,6 +241,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceMiningDict,
   coffeeMakerDict,
   powerOutletDict,
+  spaceLabDict,
+  iceMakerDict,
+  powerMeterDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
