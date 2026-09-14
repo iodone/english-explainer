@@ -271,6 +271,9 @@ import PowerFaultRelaySketch from './power-fault-relay'
 import SpaceCoolantLoopSketch from './space-coolant-loop'
 import HomeCanOpenerSketch from './home-can-opener'
 import PowerSignalTransformerSketch from './power-signal-transformer'
+import SpaceMagneticShieldSketch from './space-magnetic-shield'
+import HomeTeaStrainerSketch from './home-tea-strainer'
+import PowerEarthSwitchSketch from './power-earth-switch'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -556,6 +559,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-coolant-loop': SpaceCoolantLoopSketch,
   'home-can-opener': HomeCanOpenerSketch,
   'power-signal-transformer': PowerSignalTransformerSketch,
+  'space-magnetic-shield': SpaceMagneticShieldSketch,
+  'home-tea-strainer': HomeTeaStrainerSketch,
+  'power-earth-switch': PowerEarthSwitchSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
