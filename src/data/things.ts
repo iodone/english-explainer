@@ -262,6 +262,9 @@ import { powerHeatSink } from './things/power-heat-sink'
 import { spaceAirFilter } from './things/space-air-filter'
 import { homePepperMill } from './things/home-pepper-mill'
 import { powerBusDuct } from './things/power-bus-duct'
+import { spaceDustFilter } from './things/space-dust-filter'
+import { homeGarlicPress } from './things/home-garlic-press'
+import { powerSlipRing } from './things/power-slip-ring'
 import { spaceCargoBag } from './things/space-cargo-bag'
 import { homeWhisk } from './things/home-whisk'
 import { powerInductor } from './things/power-inductor'
@@ -537,6 +540,9 @@ export const things: ThingData[] = [
   spaceAirFilter,
   homePepperMill,
   powerBusDuct,
+  spaceDustFilter,
+  homeGarlicPress,
+  powerSlipRing,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

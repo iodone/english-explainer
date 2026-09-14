@@ -262,6 +262,9 @@ import PowerHeatSinkSketch from './power-heat-sink'
 import SpaceAirFilterSketch from './space-air-filter'
 import HomePepperMillSketch from './home-pepper-mill'
 import PowerBusDuctSketch from './power-bus-duct'
+import SpaceDustFilterSketch from './space-dust-filter'
+import HomeGarlicPressSketch from './home-garlic-press'
+import PowerSlipRingSketch from './power-slip-ring'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -538,6 +541,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-air-filter': SpaceAirFilterSketch,
   'home-pepper-mill': HomePepperMillSketch,
   'power-bus-duct': PowerBusDuctSketch,
+  'space-dust-filter': SpaceDustFilterSketch,
+  'home-garlic-press': HomeGarlicPressSketch,
+  'power-slip-ring': PowerSlipRingSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
