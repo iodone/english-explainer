@@ -106,6 +106,9 @@ import ElectricFanSketch from './electric-fan'
 import SpaceGloveSketch from './space-glove'
 import RiceCookerSketch from './rice-cooker'
 import TrolleySketch from './trolley'
+import SpaceBootSketch from './space-boot'
+import BreadMakerSketch from './bread-maker'
+import WaterPumpSketch from './water-pump'
 
 /**
  * thing.id → 几何体分发表。
@@ -220,6 +223,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-glove': SpaceGloveSketch,
   'rice-cooker': RiceCookerSketch,
   trolley: TrolleySketch,
+  'space-boot': SpaceBootSketch,
+  'bread-maker': BreadMakerSketch,
+  'water-pump': WaterPumpSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
