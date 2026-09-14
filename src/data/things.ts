@@ -100,6 +100,9 @@ import { waterHeater } from './things/water-heater'
 import { spaceProbe } from './things/space-probe'
 import { stethoscope } from './things/stethoscope'
 import { monorail } from './things/monorail'
+import { spaceHelmet } from './things/space-helmet'
+import { vacuumFlask } from './things/vacuum-flask'
+import { electricFan } from './things/electric-fan'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -207,6 +210,9 @@ export const things: ThingData[] = [
   spaceProbe,
   stethoscope,
   monorail,
+  spaceHelmet,
+  vacuumFlask,
+  electricFan,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

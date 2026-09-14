@@ -100,6 +100,9 @@ import WaterHeaterSketch from './water-heater'
 import SpaceProbeSketch from './space-probe'
 import StethoscopeSketch from './stethoscope'
 import MonorailSketch from './monorail'
+import SpaceHelmetSketch from './space-helmet'
+import VacuumFlaskSketch from './vacuum-flask'
+import ElectricFanSketch from './electric-fan'
 
 /**
  * thing.id → 几何体分发表。
@@ -208,6 +211,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-probe': SpaceProbeSketch,
   stethoscope: StethoscopeSketch,
   monorail: MonorailSketch,
+  'space-helmet': SpaceHelmetSketch,
+  'vacuum-flask': VacuumFlaskSketch,
+  'electric-fan': ElectricFanSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
