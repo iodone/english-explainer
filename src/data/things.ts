@@ -187,6 +187,9 @@ import { powerRelay } from './things/power-relay'
 import { spaceMonitor } from './things/space-monitor'
 import { homeDoor } from './things/home-door'
 import { powerTransistor } from './things/power-transistor'
+import { spaceCalculator } from './things/space-calculator'
+import { homeWindow } from './things/home-window'
+import { powerAmplifier } from './things/power-amplifier'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -381,6 +384,9 @@ export const things: ThingData[] = [
   spaceMonitor,
   homeDoor,
   powerTransistor,
+  spaceCalculator,
+  homeWindow,
+  powerAmplifier,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

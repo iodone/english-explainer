@@ -187,6 +187,9 @@ import PowerRelaySketch from './power-relay'
 import SpaceMonitorSketch from './space-monitor'
 import HomeDoorSketch from './home-door'
 import PowerTransistorSketch from './power-transistor'
+import SpaceCalculatorSketch from './space-calculator'
+import HomeWindowSketch from './home-window'
+import PowerAmplifierSketch from './power-amplifier'
 
 /**
  * thing.id → 几何体分发表。
@@ -382,6 +385,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-monitor': SpaceMonitorSketch,
   'home-door': HomeDoorSketch,
   'power-transistor': PowerTransistorSketch,
+  'space-calculator': SpaceCalculatorSketch,
+  'home-window': HomeWindowSketch,
+  'power-amplifier': PowerAmplifierSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
