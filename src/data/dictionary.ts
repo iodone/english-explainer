@@ -202,6 +202,9 @@ import { powerSolenoidDict } from './dict/power-solenoid'
 import { spaceBeaconDict } from './dict/space-beacon'
 import { homeMirrorDict } from './dict/home-mirror'
 import { powerRectifierDict } from './dict/power-rectifier'
+import { spaceDockingPortDict } from './dict/space-docking-port'
+import { homeTowelDict } from './dict/home-towel'
+import { powerCapacitorDict } from './dict/power-capacitor'
 
 /**
  * 词典汇总层。
@@ -412,6 +415,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceBeaconDict,
   homeMirrorDict,
   powerRectifierDict,
+  spaceDockingPortDict,
+  homeTowelDict,
+  powerCapacitorDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

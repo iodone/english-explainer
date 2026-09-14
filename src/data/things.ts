@@ -208,6 +208,9 @@ import { powerSolenoid } from './things/power-solenoid'
 import { spaceBeacon } from './things/space-beacon'
 import { homeMirror } from './things/home-mirror'
 import { powerRectifier } from './things/power-rectifier'
+import { spaceDockingPort } from './things/space-docking-port'
+import { homeTowel } from './things/home-towel'
+import { powerCapacitor } from './things/power-capacitor'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -423,6 +426,9 @@ export const things: ThingData[] = [
   spaceBeacon,
   homeMirror,
   powerRectifier,
+  spaceDockingPort,
+  homeTowel,
+  powerCapacitor,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

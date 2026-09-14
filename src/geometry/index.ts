@@ -208,6 +208,9 @@ import PowerSolenoidSketch from './power-solenoid'
 import SpaceBeaconSketch from './space-beacon'
 import HomeMirrorSketch from './home-mirror'
 import PowerRectifierSketch from './power-rectifier'
+import SpaceDockingPortSketch from './space-docking-port'
+import HomeTowelSketch from './home-towel'
+import PowerCapacitorSketch from './power-capacitor'
 
 /**
  * thing.id → 几何体分发表。
@@ -424,6 +427,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-beacon': SpaceBeaconSketch,
   'home-mirror': HomeMirrorSketch,
   'power-rectifier': PowerRectifierSketch,
+  'space-docking-port': SpaceDockingPortSketch,
+  'home-towel': HomeTowelSketch,
+  'power-capacitor': PowerCapacitorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
