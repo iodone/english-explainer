@@ -88,6 +88,9 @@ import HovercraftSketch from './hovercraft'
 import SpaceFarmSketch from './space-farm'
 import SpaceFoodSketch from './space-food'
 import SpaceRobotSketch from './space-robot'
+import WindTurbineSketch from './wind-turbine'
+import FuelCellSketch from './fuel-cell'
+import PowerInverterSketch from './power-inverter'
 
 /**
  * thing.id → 几何体分发表。
@@ -184,6 +187,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-farm': SpaceFarmSketch,
   'space-food': SpaceFoodSketch,
   'space-robot': SpaceRobotSketch,
+  'wind-turbine': WindTurbineSketch,
+  'fuel-cell': FuelCellSketch,
+  'power-inverter': PowerInverterSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
