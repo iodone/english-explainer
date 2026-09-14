@@ -301,6 +301,9 @@ import PowerLoadBreakSwitchSketch from './power-load-break-switch'
 import SpaceSpectrometerSketch from './space-spectrometer'
 import HomeAvocadoSlicerSketch from './home-avocado-slicer'
 import PowerDisconnectSwitchSketch from './power-disconnect-switch'
+import SpaceGravimeterSketch from './space-gravimeter'
+import HomeMelonBallerSketch from './home-melon-baller'
+import PowerCircuitRecloserSketch from './power-circuit-recloser'
 
 /**
  * thing.id → 几何体分发表。
@@ -610,6 +613,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-spectrometer': SpaceSpectrometerSketch,
   'home-avocado-slicer': HomeAvocadoSlicerSketch,
   'power-disconnect-switch': PowerDisconnectSwitchSketch,
+  'space-gravimeter': SpaceGravimeterSketch,
+  'home-melon-baller': HomeMelonBallerSketch,
+  'power-circuit-recloser': PowerCircuitRecloserSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

@@ -295,6 +295,9 @@ import { powerLoadBreakSwitchDict } from './dict/power-load-break-switch'
 import { spaceSpectrometerDict } from './dict/space-spectrometer'
 import { homeAvocadoSlicerDict } from './dict/home-avocado-slicer'
 import { powerDisconnectSwitchDict } from './dict/power-disconnect-switch'
+import { spaceGravimeterDict } from './dict/space-gravimeter'
+import { homeMelonBallerDict } from './dict/home-melon-baller'
+import { powerCircuitRecloserDict } from './dict/power-circuit-recloser'
 
 /**
  * 词典汇总层。
@@ -598,6 +601,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceSpectrometerDict,
   homeAvocadoSlicerDict,
   powerDisconnectSwitchDict,
+  spaceGravimeterDict,
+  homeMelonBallerDict,
+  powerCircuitRecloserDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
