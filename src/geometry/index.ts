@@ -235,6 +235,9 @@ import PowerEnclosureSketch from './power-enclosure'
 import SpaceMagneticBootSketch from './space-magnetic-boot'
 import HomeLadleSketch from './home-ladle'
 import PowerSurgeSketch from './power-surge'
+import SpaceHeadsetSketch from './space-headset'
+import HomeSpatulaSketch from './home-spatula'
+import PowerThermostatSketch from './power-thermostat'
 import SpaceCargoBagSketch from './space-cargo-bag'
 import HomeWhiskSketch from './home-whisk'
 import PowerInductorSketch from './power-inductor'
@@ -484,6 +487,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-magnetic-boot': SpaceMagneticBootSketch,
   'home-ladle': HomeLadleSketch,
   'power-surge': PowerSurgeSketch,
+  'space-headset': SpaceHeadsetSketch,
+  'home-spatula': HomeSpatulaSketch,
+  'power-thermostat': PowerThermostatSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
