@@ -148,6 +148,9 @@ import PowerBankSketch from './power-bank'
 import SpaceMirrorSketch from './space-mirror'
 import WindowBlindSketch from './window-blind'
 import PowerCableSketch from './power-cable'
+import SpacePlantSketch from './space-plant'
+import DoorHandleSketch from './door-handle'
+import PowerSocketSketch from './power-socket'
 
 /**
  * thing.id → 几何体分发表。
@@ -304,6 +307,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-mirror': SpaceMirrorSketch,
   'window-blind': WindowBlindSketch,
   'power-cable': PowerCableSketch,
+  'space-plant': SpacePlantSketch,
+  'door-handle': DoorHandleSketch,
+  'power-socket': PowerSocketSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

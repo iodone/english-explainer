@@ -142,6 +142,9 @@ import { powerBankDict } from './dict/power-bank'
 import { spaceMirrorDict } from './dict/space-mirror'
 import { windowBlindDict } from './dict/window-blind'
 import { powerCableDict } from './dict/power-cable'
+import { spacePlantDict } from './dict/space-plant'
+import { doorHandleDict } from './dict/door-handle'
+import { powerSocketDict } from './dict/power-socket'
 
 /**
  * 词典汇总层。
@@ -292,6 +295,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceMirrorDict,
   windowBlindDict,
   powerCableDict,
+  spacePlantDict,
+  doorHandleDict,
+  powerSocketDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
