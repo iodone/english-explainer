@@ -85,6 +85,9 @@ import { spaceRobotDict } from './dict/space-robot'
 import { windTurbineDict } from './dict/wind-turbine'
 import { fuelCellDict } from './dict/fuel-cell'
 import { powerInverterDict } from './dict/power-inverter'
+import { blenderDict } from './dict/blender'
+import { tramDict } from './dict/tram'
+import { spaceshipDict } from './dict/spaceship'
 
 /**
  * 词典汇总层。
@@ -178,6 +181,9 @@ const sources: Record<string, DictEntry>[] = [
   windTurbineDict,
   fuelCellDict,
   powerInverterDict,
+  blenderDict,
+  tramDict,
+  spaceshipDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

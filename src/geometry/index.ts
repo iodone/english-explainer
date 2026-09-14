@@ -91,6 +91,9 @@ import SpaceRobotSketch from './space-robot'
 import WindTurbineSketch from './wind-turbine'
 import FuelCellSketch from './fuel-cell'
 import PowerInverterSketch from './power-inverter'
+import BlenderSketch from './blender'
+import TramSketch from './tram'
+import SpaceshipSketch from './spaceship'
 
 /**
  * thing.id → 几何体分发表。
@@ -190,6 +193,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'wind-turbine': WindTurbineSketch,
   'fuel-cell': FuelCellSketch,
   'power-inverter': PowerInverterSketch,
+  blender: BlenderSketch,
+  tram: TramSketch,
+  spaceship: SpaceshipSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
