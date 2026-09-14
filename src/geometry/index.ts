@@ -172,6 +172,9 @@ import PowerWireSketch from './power-wire'
 import SpaceWrenchSketch from './space-wrench'
 import HomeShelfSketch from './home-shelf'
 import PowerVentSketch from './power-vent'
+import SpaceDrillSketch from './space-drill'
+import HomeRugSketch from './home-rug'
+import PowerPlugSketch from './power-plug'
 
 /**
  * thing.id → 几何体分发表。
@@ -352,6 +355,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-wrench': SpaceWrenchSketch,
   'home-shelf': HomeShelfSketch,
   'power-vent': PowerVentSketch,
+  'space-drill': SpaceDrillSketch,
+  'home-rug': HomeRugSketch,
+  'power-plug': PowerPlugSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
