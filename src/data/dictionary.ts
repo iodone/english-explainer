@@ -289,6 +289,9 @@ import { powerSurgeProtectorDict } from './dict/power-surge-protector'
 import { spaceMagnetometerDict } from './dict/space-magnetometer'
 import { homeCitrusPressDict } from './dict/home-citrus-press'
 import { powerArcFaultDetectorDict } from './dict/power-arc-fault-detector'
+import { spaceRadiometerDict } from './dict/space-radiometer'
+import { homeAppleCorerDict } from './dict/home-apple-corer'
+import { powerLoadBreakSwitchDict } from './dict/power-load-break-switch'
 
 /**
  * 词典汇总层。
@@ -586,6 +589,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceMagnetometerDict,
   homeCitrusPressDict,
   powerArcFaultDetectorDict,
+  spaceRadiometerDict,
+  homeAppleCorerDict,
+  powerLoadBreakSwitchDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

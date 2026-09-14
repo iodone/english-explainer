@@ -295,6 +295,9 @@ import { powerSurgeProtector } from './things/power-surge-protector'
 import { spaceMagnetometer } from './things/space-magnetometer'
 import { homeCitrusPress } from './things/home-citrus-press'
 import { powerArcFaultDetector } from './things/power-arc-fault-detector'
+import { spaceRadiometer } from './things/space-radiometer'
+import { homeAppleCorer } from './things/home-apple-corer'
+import { powerLoadBreakSwitch } from './things/power-load-break-switch'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -597,6 +600,9 @@ export const things: ThingData[] = [
   spaceMagnetometer,
   homeCitrusPress,
   powerArcFaultDetector,
+  spaceRadiometer,
+  homeAppleCorer,
+  powerLoadBreakSwitch,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

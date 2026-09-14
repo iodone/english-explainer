@@ -295,6 +295,9 @@ import PowerSurgeProtectorSketch from './power-surge-protector'
 import SpaceMagnetometerSketch from './space-magnetometer'
 import HomeCitrusPressSketch from './home-citrus-press'
 import PowerArcFaultDetectorSketch from './power-arc-fault-detector'
+import SpaceRadiometerSketch from './space-radiometer'
+import HomeAppleCorerSketch from './home-apple-corer'
+import PowerLoadBreakSwitchSketch from './power-load-break-switch'
 
 /**
  * thing.id → 几何体分发表。
@@ -598,6 +601,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-magnetometer': SpaceMagnetometerSketch,
   'home-citrus-press': HomeCitrusPressSketch,
   'power-arc-fault-detector': PowerArcFaultDetectorSketch,
+  'space-radiometer': SpaceRadiometerSketch,
+  'home-apple-corer': HomeAppleCorerSketch,
+  'power-load-break-switch': PowerLoadBreakSwitchSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
