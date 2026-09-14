@@ -82,6 +82,9 @@ import SolarPanelSketch from './solar-panel'
 import ExcavatorSketch from './excavator'
 import PianoSketch from './piano'
 import SupernovaSketch from './supernova'
+import TransformerSketch from './transformer'
+import SewingMachineSketch from './sewing-machine'
+import HovercraftSketch from './hovercraft'
 
 /**
  * thing.id → 几何体分发表。
@@ -172,6 +175,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   excavator: ExcavatorSketch,
   piano: PianoSketch,
   supernova: SupernovaSketch,
+  transformer: TransformerSketch,
+  'sewing-machine': SewingMachineSketch,
+  hovercraft: HovercraftSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
