@@ -337,6 +337,9 @@ import PowerWaveAnalyzerSketch from './power-wave-analyzer'
 import SpaceGrappleSketch from './space-grapple'
 import HomeWaffleMakerSketch from './home-waffle-maker'
 import PowerPhaseDetectorSketch from './power-phase-detector'
+import SpaceDockingCollarSketch from './space-docking-collar'
+import HomeSlowCookerSketch from './home-slow-cooker'
+import PowerGroundTesterSketch from './power-ground-tester'
 
 /**
  * thing.id → 几何体分发表。
@@ -682,6 +685,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-grapple': SpaceGrappleSketch,
   'home-waffle-maker': HomeWaffleMakerSketch,
   'power-phase-detector': PowerPhaseDetectorSketch,
+  'space-docking-collar': SpaceDockingCollarSketch,
+  'home-slow-cooker': HomeSlowCookerSketch,
+  'power-ground-tester': PowerGroundTesterSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

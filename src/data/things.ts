@@ -337,6 +337,9 @@ import { powerWaveAnalyzer } from './things/power-wave-analyzer'
 import { spaceGrapple } from './things/space-grapple'
 import { homeWaffleMaker } from './things/home-waffle-maker'
 import { powerPhaseDetector } from './things/power-phase-detector'
+import { spaceDockingCollar } from './things/space-docking-collar'
+import { homeSlowCooker } from './things/home-slow-cooker'
+import { powerGroundTester } from './things/power-ground-tester'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -681,6 +684,9 @@ export const things: ThingData[] = [
   spaceGrapple,
   homeWaffleMaker,
   powerPhaseDetector,
+  spaceDockingCollar,
+  homeSlowCooker,
+  powerGroundTester,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
