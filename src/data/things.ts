@@ -331,6 +331,9 @@ import { powerCurrentShunt } from './things/power-current-shunt'
 import { spaceMeteorShield } from './things/space-meteor-shield'
 import { homeBlender } from './things/home-blender'
 import { powerFrequencyCounter } from './things/power-frequency-counter'
+import { spaceRobotArm } from './things/space-robot-arm'
+import { homeMicrowave } from './things/home-microwave'
+import { powerWaveAnalyzer } from './things/power-wave-analyzer'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -669,6 +672,9 @@ export const things: ThingData[] = [
   spaceMeteorShield,
   homeBlender,
   powerFrequencyCounter,
+  spaceRobotArm,
+  homeMicrowave,
+  powerWaveAnalyzer,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

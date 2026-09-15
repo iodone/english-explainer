@@ -325,6 +325,9 @@ import { powerCurrentShuntDict } from './dict/power-current-shunt'
 import { spaceMeteorShieldDict } from './dict/space-meteor-shield'
 import { homeBlenderDict } from './dict/home-blender'
 import { powerFrequencyCounterDict } from './dict/power-frequency-counter'
+import { spaceRobotArmDict } from './dict/space-robot-arm'
+import { homeMicrowaveDict } from './dict/home-microwave'
+import { powerWaveAnalyzerDict } from './dict/power-wave-analyzer'
 
 /**
  * 词典汇总层。
@@ -658,6 +661,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceMeteorShieldDict,
   homeBlenderDict,
   powerFrequencyCounterDict,
+  spaceRobotArmDict,
+  homeMicrowaveDict,
+  powerWaveAnalyzerDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

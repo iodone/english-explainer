@@ -331,6 +331,9 @@ import PowerCurrentShuntSketch from './power-current-shunt'
 import SpaceMeteorShieldSketch from './space-meteor-shield'
 import HomeBlenderSketch from './home-blender'
 import PowerFrequencyCounterSketch from './power-frequency-counter'
+import SpaceRobotArmSketch from './space-robot-arm'
+import HomeMicrowaveSketch from './home-microwave'
+import PowerWaveAnalyzerSketch from './power-wave-analyzer'
 
 /**
  * thing.id → 几何体分发表。
@@ -670,6 +673,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-meteor-shield': SpaceMeteorShieldSketch,
   'home-blender': HomeBlenderSketch,
   'power-frequency-counter': PowerFrequencyCounterSketch,
+  'space-robot-arm': SpaceRobotArmSketch,
+  'home-microwave': HomeMicrowaveSketch,
+  'power-wave-analyzer': PowerWaveAnalyzerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
