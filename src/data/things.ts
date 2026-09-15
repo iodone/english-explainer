@@ -307,6 +307,9 @@ import { powerCircuitRecloser } from './things/power-circuit-recloser'
 import { spaceFuelCell } from './things/space-fuel-cell'
 import { homeBreadMachine } from './things/home-bread-machine'
 import { powerEncoder } from './things/power-encoder'
+import { spaceCargoCrane } from './things/space-cargo-crane'
+import { homeCrepeMaker } from './things/home-crepe-maker'
+import { powerCurrentLimiter } from './things/power-current-limiter'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -621,6 +624,9 @@ export const things: ThingData[] = [
   spaceFuelCell,
   homeBreadMachine,
   powerEncoder,
+  spaceCargoCrane,
+  homeCrepeMaker,
+  powerCurrentLimiter,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

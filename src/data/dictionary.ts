@@ -301,6 +301,9 @@ import { powerCircuitRecloserDict } from './dict/power-circuit-recloser'
 import { spaceFuelCellDict } from './dict/space-fuel-cell'
 import { homeBreadMachineDict } from './dict/home-bread-machine'
 import { powerEncoderDict } from './dict/power-encoder'
+import { spaceCargoCraneDict } from './dict/space-cargo-crane'
+import { homeCrepeMakerDict } from './dict/home-crepe-maker'
+import { powerCurrentLimiterDict } from './dict/power-current-limiter'
 
 /**
  * 词典汇总层。
@@ -610,6 +613,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceFuelCellDict,
   homeBreadMachineDict,
   powerEncoderDict,
+  spaceCargoCraneDict,
+  homeCrepeMakerDict,
+  powerCurrentLimiterDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
