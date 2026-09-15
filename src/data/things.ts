@@ -313,6 +313,9 @@ import { powerCurrentLimiter } from './things/power-current-limiter'
 import { spaceDataRecorder } from './things/space-data-recorder'
 import { homeSandwichMaker } from './things/home-sandwich-maker'
 import { powerSignalFilter } from './things/power-signal-filter'
+import { spaceLightFilter } from './things/space-light-filter'
+import { homeYogurtMaker } from './things/home-yogurt-maker'
+import { powerDataLogger } from './things/power-data-logger'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -633,6 +636,9 @@ export const things: ThingData[] = [
   spaceDataRecorder,
   homeSandwichMaker,
   powerSignalFilter,
+  spaceLightFilter,
+  homeYogurtMaker,
+  powerDataLogger,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

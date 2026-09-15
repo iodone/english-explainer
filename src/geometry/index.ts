@@ -313,6 +313,9 @@ import PowerCurrentLimiterSketch from './power-current-limiter'
 import SpaceDataRecorderSketch from './space-data-recorder'
 import HomeSandwichMakerSketch from './home-sandwich-maker'
 import PowerSignalFilterSketch from './power-signal-filter'
+import SpaceLightFilterSketch from './space-light-filter'
+import HomeYogurtMakerSketch from './home-yogurt-maker'
+import PowerDataLoggerSketch from './power-data-logger'
 
 /**
  * thing.id → 几何体分发表。
@@ -634,6 +637,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-data-recorder': SpaceDataRecorderSketch,
   'home-sandwich-maker': HomeSandwichMakerSketch,
   'power-signal-filter': PowerSignalFilterSketch,
+  'space-light-filter': SpaceLightFilterSketch,
+  'home-yogurt-maker': HomeYogurtMakerSketch,
+  'power-data-logger': PowerDataLoggerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */
