@@ -334,6 +334,9 @@ import PowerFrequencyCounterSketch from './power-frequency-counter'
 import SpaceRobotArmSketch from './space-robot-arm'
 import HomeMicrowaveSketch from './home-microwave'
 import PowerWaveAnalyzerSketch from './power-wave-analyzer'
+import SpaceGrappleSketch from './space-grapple'
+import HomeWaffleMakerSketch from './home-waffle-maker'
+import PowerPhaseDetectorSketch from './power-phase-detector'
 
 /**
  * thing.id → 几何体分发表。
@@ -676,6 +679,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-robot-arm': SpaceRobotArmSketch,
   'home-microwave': HomeMicrowaveSketch,
   'power-wave-analyzer': PowerWaveAnalyzerSketch,
+  'space-grapple': SpaceGrappleSketch,
+  'home-waffle-maker': HomeWaffleMakerSketch,
+  'power-phase-detector': PowerPhaseDetectorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

@@ -334,6 +334,9 @@ import { powerFrequencyCounter } from './things/power-frequency-counter'
 import { spaceRobotArm } from './things/space-robot-arm'
 import { homeMicrowave } from './things/home-microwave'
 import { powerWaveAnalyzer } from './things/power-wave-analyzer'
+import { spaceGrapple } from './things/space-grapple'
+import { homeWaffleMaker } from './things/home-waffle-maker'
+import { powerPhaseDetector } from './things/power-phase-detector'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -675,6 +678,9 @@ export const things: ThingData[] = [
   spaceRobotArm,
   homeMicrowave,
   powerWaveAnalyzer,
+  spaceGrapple,
+  homeWaffleMaker,
+  powerPhaseDetector,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
