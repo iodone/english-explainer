@@ -343,6 +343,9 @@ import PowerGroundTesterSketch from './power-ground-tester'
 import SpacePayloadFairingSketch from './space-payload-fairing'
 import HomeToasterOvenSketch from './home-toaster-oven'
 import PowerContinuityTesterSketch from './power-continuity-tester'
+import SpaceRoboticHandSketch from './space-robotic-hand'
+import HomePressureCookerSketch from './home-pressure-cooker'
+import PowerRelayBoxSketch from './power-relay-box'
 
 /**
  * thing.id → 几何体分发表。
@@ -694,6 +697,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-payload-fairing': SpacePayloadFairingSketch,
   'home-toaster-oven': HomeToasterOvenSketch,
   'power-continuity-tester': PowerContinuityTesterSketch,
+  'space-robotic-hand': SpaceRoboticHandSketch,
+  'home-pressure-cooker': HomePressureCookerSketch,
+  'power-relay-box': PowerRelayBoxSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

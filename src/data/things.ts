@@ -343,6 +343,9 @@ import { powerGroundTester } from './things/power-ground-tester'
 import { spacePayloadFairing } from './things/space-payload-fairing'
 import { homeToasterOven } from './things/home-toaster-oven'
 import { powerContinuityTester } from './things/power-continuity-tester'
+import { spaceRoboticHand } from './things/space-robotic-hand'
+import { homePressureCooker } from './things/home-pressure-cooker'
+import { powerRelayBox } from './things/power-relay-box'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -693,6 +696,9 @@ export const things: ThingData[] = [
   spacePayloadFairing,
   homeToasterOven,
   powerContinuityTester,
+  spaceRoboticHand,
+  homePressureCooker,
+  powerRelayBox,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
