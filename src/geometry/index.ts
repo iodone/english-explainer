@@ -322,6 +322,9 @@ import PowerCircuitBreakerSketch from './power-circuit-breaker'
 import SpaceAntennaDishSketch from './space-antenna-dish'
 import HomeEspressoSketch from './home-espresso'
 import PowerCircuitMonitorSketch from './power-circuit-monitor'
+import SpaceLaserRangeSketch from './space-laser-range'
+import HomePastaMakerSketch from './home-pasta-maker'
+import PowerVoltageSensorSketch from './power-voltage-sensor'
 
 /**
  * thing.id → 几何体分发表。
@@ -652,6 +655,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-antenna-dish': SpaceAntennaDishSketch,
   'home-espresso': HomeEspressoSketch,
   'power-circuit-monitor': PowerCircuitMonitorSketch,
+  'space-laser-range': SpaceLaserRangeSketch,
+  'home-pasta-maker': HomePastaMakerSketch,
+  'power-voltage-sensor': PowerVoltageSensorSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

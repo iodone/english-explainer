@@ -322,6 +322,9 @@ import { powerCircuitBreaker } from './things/power-circuit-breaker'
 import { spaceAntennaDish } from './things/space-antenna-dish'
 import { homeEspresso } from './things/home-espresso'
 import { powerCircuitMonitor } from './things/power-circuit-monitor'
+import { spaceLaserRange } from './things/space-laser-range'
+import { homePastaMaker } from './things/home-pasta-maker'
+import { powerVoltageSensor } from './things/power-voltage-sensor'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -651,6 +654,9 @@ export const things: ThingData[] = [
   spaceAntennaDish,
   homeEspresso,
   powerCircuitMonitor,
+  spaceLaserRange,
+  homePastaMaker,
+  powerVoltageSensor,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
