@@ -310,6 +310,9 @@ import PowerEncoderSketch from './power-encoder'
 import SpaceCargoCraneSketch from './space-cargo-crane'
 import HomeCrepeMakerSketch from './home-crepe-maker'
 import PowerCurrentLimiterSketch from './power-current-limiter'
+import SpaceDataRecorderSketch from './space-data-recorder'
+import HomeSandwichMakerSketch from './home-sandwich-maker'
+import PowerSignalFilterSketch from './power-signal-filter'
 
 /**
  * thing.id → 几何体分发表。
@@ -628,6 +631,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-cargo-crane': SpaceCargoCraneSketch,
   'home-crepe-maker': HomeCrepeMakerSketch,
   'power-current-limiter': PowerCurrentLimiterSketch,
+  'space-data-recorder': SpaceDataRecorderSketch,
+  'home-sandwich-maker': HomeSandwichMakerSketch,
+  'power-signal-filter': PowerSignalFilterSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

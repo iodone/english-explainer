@@ -304,6 +304,9 @@ import { powerEncoderDict } from './dict/power-encoder'
 import { spaceCargoCraneDict } from './dict/space-cargo-crane'
 import { homeCrepeMakerDict } from './dict/home-crepe-maker'
 import { powerCurrentLimiterDict } from './dict/power-current-limiter'
+import { spaceDataRecorderDict } from './dict/space-data-recorder'
+import { homeSandwichMakerDict } from './dict/home-sandwich-maker'
+import { powerSignalFilterDict } from './dict/power-signal-filter'
 
 /**
  * 词典汇总层。
@@ -616,6 +619,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceCargoCraneDict,
   homeCrepeMakerDict,
   powerCurrentLimiterDict,
+  spaceDataRecorderDict,
+  homeSandwichMakerDict,
+  powerSignalFilterDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

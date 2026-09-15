@@ -310,6 +310,9 @@ import { powerEncoder } from './things/power-encoder'
 import { spaceCargoCrane } from './things/space-cargo-crane'
 import { homeCrepeMaker } from './things/home-crepe-maker'
 import { powerCurrentLimiter } from './things/power-current-limiter'
+import { spaceDataRecorder } from './things/space-data-recorder'
+import { homeSandwichMaker } from './things/home-sandwich-maker'
+import { powerSignalFilter } from './things/power-signal-filter'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -627,6 +630,9 @@ export const things: ThingData[] = [
   spaceCargoCrane,
   homeCrepeMaker,
   powerCurrentLimiter,
+  spaceDataRecorder,
+  homeSandwichMaker,
+  powerSignalFilter,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
