@@ -328,6 +328,9 @@ import PowerVoltageSensorSketch from './power-voltage-sensor'
 import SpaceSolarSailSketch from './space-solar-sail'
 import HomeBreadToasterSketch from './home-bread-toaster'
 import PowerCurrentShuntSketch from './power-current-shunt'
+import SpaceMeteorShieldSketch from './space-meteor-shield'
+import HomeBlenderSketch from './home-blender'
+import PowerFrequencyCounterSketch from './power-frequency-counter'
 
 /**
  * thing.id → 几何体分发表。
@@ -664,6 +667,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-solar-sail': SpaceSolarSailSketch,
   'home-bread-toaster': HomeBreadToasterSketch,
   'power-current-shunt': PowerCurrentShuntSketch,
+  'space-meteor-shield': SpaceMeteorShieldSketch,
+  'home-blender': HomeBlenderSketch,
+  'power-frequency-counter': PowerFrequencyCounterSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

@@ -328,6 +328,9 @@ import { powerVoltageSensor } from './things/power-voltage-sensor'
 import { spaceSolarSail } from './things/space-solar-sail'
 import { homeBreadToaster } from './things/home-bread-toaster'
 import { powerCurrentShunt } from './things/power-current-shunt'
+import { spaceMeteorShield } from './things/space-meteor-shield'
+import { homeBlender } from './things/home-blender'
+import { powerFrequencyCounter } from './things/power-frequency-counter'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -663,6 +666,9 @@ export const things: ThingData[] = [
   spaceSolarSail,
   homeBreadToaster,
   powerCurrentShunt,
+  spaceMeteorShield,
+  homeBlender,
+  powerFrequencyCounter,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
