@@ -325,6 +325,9 @@ import { powerCircuitMonitor } from './things/power-circuit-monitor'
 import { spaceLaserRange } from './things/space-laser-range'
 import { homePastaMaker } from './things/home-pasta-maker'
 import { powerVoltageSensor } from './things/power-voltage-sensor'
+import { spaceSolarSail } from './things/space-solar-sail'
+import { homeBreadToaster } from './things/home-bread-toaster'
+import { powerCurrentShunt } from './things/power-current-shunt'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -657,6 +660,9 @@ export const things: ThingData[] = [
   spaceLaserRange,
   homePastaMaker,
   powerVoltageSensor,
+  spaceSolarSail,
+  homeBreadToaster,
+  powerCurrentShunt,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

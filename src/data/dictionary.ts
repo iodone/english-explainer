@@ -319,6 +319,9 @@ import { powerCircuitMonitorDict } from './dict/power-circuit-monitor'
 import { spaceLaserRangeDict } from './dict/space-laser-range'
 import { homePastaMakerDict } from './dict/home-pasta-maker'
 import { powerVoltageSensorDict } from './dict/power-voltage-sensor'
+import { spaceSolarSailDict } from './dict/space-solar-sail'
+import { homeBreadToasterDict } from './dict/home-bread-toaster'
+import { powerCurrentShuntDict } from './dict/power-current-shunt'
 
 /**
  * 词典汇总层。
@@ -646,6 +649,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceLaserRangeDict,
   homePastaMakerDict,
   powerVoltageSensorDict,
+  spaceSolarSailDict,
+  homeBreadToasterDict,
+  powerCurrentShuntDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
