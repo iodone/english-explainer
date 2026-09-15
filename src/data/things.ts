@@ -340,6 +340,9 @@ import { powerPhaseDetector } from './things/power-phase-detector'
 import { spaceDockingCollar } from './things/space-docking-collar'
 import { homeSlowCooker } from './things/home-slow-cooker'
 import { powerGroundTester } from './things/power-ground-tester'
+import { spacePayloadFairing } from './things/space-payload-fairing'
+import { homeToasterOven } from './things/home-toaster-oven'
+import { powerContinuityTester } from './things/power-continuity-tester'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -687,6 +690,9 @@ export const things: ThingData[] = [
   spaceDockingCollar,
   homeSlowCooker,
   powerGroundTester,
+  spacePayloadFairing,
+  homeToasterOven,
+  powerContinuityTester,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

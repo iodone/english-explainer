@@ -334,6 +334,9 @@ import { powerPhaseDetectorDict } from './dict/power-phase-detector'
 import { spaceDockingCollarDict } from './dict/space-docking-collar'
 import { homeSlowCookerDict } from './dict/home-slow-cooker'
 import { powerGroundTesterDict } from './dict/power-ground-tester'
+import { spacePayloadFairingDict } from './dict/space-payload-fairing'
+import { homeToasterOvenDict } from './dict/home-toaster-oven'
+import { powerContinuityTesterDict } from './dict/power-continuity-tester'
 
 /**
  * 词典汇总层。
@@ -676,6 +679,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceDockingCollarDict,
   homeSlowCookerDict,
   powerGroundTesterDict,
+  spacePayloadFairingDict,
+  homeToasterOvenDict,
+  powerContinuityTesterDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
