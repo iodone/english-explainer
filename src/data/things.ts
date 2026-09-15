@@ -319,6 +319,9 @@ import { powerDataLogger } from './things/power-data-logger'
 import { spaceHeatExchanger } from './things/space-heat-exchanger'
 import { homePopcornMaker } from './things/home-popcorn-maker'
 import { powerCircuitBreaker } from './things/power-circuit-breaker'
+import { spaceAntennaDish } from './things/space-antenna-dish'
+import { homeEspresso } from './things/home-espresso'
+import { powerCircuitMonitor } from './things/power-circuit-monitor'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -645,6 +648,9 @@ export const things: ThingData[] = [
   spaceHeatExchanger,
   homePopcornMaker,
   powerCircuitBreaker,
+  spaceAntennaDish,
+  homeEspresso,
+  powerCircuitMonitor,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>
