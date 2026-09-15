@@ -304,6 +304,9 @@ import { powerDisconnectSwitch } from './things/power-disconnect-switch'
 import { spaceGravimeter } from './things/space-gravimeter'
 import { homeMelonBaller } from './things/home-melon-baller'
 import { powerCircuitRecloser } from './things/power-circuit-recloser'
+import { spaceFuelCell } from './things/space-fuel-cell'
+import { homeBreadMachine } from './things/home-bread-machine'
+import { powerEncoder } from './things/power-encoder'
 
 /**
  * 数据注册表 —— 单一事实来源。
@@ -615,6 +618,9 @@ export const things: ThingData[] = [
   spaceGravimeter,
   homeMelonBaller,
   powerCircuitRecloser,
+  spaceFuelCell,
+  homeBreadMachine,
+  powerEncoder,
 ]
 
 export const getThingBySlug = (slug: string): ThingData | undefined =>

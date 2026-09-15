@@ -298,6 +298,9 @@ import { powerDisconnectSwitchDict } from './dict/power-disconnect-switch'
 import { spaceGravimeterDict } from './dict/space-gravimeter'
 import { homeMelonBallerDict } from './dict/home-melon-baller'
 import { powerCircuitRecloserDict } from './dict/power-circuit-recloser'
+import { spaceFuelCellDict } from './dict/space-fuel-cell'
+import { homeBreadMachineDict } from './dict/home-bread-machine'
+import { powerEncoderDict } from './dict/power-encoder'
 
 /**
  * 词典汇总层。
@@ -604,6 +607,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceGravimeterDict,
   homeMelonBallerDict,
   powerCircuitRecloserDict,
+  spaceFuelCellDict,
+  homeBreadMachineDict,
+  powerEncoderDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(
