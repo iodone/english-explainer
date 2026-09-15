@@ -310,6 +310,9 @@ import { powerSignalFilterDict } from './dict/power-signal-filter'
 import { spaceLightFilterDict } from './dict/space-light-filter'
 import { homeYogurtMakerDict } from './dict/home-yogurt-maker'
 import { powerDataLoggerDict } from './dict/power-data-logger'
+import { spaceHeatExchangerDict } from './dict/space-heat-exchanger'
+import { homePopcornMakerDict } from './dict/home-popcorn-maker'
+import { powerCircuitBreakerDict } from './dict/power-circuit-breaker'
 
 /**
  * 词典汇总层。
@@ -628,6 +631,9 @@ const sources: Record<string, DictEntry>[] = [
   spaceLightFilterDict,
   homeYogurtMakerDict,
   powerDataLoggerDict,
+  spaceHeatExchangerDict,
+  homePopcornMakerDict,
+  powerCircuitBreakerDict,
 ]
 
 export const dictionary: Record<string, DictEntry> = sources.reduce(

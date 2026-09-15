@@ -316,6 +316,9 @@ import PowerSignalFilterSketch from './power-signal-filter'
 import SpaceLightFilterSketch from './space-light-filter'
 import HomeYogurtMakerSketch from './home-yogurt-maker'
 import PowerDataLoggerSketch from './power-data-logger'
+import SpaceHeatExchangerSketch from './space-heat-exchanger'
+import HomePopcornMakerSketch from './home-popcorn-maker'
+import PowerCircuitBreakerSketch from './power-circuit-breaker'
 
 /**
  * thing.id → 几何体分发表。
@@ -640,6 +643,9 @@ export const GEOMETRY: Record<string, ComponentType> = {
   'space-light-filter': SpaceLightFilterSketch,
   'home-yogurt-maker': HomeYogurtMakerSketch,
   'power-data-logger': PowerDataLoggerSketch,
+  'space-heat-exchanger': SpaceHeatExchangerSketch,
+  'home-popcorn-maker': HomePopcornMakerSketch,
+  'power-circuit-breaker': PowerCircuitBreakerSketch,
 }
 
 /** 原语层公共面（常量 / context / 高亮引擎 / 绘制元件），几何文件与 ThingScene 共用 */

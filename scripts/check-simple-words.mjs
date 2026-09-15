@@ -50,8 +50,10 @@ for (const [key, entry] of Object.entries(dictionary)) {
 
 /* ─── 通道 3b：复合词拆分（heat-sink → heat + sink 各自查表） ─── */
 function hitsCompound(word) {
+  // 最小 8 字符才尝试拆分，避免 damage→dam+age 这类误判
+  if (word.length < 8) return false
   // 尝试在每个位置切一刀，两半都通过任意通道即算命中
-  for (let i = 2; i <= word.length - 2; i++) {
+  for (let i = 3; i <= word.length - 3; i++) {
     const left = word.slice(0, i)
     const right = word.slice(i)
     // 两半都必须在已知词集中（orig / merged / dict / inflect 任一）
