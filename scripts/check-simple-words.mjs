@@ -48,6 +48,26 @@ for (const [key, entry] of Object.entries(dictionary)) {
   }
 }
 
+/* ─── 通道 3b：复合词拆分（heat-sink → heat + sink 各自查表） ─── */
+function hitsCompound(word) {
+  // 尝试在每个位置切一刀，两半都通过任意通道即算命中
+  for (let i = 2; i <= word.length - 2; i++) {
+    const left = word.slice(0, i)
+    const right = word.slice(i)
+    // 两半都必须在已知词集中（orig / merged / dict / inflect 任一）
+    if (verdictBase(left) && verdictBase(right)) return true
+  }
+  return false
+}
+/** 仅查通道 1-3 + 屈折，不含复合词（避免递归） */
+function verdictBase(word) {
+  if (ORIG.has(word)) return true
+  if (OURS.has(word)) return true
+  if (DICT_WORDS.has(word)) return true
+  if (hitsInflect(word)) return true
+  return false
+}
+
 /* ─── 通道 4：屈折逆推（链式 + 名词化/比较级/副词） ─── */
 function inflectForms(word) {
   const c = [word]
@@ -104,6 +124,7 @@ function verdict(word) {
   if (ORIG.has(word)) return 'orig'
   if (OURS.has(word)) return 'merged'
   if (DICT_WORDS.has(word)) return 'dict'
+  if (hitsCompound(word)) return 'compound'
   if (hitsInflect(word)) return 'inflect'
   return null
 }
@@ -118,12 +139,14 @@ let errors = 0
 for (const thing of things) {
   const offenders = []
   const dictRelied = new Set()
+  const compoundRelied = new Set()
 
   const check = (text, where) => {
     for (const w of tokenize(text)) {
       const v = verdict(w)
       if (!v) offenders.push({ word: w, where })
       else if (v === 'dict') dictRelied.add(w)
+      else if (v === 'compound') compoundRelied.add(w)
     }
   }
 
@@ -158,11 +181,11 @@ for (const thing of things) {
     }
   } else {
     console.log(
-      `· ${thing.slug}: ${sentenceIdx} 句全词在表 · dict 豁免依赖 ${dictRelied.size} 词${dictRelied.size ? `（${[...dictRelied].join(' ')}）` : ''}`,
+      `· ${thing.slug}: ${sentenceIdx} 句全词在表 · dict 豁免 ${dictRelied.size} 词${dictRelied.size ? `（${[...dictRelied].join(' ')}）` : ''}${compoundRelied.size ? ` · 复合词 ${compoundRelied.size}（${[...compoundRelied].join(' ')}）` : ''}`,
     )
   }
 }
 
-console.log(`\n通道容量：xkcd 原表 ${ORIG.size} · 合并表 ${OURS.size} · dict 分词 ${DICT_WORDS.size}`)
+console.log(`\n通道容量：xkcd 原表 ${ORIG.size} · 合并表 ${OURS.size} · dict 分词 ${DICT_WORDS.size} · 复合词拆分已启用`)
 console.log(errors === 0 ? '✓ Munroe 闸门全部通过' : `✗ ${errors} 个超纲词`)
 process.exit(errors === 0 ? 0 : 1)
