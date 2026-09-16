@@ -57,8 +57,8 @@ export default function ArticleView({
           key={pi}
           className={
             pi === 0
-              ? 'text-2xl leading-[1.8] mb-7'
-              : 'text-xl leading-[1.8] mb-7'
+              ? 'text-xl leading-[1.6] mb-4'
+              : 'text-lg leading-[1.6] mb-4'
           }
           style={{ maxWidth: '68ch' }}
         >

@@ -39,7 +39,7 @@ export default function PracticePanel({ thing, onPartHover }: PracticePanelProps
     <div className="max-w-[68ch]">
       {/* 练习说明 */}
       <div className="micro-label text-hud-cyan">RETELL PRACTICE</div>
-      <p className="font-display text-2xl text-ink leading-[1.6] mt-3">
+      <p className="font-display text-xl text-ink leading-[1.5] mt-3">
         Look at the picture. Say how it works in your own words.
       </p>
       <p className="font-body text-sm text-ink-soft mt-3">

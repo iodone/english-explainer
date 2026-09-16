@@ -35,6 +35,7 @@ export default function ThingPage() {
   const [activePartId, setActivePartId] = useState<string | null>(null)
   const [wordPopup, setWordPopup] = useState<{ key: string; rect: DOMRect } | null>(null)
   const [flowStep, setFlowStep] = useState<FlowStepInfo | null>(null)
+  const [funFactsOpen, setFunFactsOpen] = useState(false)
   const closeTimerRef = useRef<number | null>(null)
 
   const articleRef = useRef<ArticleViewHandle>(null)
@@ -172,7 +173,7 @@ export default function ThingPage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Thing header */}
-      <div className="px-6 py-4 flex items-center justify-between border-b border-canvas-grid flex-shrink-0">
+      <div className="px-6 py-3 flex items-center justify-between border-b border-canvas-grid flex-shrink-0">
         <div className="flex items-center gap-4">
           <Link to="/" className="micro-label text-hud-cyan hover:underline no-underline">
             ← ALL
@@ -198,7 +199,7 @@ export default function ThingPage() {
         {/* 文章主列 — 实色纸面，遮蔽背景网格（阅读面干净） */}
         <div
           ref={articleScrollRef}
-          className="overflow-y-auto px-8 py-8 bg-canvas min-w-[420px]"
+          className="overflow-y-auto px-6 py-5 bg-canvas min-w-[420px]"
           style={{ width: `${splitPct}%` }}
           onClick={() => setWordPopup(null)}
         >
@@ -219,18 +220,25 @@ export default function ThingPage() {
                 onWordLeave={handleWordLeave}
               />
 
-              {/* Did you know — 静态小节（原 FunFacts 降级） */}
+              {/* Did you know — 可收起 */}
               {mode === 'read' && thing.funFacts.length > 0 && (
-                <div className="hud-panel corner-accent mt-10 p-5" style={{ maxWidth: '68ch' }}>
-                  <div className="micro-label text-hud-cyan mb-3">DID YOU KNOW</div>
-                  <ul className="space-y-2">
-                    {thing.funFacts.map((fact, i) => (
-                      <li key={i} className="font-display text-base text-ink-soft leading-relaxed flex gap-2">
-                        <span className="text-hud-cyan">—</span>
-                        {fact}
-                      </li>
-                    ))}
-                  </ul>
+                <div className="hud-panel corner-accent mt-6" style={{ maxWidth: '68ch' }}>
+                  <button
+                    onClick={() => setFunFactsOpen(v => !v)}
+                    className="micro-label text-hud-cyan hover:underline w-full text-left px-5 py-3"
+                  >
+                    DID YOU KNOW {funFactsOpen ? '▾' : '▸'}
+                  </button>
+                  {funFactsOpen && (
+                    <ul className="px-5 pb-4 space-y-1.5">
+                      {thing.funFacts.map((fact, i) => (
+                        <li key={i} className="font-display text-sm text-ink-soft leading-relaxed flex gap-2">
+                          <span className="text-hud-cyan">—</span>
+                          {fact}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
             </>
