@@ -2,10 +2,10 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import {
   OrbitControls,
   Line,
-  Text,
+  Html,
   Bounds,
   GizmoHelper,
-  GizmoViewport,
+  useGizmoContext,
 } from '@react-three/drei'
 import { useMemo, useRef, useState } from 'react'
 import type { ComponentRef } from 'react'
@@ -13,59 +13,34 @@ import * as THREE from 'three'
 import type { ThingData } from '../data/types'
 import {
   GEOMETRY,
+  AccentContext,
   PartMetaContext,
   usePartHighlight,
   INK,
-  INK_SOFT,
   WARNING_RED,
 } from '../geometry'
 import type { HighlightState, PartMeta } from '../geometry'
 
 /** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
 const PAPER = '#F4F1EA'
-const LABEL_BASE_OFFSET = new THREE.Vector3(0.35, 0.2, 0)
-const LABEL_LINE_POINTS: [number, number, number][] = [
-  [0, 0, 0],
-  [0.3, 0.2, 0],
-]
-const LABEL_OFFSET_CANDIDATES: Array<[number, number]> = [
-  [0, 0],
-  [0, 0.24],
-  [0, -0.24],
-  [0, 0.48],
-  [0, -0.48],
-  [0, 0.72],
-  [0, -0.72],
-]
-const LABEL_CHARACTER_WIDTH = 0.095
-const LABEL_HEIGHT = 0.18
-
-interface ScreenRect {
-  left: number
-  right: number
-  top: number
-  bottom: number
-}
+/** 标签落点候选：沿部件包围盒"朝外方向"的试探距离（世界单位，逐级外推找空位） */
+const LABEL_REACH_CANDIDATES = [0.95, 1.3, 1.7, 2.15, 2.65]
+/** 包围盒朝外点的试探比例（0=中心，1=盒边缘） */
+const ANCHOR_EDGE_T = [0.72, 1.0]
+/** 引线水平尾巴长度（世界单位） */
+const LABEL_TAIL = 0.5
+/** 标签多行文本的样式（DOM 渲染，可直接读设计字体令牌） */
+const LABEL_STYLE = {
+  fontFamily: "var(--font-mono)",
+  fontSize: '10px',
+  letterSpacing: '0.06em',
+  lineHeight: '1.25',
+} as const
+/** 标签文本宽高的粗略估算（DOM 测量前的碰撞预判，屏幕像素） */
+const LABEL_ROW_PX = 13
+const LABEL_CHAR_PX = 6.6
 
 type LineElement = ComponentRef<typeof Line>
-type TextElement = ComponentRef<typeof Text>
-
-function updateLeaderLine(line: unknown, labelOffset: THREE.Vector3) {
-  const lineElement = line as {
-    geometry: { setPositions: (positions: number[]) => void }
-    computeLineDistances?: () => void
-  }
-
-  lineElement.geometry.setPositions([
-    0,
-    0,
-    0,
-    labelOffset.x - 0.05,
-    labelOffset.y,
-    labelOffset.z,
-  ])
-  lineElement.computeLineDistances?.()
-}
 
 function setMaterialOpacity(object: unknown, opacity: number) {
   const material = (object as { material?: THREE.Material | THREE.Material[] }).material
@@ -84,7 +59,7 @@ function setMaterialOpacity(object: unknown, opacity: number) {
  * 绘制风格按 DESIGN.md §1.5 JX-7b 规范：
  * - 外壳/结构件 = 半透明灰实体面（体量感）+ 墨 Edges 轮廓（四边形拓扑感）
  * - 地面 = 3D 透视网格（CAD 虚空工作区）+ 虚线中心轴
- * - 右上角坐标轴 gizmo；标签 billboard 等宽大写（工程数据格式）
+ * - 右上角坐标轴 gizmo；标注走工程图 leader line（包围盒边缘出线 + 折角 + 两行中英）
  * - 取景 = Bounds 自适应（fit + observe，分栏拖动后自动重取景）
  *
  * 几何体按 thing.id 从 GEOMETRY map 分发（src/geometry/<slug>.tsx，一 thing 一文件）；
@@ -123,6 +98,12 @@ export default function ThingScene({
     [thing, onPartClick],
   )
 
+  // 正交 = 工程图观看方式（blueprint 技法移植），默认透视保留 3D 辅证的亲和力
+  const [ortho, setOrtho] = useState(false)
+  const accentColor = useMemo(() => new THREE.Color(thing.color), [thing.color])
+  // 几何根组：标注层读它的包围盒来算部件边缘锚点
+  const partsRef = useRef<THREE.Group>(null)
+
   return (
     <div className="w-full h-full reticle">
       {/* HUD overlay labels */}
@@ -142,30 +123,48 @@ export default function ThingScene({
         <div className="micro-label">DRAG TO ROTATE · SCROLL TO ZOOM · CLICK A PART</div>
       </div>
 
+      {/* 正交 / 透视切换（工程图观看方式） */}
+      <button
+        className="absolute bottom-4 right-4 z-10 micro-label px-3 py-1.5 border border-ink-faint text-ink-soft hover:border-hud-cyan hover:text-hud-cyan pointer-events-auto"
+        onClick={() => setOrtho(o => !o)}
+      >
+        VIEW: {ortho ? 'ORTHO' : 'PERSPECTIVE'}
+      </button>
+
       {/* 3D Canvas — 纸色实底（CAD viewport），3D 地面网格提供透视参考 */}
       <Canvas
-        camera={{ position: [5, 3, 5], fov: 50 }}
+        key={ortho ? 'ortho' : 'persp'}
+        orthographic={ortho}
+        camera={
+          ortho
+            ? { position: [5, 3.6, 5], zoom: 110 }
+            : { position: [5, 3, 5], fov: 50 }
+        }
         style={{ background: PAPER }}
       >
-        <PartMetaContext.Provider value={partMeta}>
-          {/* key=thing.id：切模型时 Bounds 重新 fit；margin 略松给标注留空间 */}
-          <Bounds key={thing.id} fit clip observe margin={1.1}>
-            <SketchModel
-              thing={thing}
-              highlightPartId={highlightPartId}
-              activePartIds={activePartIds}
-              pastPartIds={pastPartIds}
-              dimOthers={dimOthers}
-            />
-          </Bounds>
-        </PartMetaContext.Provider>
-        <AnnotationLabels
-          thing={thing}
-          highlightPartId={highlightPartId}
-          activePartIds={activePartIds}
-          dimOthers={dimOthers}
-          onPartClick={onPartClick}
-        />
+        <AccentContext.Provider value={accentColor}>
+          <PartMetaContext.Provider value={partMeta}>
+            {/* key=thing.id：切模型时 Bounds 重新 fit；margin 略松给标注留空间 */}
+            <Bounds key={thing.id} fit clip observe margin={1.1}>
+              <SketchModel
+                thing={thing}
+                partsRef={partsRef}
+                highlightPartId={highlightPartId}
+                activePartIds={activePartIds}
+                pastPartIds={pastPartIds}
+                dimOthers={dimOthers}
+              />
+            </Bounds>
+          </PartMetaContext.Provider>
+          <AnnotationLabels
+            thing={thing}
+            partsRef={partsRef}
+            highlightPartId={highlightPartId}
+            activePartIds={activePartIds}
+            dimOthers={dimOthers}
+            onPartClick={onPartClick}
+          />
+        </AccentContext.Provider>
         <CenterAxes />
         <GroundGrid />
         <OrbitControls
@@ -178,12 +177,7 @@ export default function ThingScene({
           autoRotateSpeed={0.4}
         />
         {/* 右上角数字化指南针（JX-7b §HUD） */}
-        <GizmoHelper alignment="top-right" margin={[76, 76]}>
-          <GizmoViewport
-            axisColors={['#E8453C', '#4ADE80', '#60A5FA']}
-            labelColor={INK}
-          />
-        </GizmoHelper>
+        <AxisGizmo />
       </Canvas>
     </div>
   )
@@ -193,13 +187,16 @@ export default function ThingScene({
  * 草稿线框模型 — 按 thing.id 从 GEOMETRY map 取几何体分发。
  * 几何文件内部 SketchMesh 带 name={partId}，供 usePartHighlight 驱动。
  */
-function SketchModel({ thing, ...state }: { thing: ThingData } & HighlightState) {
-  const groupRef = useRef<THREE.Group>(null)
-  usePartHighlight(groupRef, thing, state)
+function SketchModel({
+  thing,
+  partsRef,
+  ...state
+}: { thing: ThingData; partsRef: React.RefObject<THREE.Group | null> } & HighlightState) {
+  usePartHighlight(partsRef, thing, state)
   const Sketch = GEOMETRY[thing.id]
 
   return (
-    <group ref={groupRef}>
+    <group ref={partsRef}>
       {Sketch && <Sketch />}
     </group>
   )
@@ -207,14 +204,35 @@ function SketchModel({ thing, ...state }: { thing: ThingData } & HighlightState)
 
 /* ─── Annotation Labels ─── */
 
+interface Rect {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+
+/**
+ * 工程图标注层（2026-09-29 重做 · A/D 方案）
+ *
+ * 与旧版的区别：
+ * - 锚点从"部件中心 + 固定偏移"改为"部件包围盒朝外点"——引线从几何边缘出发
+ * - 引线走真图纸的 leader line 语法：部件点 → 出形 → 斜段 → 水平尾巴 → 文字
+ * - 标签用 DOM 渲染（drei Html）：读得到设计字体令牌、可放中英两行、横排不随相机转
+ * - 避让：沿朝外方向逐级外推，用屏幕矩形占用检测挑空位；都不行就淡出（不叠字）
+ *
+ * 坐标说明：AnnotationLabels 的 group 在场景根（无变换），因此引线/标签可以直接
+ * 用世界坐标；部件点（part.position 在模型局部空间）经 root.localToWorld 换算。
+ */
 function AnnotationLabels({
   thing,
+  partsRef,
   highlightPartId,
   activePartIds,
   dimOthers,
   onPartClick,
 }: {
   thing: ThingData
+  partsRef: React.RefObject<THREE.Group | null>
   highlightPartId: string | null
   activePartIds: string[]
   dimOthers: boolean
@@ -222,140 +240,215 @@ function AnnotationLabels({
 }) {
   const [hovered, setHovered] = useState<string | null>(null)
   const accent = thing.color
-  const labelGroupRefs = useRef<(THREE.Group | null)[]>([])
   const lineRefs = useRef<(LineElement | null)[]>([])
-  const textRefs = useRef<(TextElement | null)[]>([])
-  const layoutTemp = useMemo(
+  const htmlRefs = useRef<(THREE.Group | null)[]>([])
+  const labelRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  const tmp = useMemo(
     () => ({
-      cameraRight: new THREE.Vector3(),
-      cameraUp: new THREE.Vector3(),
-      partPosition: new THREE.Vector3(),
-      baseWorld: new THREE.Vector3(),
-      candidateWorld: new THREE.Vector3(),
-      widthEnd: new THREE.Vector3(),
-      heightEnd: new THREE.Vector3(),
+      right: new THREE.Vector3(),
+      up: new THREE.Vector3(),
+      box: new THREE.Box3(),
+      size: new THREE.Vector3(),
+      nodeCenter: new THREE.Vector3(),
+      rootWorld: new THREE.Vector3(),
+      normal: new THREE.Vector3(),
+      scratch: new THREE.Vector3(),
       projected: new THREE.Vector3(),
-      labelOffset: new THREE.Vector3(),
+      vis: new THREE.Vector3(),
+      dot: new THREE.Vector3(),
+      edge: new THREE.Vector3(),
+      shoulder: new THREE.Vector3(),
+      label: new THREE.Vector3(),
+      localPart: new THREE.Vector3(),
     }),
     [],
   )
-  const labelPriority = (partId: string) => {
-    const isActive =
-      highlightPartId === partId || activePartIds.includes(partId)
 
-    return isActive ? 0 : hovered === partId ? 1 : 2
+  interface BoxEntry {
+    center: THREE.Vector3
+    normal: THREE.Vector3
+    radius: number
   }
 
+  const labelPriority = (partId: string) =>
+    highlightPartId === partId || activePartIds.includes(partId)
+      ? 0
+      : hovered === partId
+        ? 1
+        : 2
+
   useFrame(({ camera, size }) => {
-    const order = thing.parts.map((_, index) => index)
-    const distances = thing.parts.map(() => 0)
-    const occupied: ScreenRect[] = []
+    const root = partsRef.current
+    if (!root) return
 
-    layoutTemp.cameraRight.set(1, 0, 0).applyQuaternion(camera.quaternion)
-    layoutTemp.cameraUp.set(0, 1, 0).applyQuaternion(camera.quaternion)
+    // root 的世界矩阵（Bounds 每帧改它的 scale，必须显式刷新）
+    root.updateWorldMatrix(true, false)
+    root.getWorldPosition(tmp.rootWorld)
 
-    for (let index = 0; index < thing.parts.length; index += 1) {
-      const position = thing.parts[index].position
-      layoutTemp.partPosition.set(position[0], position[1], position[2])
-      distances[index] = camera.position.distanceToSquared(layoutTemp.partPosition)
+    // ① 部件包围盒（世界）→ 中心 / 朝外法线 / 半径
+    const boxes = new Map<string, BoxEntry>()
+    const counts = new Map<string, number>()
+    root.traverse(node => {
+      if (!(node instanceof THREE.Mesh) || !node.name) return
+      tmp.box.setFromObject(node)
+      if (tmp.box.isEmpty()) return
+      tmp.box.getCenter(tmp.nodeCenter)
+      tmp.box.getSize(tmp.size)
+      const entry =
+        boxes.get(node.name) ??
+        { center: new THREE.Vector3(), normal: new THREE.Vector3(), radius: 0 }
+      entry.center.add(tmp.nodeCenter)
+      entry.radius = Math.max(entry.radius, tmp.size.length() / 2)
+      tmp.scratch.copy(tmp.nodeCenter).sub(tmp.rootWorld)
+      if (tmp.scratch.lengthSq() > 1e-8) entry.normal.add(tmp.scratch.normalize())
+      boxes.set(node.name, entry)
+      counts.set(node.name, (counts.get(node.name) ?? 0) + 1)
+    })
+    // 同名多 mesh（面 + 外壳描边）取平均
+    for (const [id, entry] of boxes) {
+      const n = counts.get(id) ?? 1
+      if (n > 1) entry.center.divideScalar(n)
     }
 
-    order.sort((left, right) => {
-      const priority =
-        labelPriority(thing.parts[left].id) - labelPriority(thing.parts[right].id)
-      if (priority !== 0) return priority
-      return distances[left] - distances[right]
+    tmp.right.set(1, 0, 0).applyQuaternion(camera.quaternion)
+    tmp.up.set(0, 1, 0).applyQuaternion(camera.quaternion)
+
+    const toScreen = (world: THREE.Vector3) => {
+      tmp.projected.copy(world).project(camera)
+      return {
+        x: (tmp.projected.x * 0.5 + 0.5) * size.width,
+        y: (-tmp.projected.y * 0.5 + 0.5) * size.height,
+        visible: tmp.projected.z < 1,
+      }
+    }
+
+    const occupied: Rect[] = []
+    const order = thing.parts.map((_, i) => i)
+    const distanceOf = thing.parts.map(part => {
+      const entry = boxes.get(part.id)
+      const c = entry?.center ?? tmp.dot.set(...part.position)
+      return camera.position.distanceToSquared(c)
+    })
+    order.sort((a, b) => {
+      const p = labelPriority(thing.parts[a].id) - labelPriority(thing.parts[b].id)
+      return p !== 0 ? p : distanceOf[a] - distanceOf[b]
     })
 
     for (const index of order) {
       const part = thing.parts[index]
-      const labelGroup = labelGroupRefs.current[index]
       const line = lineRefs.current[index]
-      const text = textRefs.current[index]
-      if (!labelGroup || !line || !text) continue
-
-      layoutTemp.baseWorld.set(
-        part.position[0] + LABEL_BASE_OFFSET.x,
-        part.position[1] + LABEL_BASE_OFFSET.y,
-        part.position[2] + LABEL_BASE_OFFSET.z,
-      )
-
-      let selectedRect: ScreenRect | null = null
-      let selectedOffset = LABEL_OFFSET_CANDIDATES[0]
-      const labelWidthWorld = Math.max(
-        0.35,
-        part.label.length * LABEL_CHARACTER_WIDTH,
-      )
-
-      for (const candidateOffset of LABEL_OFFSET_CANDIDATES) {
-        layoutTemp.candidateWorld
-          .copy(layoutTemp.baseWorld)
-          .addScaledVector(layoutTemp.cameraRight, candidateOffset[0])
-          .addScaledVector(layoutTemp.cameraUp, candidateOffset[1])
-
-        layoutTemp.projected.copy(layoutTemp.candidateWorld).project(camera)
-        const screenX =
-          (layoutTemp.projected.x * 0.5 + 0.5) * size.width
-        const screenY =
-          (-layoutTemp.projected.y * 0.5 + 0.5) * size.height
-
-        layoutTemp.widthEnd
-          .copy(layoutTemp.candidateWorld)
-          .addScaledVector(layoutTemp.cameraRight, 1)
-        layoutTemp.projected.copy(layoutTemp.widthEnd).project(camera)
-        const unitEndX =
-          (layoutTemp.projected.x * 0.5 + 0.5) * size.width
-        const pixelsPerWorldX = Math.abs(unitEndX - screenX)
-        const widthPx = labelWidthWorld * pixelsPerWorldX
-
-        layoutTemp.heightEnd
-          .copy(layoutTemp.candidateWorld)
-          .addScaledVector(layoutTemp.cameraUp, 1)
-        layoutTemp.projected.copy(layoutTemp.heightEnd).project(camera)
-        const unitEndY =
-          (-layoutTemp.projected.y * 0.5 + 0.5) * size.height
-        const pixelsPerWorldY = Math.abs(unitEndY - screenY)
-        const heightPx = LABEL_HEIGHT * pixelsPerWorldY
-
-        const candidateRect: ScreenRect = {
-          left: screenX - 3,
-          right: screenX + widthPx + 3,
-          top: screenY - heightPx / 2 - 3,
-          bottom: screenY + heightPx / 2 + 3,
+      const htmlGroup = htmlRefs.current[index]
+      const labelEl = labelRefs.current[index]
+      if (!line || !htmlGroup || !labelEl) continue
+      // 无几何的部件退化：用数据里的 position 当锚点
+      const entry =
+        boxes.get(part.id) ??
+        {
+          center: new THREE.Vector3(...part.position),
+          normal: new THREE.Vector3(0, 1, 0),
+          radius: 0.2,
         }
-        const intersects = occupied.some(rect =>
-          candidateRect.left < rect.right &&
-          candidateRect.right > rect.left &&
-          candidateRect.top < rect.bottom &&
-          candidateRect.bottom > rect.top,
-        )
 
-        if (!intersects) {
-          selectedRect = candidateRect
-          selectedOffset = candidateOffset
-          break
+      // ② 朝外方向：部件几何法线，退化用"相对图纸中心"
+      tmp.normal.copy(entry.normal)
+      if (tmp.normal.lengthSq() < 1e-8) tmp.normal.copy(entry.center).sub(tmp.rootWorld)
+      if (tmp.normal.lengthSq() < 1e-8) tmp.normal.set(0, 1, 0)
+      tmp.normal.normalize()
+      const radius = Math.max(entry.radius, 0.14)
+
+      // 屏幕朝向（相机右/上基分解）；折角因此横平竖直，读起来像图纸
+      const sx = tmp.normal.dot(tmp.right)
+      const sy = tmp.normal.dot(tmp.up)
+      tmp.vis.copy(tmp.right).multiplyScalar(sx).addScaledVector(tmp.up, sy)
+      if (tmp.vis.lengthSq() < 1e-6) tmp.vis.copy(tmp.up)
+      tmp.vis.normalize()
+
+      const rows = part.realName ? 2 : 1
+      const longest = Math.max(part.label.length, part.realName?.length ?? 0)
+      const estWidth = longest * LABEL_CHAR_PX + 8
+      const estHeight = rows * LABEL_ROW_PX
+
+      // 部件点（模型局部 → 世界）：引线从这里出发
+      tmp.localPart.set(part.position[0], part.position[1], part.position[2])
+      const dotWorld = root.localToWorld(tmp.localPart.clone())
+
+      type Placement = {
+        edge: THREE.Vector3
+        shoulder: THREE.Vector3
+        label: THREE.Vector3
+      }
+      let placed: Placement | null = null
+      let nearest: (Placement & { dist: number }) | null = null
+
+      for (const t of ANCHOR_EDGE_T) {
+        const edgeWorld = entry.center.clone().addScaledVector(tmp.normal, radius * t)
+        if (!toScreen(edgeWorld).visible) continue
+
+        for (const reach of LABEL_REACH_CANDIDATES) {
+          const shoulderWorld = edgeWorld.clone().addScaledVector(tmp.vis, reach)
+          const labelWorld = shoulderWorld
+            .clone()
+            .addScaledVector(tmp.right, (sx >= 0 ? 1 : -1) * LABEL_TAIL)
+          const s = toScreen(labelWorld)
+          if (!s.visible) continue
+
+          const left = sx >= 0 ? s.x : s.x - estWidth
+          const rect: Rect = {
+            left: left - 4,
+            right: left + estWidth + 4,
+            top: s.y - estHeight / 2 - 3,
+            bottom: s.y + estHeight / 2 + 3,
+          }
+          const candidate = { edge: edgeWorld, shoulder: shoulderWorld, label: labelWorld }
+          const dist = toScreen(edgeWorld).x - s.x
+          if (!nearest || Math.abs(dist) < Math.abs(nearest.dist)) {
+            nearest = { ...candidate, dist }
+          }
+
+          const hit = occupied.some(
+            r =>
+              rect.left < r.right &&
+              rect.right > r.left &&
+              rect.top < r.bottom &&
+              rect.bottom > r.top,
+          )
+          if (!hit) {
+            placed = candidate
+            occupied.push(rect)
+            break
+          }
         }
+        if (placed) break
       }
 
-      layoutTemp.labelOffset
-        .copy(LABEL_BASE_OFFSET)
-        .addScaledVector(layoutTemp.cameraRight, selectedOffset[0])
-        .addScaledVector(layoutTemp.cameraUp, selectedOffset[1])
-      labelGroup.position.copy(layoutTemp.labelOffset)
-      updateLeaderLine(line, layoutTemp.labelOffset)
-
-      const isActive =
-        highlightPartId === part.id || activePartIds.includes(part.id)
+      const pick = placed ?? nearest
+      const faded = !placed
+      const isActive = highlightPartId === part.id || activePartIds.includes(part.id)
       const isHovered = hovered === part.id
       const show = isActive || isHovered
-      const lineOpacity =
-        dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5
-      const isFaded = selectedRect === null
 
-      setMaterialOpacity(text, isFaded ? 0.18 : 1)
-      setMaterialOpacity(line, isFaded ? lineOpacity * 0.25 : lineOpacity)
+      if (pick) {
+        // 引线：部件点 → 出形点 → 斜段肩点 → 水平尾巴终点（4 点 3 段）
+        line.geometry.setPositions([
+          dotWorld.x, dotWorld.y, dotWorld.z,
+          pick.edge.x, pick.edge.y, pick.edge.z,
+          pick.shoulder.x, pick.shoulder.y, pick.shoulder.z,
+          pick.label.x, pick.label.y, pick.label.z,
+        ])
+        line.computeLineDistances?.()
+        htmlGroup.position.copy(pick.label)
+        htmlGroup.visible = true
+      } else {
+        htmlGroup.visible = false
+      }
 
-      if (selectedRect) occupied.push(selectedRect)
+      labelEl.style.opacity = String(faded ? 0.35 : show ? 1 : 0.9)
+      labelEl.style.transform =
+        sx >= 0 ? 'translateY(-50%)' : 'translate(-100%, -50%)'
+      labelEl.style.textAlign = sx >= 0 ? 'left' : 'right'
+      labelEl.style.color = isActive ? accent : isHovered ? '#3ECFCF' : '#5A554C'
+      setMaterialOpacity(line, dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5)
     }
   })
 
@@ -363,17 +456,17 @@ function AnnotationLabels({
     <group>
       {thing.parts.map((part, index) => {
         const hoveredNow = hovered === part.id
-        const isActive =
-          highlightPartId === part.id || activePartIds.includes(part.id)
+        const isActive = highlightPartId === part.id || activePartIds.includes(part.id)
         const show = hoveredNow || isActive
-        // 常态 dot 跟部件配色角色：警示红件红 dot，灰件墨 dot
         const idleColor = part.finish === 'warning' ? WARNING_RED : INK
         const dotColor = isActive ? accent : hoveredNow ? '#3ECFCF' : idleColor
         const dotOpacity = dimOthers && !isActive ? 0.2 : show ? 1 : 0.85
         return (
-          <group key={part.id} position={part.position}>
-            {/* Dot marker — clickable (图→词) */}
+          <group key={part.id}>
+            {/* 部件点 — 可点击（图→词），留在模型坐标系内 */}
             <mesh
+              position={part.position}
+              scale={show ? 1.5 : 1}
               onPointerOver={e => {
                 e.stopPropagation()
                 setHovered(part.id)
@@ -387,51 +480,149 @@ function AnnotationLabels({
                 e.stopPropagation()
                 onPartClick?.(part.id)
               }}
-              scale={show ? 1.5 : 1}
             >
               <sphereGeometry args={[0.07, 8, 8]} />
-              <meshBasicMaterial
-                color={dotColor}
-                transparent
-                opacity={dotOpacity}
-              />
+              <meshBasicMaterial color={dotColor} transparent opacity={dotOpacity} />
             </mesh>
-            {/* Leader line from dot to label */}
+
+            {/* 折角引线：点 → 出形 → 斜段 → 平段，每帧按包围盒重排 */}
             <Line
-              ref={line => {
-                lineRefs.current[index] = line
+              ref={node => {
+                lineRefs.current[index] = node
               }}
-              points={LABEL_LINE_POINTS}
+              points={[
+                [0, 0, 0],
+                [0.2, 0.2, 0],
+                [0.35, 0.35, 0],
+                [0.55, 0.35, 0],
+              ]}
               color={show ? dotColor : INK}
               lineWidth={show ? 1.5 : 1}
               transparent
-              opacity={dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5}
+              opacity={0.5}
             />
-            {/* Label — 等宽大写工程标注（billboard） */}
+
+            {/* 标签：DOM 渲染，横排两行（简单名 / 真名），不随相机旋转 */}
             <group
-              ref={group => {
-                labelGroupRefs.current[index] = group
+              ref={node => {
+                htmlRefs.current[index] = node
               }}
-              position={LABEL_BASE_OFFSET.toArray() as [number, number, number]}
             >
-              <Text
-                ref={text => {
-                  textRefs.current[index] = text
-                }}
-                position={[0, 0, 0]}
-                fontSize={0.15}
-                color={isActive ? accent : hoveredNow ? INK : INK_SOFT}
-                anchorX="left"
-                outlineWidth={0.01}
-                outlineColor={PAPER}
-              >
-                {part.label.toUpperCase()}
-              </Text>
+              <Html position={[0, 0, 0]} zIndexRange={[8, 0]} style={{ pointerEvents: 'none' }}>
+                <div
+                  ref={node => {
+                    labelRefs.current[index] = node
+                  }}
+                  style={{ ...LABEL_STYLE, whiteSpace: 'nowrap', opacity: 0.9 }}
+                >
+                  <span style={{ display: 'block' }}>{part.label.toUpperCase()}</span>
+                  {part.realName && (
+                    <span style={{ display: 'block', color: '#8E8678', fontSize: '9px' }}>
+                      {part.realName}
+                    </span>
+                  )}
+                </div>
+              </Html>
             </group>
           </group>
         )
       })}
     </group>
+  )
+}
+
+/* ─── AxisGizmo（制图室版三向轴标） ─── */
+
+/** 轴头标签贴图：纸色圆底 + 墨色描边 + 等宽大写字母（全墨色，唯一强调留给原点 HUD 青点） */
+function makeAxisLabel(text: string, color: string) {
+  const canvas = document.createElement('canvas')
+  canvas.width = 96
+  canvas.height = 96
+  const ctx = canvas.getContext('2d')!
+  ctx.clearRect(0, 0, 96, 96)
+  ctx.beginPath()
+  ctx.arc(48, 48, 30, 0, Math.PI * 2)
+  ctx.fillStyle = PAPER
+  ctx.fill()
+  ctx.lineWidth = 3
+  ctx.strokeStyle = color
+  ctx.stroke()
+  ctx.font = 'bold 38px ui-monospace, SFMono-Regular, Menlo, monospace'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillStyle = '#2C2A25'
+  ctx.fillText(text, 48, 51)
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.anisotropy = 4
+  return texture
+}
+
+/** 单条轴：墨色细杆 + 纸色轴头标签 */
+function Axis({
+  dir,
+  letter,
+  color,
+  onPick,
+}: {
+  dir: [number, number, number]
+  letter: string
+  color: string
+  onPick?: (e: { stopPropagation: () => void; object: THREE.Object3D }) => void
+}) {
+  const texture = useMemo(() => makeAxisLabel(letter, color), [letter, color])
+  const rotation = useMemo(() => {
+    const q = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      new THREE.Vector3(...dir).normalize(),
+    )
+    return new THREE.Euler().setFromQuaternion(q)
+  }, [dir])
+
+  return (
+    <>
+      {/* 轴杆：细墨线（制图线条，不用实心块） */}
+      <mesh position={[dir[0] * 0.42, dir[1] * 0.42, dir[2] * 0.42]} rotation={rotation}>
+        <cylinderGeometry args={[0.012, 0.012, 0.84, 6]} />
+        <meshBasicMaterial color={INK} toneMapped={false} transparent opacity={0.75} />
+      </mesh>
+      {/* 轴头：贴图 sprite，可点（点一下相机对齐该轴） */}
+      <sprite
+        position={dir}
+        scale={[0.9, 0.9, 0.9]}
+        onPointerDown={
+          onPick
+            ? e => {
+                e.stopPropagation()
+                onPick(e as never)
+              }
+            : undefined
+        }
+      >
+        <spriteMaterial map={texture} alphaTest={0.25} toneMapped={false} />
+      </sprite>
+    </>
+  )
+}
+
+/**
+ * 三向轴标：替代默认 R/G/B GizmoViewport。
+ * 纸面 + 墨线语言，读作"坐标轴指示符"而不是彩色控件。
+ */
+function AxisGizmo() {
+  const { tweenCamera } = useGizmoContext()
+  return (
+    <GizmoHelper alignment="top-right" margin={[76, 76]}>
+      <group scale={40}>
+        <Axis dir={[1, 0, 0]} letter="X" color={INK} onPick={e => tweenCamera(e.object.position)} />
+        <Axis dir={[0, 1, 0]} letter="Y" color={INK} onPick={e => tweenCamera(e.object.position)} />
+        <Axis dir={[0, 0, 1]} letter="Z" color={INK} onPick={e => tweenCamera(e.object.position)} />
+        {/* 原点识别点：全轴唯一强调色（HUD 青） */}
+        <mesh>
+          <sphereGeometry args={[0.05, 10, 10]} />
+          <meshBasicMaterial color="#3ECFCF" toneMapped={false} />
+        </mesh>
+      </group>
+    </GizmoHelper>
   )
 }
 

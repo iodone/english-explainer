@@ -7,6 +7,7 @@ import {
 } from 'react'
 import * as THREE from 'three'
 import type { PartFinish, ThingData } from '../data/types'
+import { makeHullMaterial, makePaperMaterial } from './paperSurface'
 
 /**
  * Sketch primitives —— 几何绘制原语层（从 ThingScene.tsx 抽出，2026-09-09）
@@ -14,7 +15,12 @@ import type { PartFinish, ThingData } from '../data/types'
  * 每个 thing 的几何体放 src/geometry/<slug>.tsx，只 import 本文件的原语；
  * ThingScene 经 src/geometry/index.ts 的 GEOMETRY map 分发。
  * 原语职责：部件配色角色（FINISH_POOL）、点击/hover（PartMetaContext）、
- * 草稿线状态机（usePartHighlight）与三种绘制元件。
+ * 草稿线状态机（usePartHighlight）与绘制元件。
+ *
+ * 2026-09-29 材质升级（blueprint 技法移植）：
+ * - 表面从 meshBasicMaterial 换成纸面排线 shader（paperSurface.ts）：
+ *   固定 half-lambert 明暗分层 + 屏幕空间交叉排线，体量感来自明暗而非轮廓线
+ * - 外壳类（hull）额外加反向外壳描边，给出连续剪影边
  */
 
 const INK = '#2C2A25'
@@ -33,8 +39,8 @@ export { INK, INK_SOFT, WARNING_RED }
 /**
  * 部件配色池（JX-7b §1.5 色彩规范）：
  * 三灰阶层次（军工灰/冷灰/钛白）+ 警示红点缀。
- * 数据层 ThingPart.finish 决定角色；SketchMesh 初值与 usePartHighlight
- * 常态 lerp 目标共用此表（Color 实例只读，lerp 不改入参）。
+ * 数据层 ThingPart.finish 决定角色；常态 Edges 线色与透明度共用此表，
+ * 面材质则由 paperSurface.PAPER_TONES 给同一角色的纸面明度档。
  */
 const FINISH_POOL: Record<
   PartFinish,
@@ -87,8 +93,8 @@ export interface HighlightState {
 
 /**
  * 部件草稿线状态机：每帧 lerp 到目标（点亮有渐变，仪器感）。
- * 双材质：本体半透明面（体量）+ 子级 drei <Edges> 轮廓线。
- * 常态目标 = 部件配色角色（FINISH_POOL，JX-7b 三灰阶 + 警示红）；
+ * 材质三件套：纸面排线面（体量/明暗）+ 反向外壳描边（剪影）+ 子级 drei <Edges> 轮廓线。
+ * 常态目标 = 部件配色角色（FINISH_POOL / PAPER_TONES）；
  * 激活/已过/压暗覆盖透明度与线宽，激活色 = thing accent（学习聚焦语义）。
  */
 export function usePartHighlight(
@@ -96,7 +102,8 @@ export function usePartHighlight(
   thing: ThingData,
   state: HighlightState,
 ) {
-  const accent = new THREE.Color(thing.color)
+  const accent = useMemo(() => new THREE.Color(thing.color), [thing.color])
+  const accentHex = useMemo(() => thing.color, [thing.color])
 
   const finishMap = useMemo(() => {
     const m = new Map<string, PartFinish>()
@@ -112,9 +119,10 @@ export function usePartHighlight(
       const partId = node.name
       if (!partId) return
 
-      // 本体半透明面
-      const faceMat = node.material as THREE.MeshBasicMaterial
-      // Edges 墨线（drei Edges 渲染为子 Mesh，材质 LineMaterial）
+      const faceMat = node.material as THREE.Material
+      const isPaper = (faceMat as THREE.Material).type === 'ShaderMaterial'
+
+      // drei Edges 渲染为子 Mesh，材质 LineMaterial
       const edges = node.children.find(
         c =>
           c instanceof THREE.Mesh &&
@@ -128,35 +136,47 @@ export function usePartHighlight(
       let lineOpacity = base.lineOpacity
       let lineColor: THREE.Color = base.line
       let lineWidth = 1
-      let faceOpacity = base.faceOpacity
-      let faceColor: THREE.Color = base.face
+      let emphasis = 0
+      let dim = 0
 
       if (state.activePartIds.includes(partId)) {
-        lineOpacity = 1; lineColor = accent; lineWidth = 2.5
-        faceOpacity = 0.28; faceColor = accent
+        lineOpacity = 1; lineColor = accent; lineWidth = 2.5; emphasis = 1
       } else if (state.pastPartIds.includes(partId)) {
-        lineOpacity = 0.5; faceOpacity = 0.06
+        lineOpacity = 0.5; dim = 0.55
       } else if (state.dimOthers) {
-        lineOpacity = 0.12; faceOpacity = 0.02
+        lineOpacity = 0.12; dim = 1
       } else if (state.highlightPartId === partId) {
-        lineOpacity = 1; lineColor = accent; lineWidth = 2.5
-        faceOpacity = 0.28; faceColor = accent
+        lineOpacity = 1; lineColor = accent; lineWidth = 2.5; emphasis = 1
+      } else if (state.highlightPartId) {
+        dim = 0.5
       }
 
-      faceMat.opacity = THREE.MathUtils.lerp(faceMat.opacity, faceOpacity, 0.15)
-      faceMat.color.lerp(faceColor, 0.15)
+      if (isPaper) {
+        const u = (faceMat as THREE.ShaderMaterial).uniforms
+        u.uEmphasis.value = THREE.MathUtils.lerp(u.uEmphasis.value, emphasis, 0.15)
+        u.uDim.value = THREE.MathUtils.lerp(u.uDim.value, dim, 0.15)
+      } else {
+        const basic = faceMat as THREE.MeshBasicMaterial
+        basic.opacity = THREE.MathUtils.lerp(basic.opacity, base.faceOpacity, 0.15)
+        basic.color.lerp(base.face, 0.15)
+      }
+
       lineMat.opacity = THREE.MathUtils.lerp(lineMat.opacity, lineOpacity, 0.15)
       lineMat.color.lerp(lineColor, 0.15)
       lineMat.linewidth = THREE.MathUtils.lerp(lineMat.linewidth, lineWidth, 0.15)
     })
   })
+
+  return { accentHex }
 }
 
 /* ─── Sketch primitives ─── */
 
+const FALLBACK_ACCENT = new THREE.Color('#3ECFCF')
+
 /**
  * 草稿网格体（JX-7b §材质分层 + §色彩）：
- * 半透明实体面（体量/遮蔽感）+ Edges 轮廓线，色按 ThingPart.finish 角色。
+ * 纸面排线面（体量/遮蔽感）+ 反向外壳描边（外壳类）+ Edges 轮廓线，色按 finish 角色。
  * 点击本体 = 点部件（图→词）。
  */
 export function SketchMesh({
@@ -166,7 +186,19 @@ export function SketchMesh({
 }: React.ComponentProps<'mesh'> & { partId?: string }) {
   const { onPartClick, finishOf } = useContext(PartMetaContext)
   const clickable = !!partId && !!onPartClick
-  const base = FINISH_POOL[partId ? finishOf(partId) : 'hull']
+  const finish = partId ? finishOf(partId) : 'hull'
+  const base = FINISH_POOL[finish]
+  const accent = useContext(AccentContext)
+
+  const dpr = Math.min(
+    typeof window === 'undefined' ? 2 : window.devicePixelRatio,
+    2,
+  )
+  const materials = useMemo(() => {
+    const surface = makePaperMaterial(finish, accent ?? FALLBACK_ACCENT, dpr)
+    const hull = makeHullMaterial(0.022, new THREE.Color(INK))
+    return { surface, hull }
+  }, [finish, accent, dpr])
 
   return (
     <mesh
@@ -197,12 +229,14 @@ export function SketchMesh({
       }
     >
       {children}
-      <meshBasicMaterial
-        color={base.face}
-        transparent
-        opacity={base.faceOpacity}
-        depthWrite={false}
-      />
+      <primitive object={materials.surface} attach="material" />
+      {/* 反向外壳描边：只外壳/钛白类给剪影边，结构件靠 Edges 纵线（JX-7b 双层表达） */}
+      {(finish === 'hull' || finish === 'titanium') && (
+        <mesh renderOrder={1}>
+          {children}
+          <primitive object={materials.hull} attach="material" />
+        </mesh>
+      )}
       <Edges
         color={base.line}
         lineWidth={1}
@@ -213,6 +247,9 @@ export function SketchMesh({
     </mesh>
   )
 }
+
+/** 每个 thing 的 accent（用于激活高亮 + 纸面材质的 uAccent），由 ThingScene 提供 */
+export const AccentContext = createContext<THREE.Color | null>(null)
 
 /** 细杆 —— 可被部件高亮命中的"线"（4 面方杆，手绘粗线感） */
 export function Rod({
