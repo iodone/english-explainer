@@ -44,7 +44,9 @@
 `finish` 角色映射纸面明度档（`PAPER_TONES`，同一份值也导出 DOM 侧 `PAPER_SWATCH` 供图例用）。
 外壳/钛白/透明壳件额外叠一层反向外壳描边（BackSide 沿法线外扩）给出连续剪影边；
 结构件只靠 Edges 纵线——两者分工即上表「双层表达」。
-调研详情见 `design/blueprint-3d-drawing-research.md` 与 `design/anatomy-figures-research.md`。
+调研详情见 `design/blueprint-3d-drawing-research.md` 与 `design/anatomy-figures-research.md`；
+**本节的可执行长版（密度清单 / 细节原语配方 / 标注选位 / 自检工具）在
+`.agents/skills/figure-craft/`** —— 要动几何或标注层时先读它。
 
 **细节原语（2026-10-13）**：精细度来自**零件密度**而非多边形数。`primitives.tsx` 提供
 `BoltCircle`（螺栓圈）/ `SeamRing`（箍带·环缝）/ `PanelLines`（面板分缝）/ `TickRing`（刻度圈，

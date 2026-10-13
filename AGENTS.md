@@ -14,6 +14,10 @@ npm run build                # 生产构建（tsc -b && vite build）
 npx tsc --noEmit             # 仅类型检查
 npx tsx scripts/validate-data.mjs  # 数据一致性校验（句数/partId/dict 闭环）
 npx tsx scripts/check-simple-words.mjs  # Munroe ~1000 词闸门（article/flow/keyExpressions/funFacts 四通道）
+
+# 图版走查（需要 npm run dev 开着；自己起 headless Chrome，零依赖）
+node .agents/skills/figure-craft/scripts/figure.mjs shot   <thing>            # 截图
+node .agents/skills/figure-craft/scripts/figure.mjs labels <thing> [--click .word-part]
 ```
 
 ## 结构
@@ -67,6 +71,13 @@ ThingScene.tsx 只做 Canvas 编排与标注层，不再放几何体。
 - 内容遵循 Munroe 约束：simple name ↔ real name 对照，解释只用 ~1000 常用词
   （"gravity" → "the pull of the world"）；释义卡中文不受此限
 
+## 画图
+
+3D 图版的绘制技艺（部件密度、明暗分档、墨线、细节原语配方、标注层选位算法）与
+自检工具链在 **`.agents/skills/figure-craft/`**（`.claude/skills/figure-craft` 是同一个目录的软链）。
+要新增/改造某件的几何体、调细节密度、动标注层，或用户抱怨"图太简陋""标签在闪""标注压在图上"时，
+先读它的 `SKILL.md`。视觉契约的真相源仍是 `DESIGN.md`（§1.5），skill 只补它没写的可执行技艺与踩坑。
+
 ## 已知坑
 
 - Tailwind 4 用 `@theme` 定义令牌，class 名是 `text-hud-cyan` / `bg-canvas` / `text-ink` 等
@@ -75,3 +86,7 @@ ThingScene.tsx 只做 Canvas 编排与标注层，不再放几何体。
 - hex 颜色写错位数（如 `#3EFCFCF`）不会报错但渲染黑色，注意 6 位
 - `sentenceRef` 是全篇连续句索引（跨段累加，0-based），写 flow 时数清楚
 - GlooLine（drei Line）不参与部件高亮——需要高亮的"线"用 `Rod` 组件（细圆柱 mesh + name）
+- drei `<Html>` 渲染进 DOM portal，**不受父 group `visible` 控制**——隐藏标签必须切
+  `labelEl.style.display`（标注层细节见 `.agents/skills/figure-craft/references/annotate.md`）
+- 逐帧重算的结果**不能**用在二值判断上：`sx >= 0` 这类浮点符号在 0 附近会逐帧翻转，
+  表现为"标注字一直在闪"（同一个坑有三个变体，见 annotate.md §5）

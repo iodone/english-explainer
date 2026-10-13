@@ -835,6 +835,9 @@ function AnnotationLabels({
                   ref={node => {
                     labelRefs.current[index] = node
                   }}
+                  // data-label：走查工具的稳定钩子（标注有效性只有跑起来才验得了，
+                  // 见 .agents/skills/figure-craft/scripts/figure.mjs labels）
+                  data-label={part.id}
                   style={{ ...LABEL_STYLE, whiteSpace: 'nowrap', opacity: 0.9 }}
                 >
                   <span style={{ display: 'block' }}>{part.label.toUpperCase()}</span>
