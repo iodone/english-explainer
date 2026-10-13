@@ -25,7 +25,7 @@ import type { HighlightState, PartMeta } from '../geometry'
 /** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
 const PAPER = '#F4F1EA'
 /** 标签落点候选：沿部件包围盒"朝外方向"的试探距离（世界单位，逐级外推找空位） */
-const LABEL_REACH_CANDIDATES = [0.95, 1.3, 1.7, 2.15, 2.65, 3.2, 3.9]
+const LABEL_REACH_CANDIDATES = [0.95, 1.3, 1.7, 2.15, 2.65, 3.2, 3.9, 4.7, 5.6, 6.6]
 /** 包围盒朝外点的试探比例（0=中心，1=盒边缘） */
 const ANCHOR_EDGE_T = [0.72, 1.0]
 /** 引线水平尾巴长度（世界单位） */
@@ -36,12 +36,32 @@ const LABEL_STYLE = {
   fontSize: '10px',
   letterSpacing: '0.06em',
   lineHeight: '1.25',
+  // 淡排↔实排之间走渐变，避免逐帧切换时视觉上"闪"
+  transition: 'opacity 0.25s linear',
 } as const
 /** 标签之间的最小留白（屏幕像素）：太小会被读成一行连续的英文 */
 const LABEL_GUTTER = 12
+/** 标签被判定重叠后，要连续几帧才真的隐藏（去抖，防闪） */
+const LABEL_HIDE_FRAMES = 4
+/** 选位决策的最小间隔（ms）：决策是节流的，引线几何仍逐帧跟随 */
+const LABEL_SOLVE_MS = 220
+/**
+ * 引线候选方向（屏幕平面内的单位向量，逐部件算）：
+ * 0 朝外（部件法线的屏幕投影）· 1 反向 · 2/3 屏幕左右 · 4/5 屏幕上下
+ * 只给"朝外"一个方向时，贴边的部件（如最右侧的涡轮）会无位可落、标签直接消失。
+ */
+const DIR_COST = [0, 4, 2, 2, 3, 3]
+/** 文字横向延伸方向的判据死区：|dir·right| 小于它时不算"明确朝右/朝左" */
+const TEXT_SIDE_DEADBAND = 0.15
 /** 标签文本宽高的粗略估算（DOM 测量前的碰撞预判，屏幕像素） */
 const LABEL_ROW_PX = 13
 const LABEL_CHAR_PX = 6.6
+/** 每帧缓存的部件网格包围盒上限（超过就丢弃，只影响占用精度） */
+const MESH_BOUND_CAP = 512
+/** 硬占用：标签压到形体上就算失败（在形体外留 4px 呼吸） */
+const MESH_PAD = 4
+/** 软占用（整个模型包围盒）的权重：能落在形体之外就优先落外面 */
+const COST_OUTSIDE_BODY = 40
 
 type LineElement = ComponentRef<typeof Line>
 
@@ -219,6 +239,23 @@ function SketchModel({
 
 /* ─── Annotation Labels ─── */
 
+/** 标签选位：哪个锚点档 × 哪个方向 × 外推几档 × 文字往哪边排 */
+interface LabelSlot {
+  anchor: number
+  dir: number
+  reach: number
+  /** 文字从引线折角向右(true)/向左(false)延伸。定槽位时算一次，随槽位粘滞，不逐帧重算 */
+  textRight: boolean
+}
+
+/** 一个候选位的几何：引线三个点 + 标签占位矩形 */
+interface Placement {
+  edge: THREE.Vector3
+  shoulder: THREE.Vector3
+  label: THREE.Vector3
+  rect: Rect
+}
+
 interface Rect {
   left: number
   right: number
@@ -255,6 +292,16 @@ function AnnotationLabels({
 }) {
   const [hovered, setHovered] = useState<string | null>(null)
   const accent = thing.color
+  // 选位决策（节流）：slots = 每个部件选中的槽位，fades = 是否淡排
+  const decisionRef = useRef<{
+    at: number
+    key: string
+    count: number
+    slots: Map<string, LabelSlot | null>
+    fades: Map<string, boolean>
+  }>({ at: 0, key: '', count: -1, slots: new Map(), fades: new Map() })
+  // 隐藏去抖计数
+  const missRef = useRef<Map<HTMLDivElement, number>>(new Map())
   const lineRefs = useRef<(LineElement | null)[]>([])
   const htmlRefs = useRef<(THREE.Group | null)[]>([])
   const labelRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -272,6 +319,7 @@ function AnnotationLabels({
       projected: new THREE.Vector3(),
       vis: new THREE.Vector3(),
       dot: new THREE.Vector3(),
+      meshBounds: new Float32Array(MESH_BOUND_CAP * 6),
       edge: new THREE.Vector3(),
       shoulder: new THREE.Vector3(),
       label: new THREE.Vector3(),
@@ -284,6 +332,14 @@ function AnnotationLabels({
     center: THREE.Vector3
     normal: THREE.Vector3
     radius: number
+  }
+
+  // display 只在变化时写，避免每帧无谓的样式/布局抖动
+  const showLabel = (el: HTMLDivElement) => {
+    if (el.style.display === 'none') el.style.display = ''
+  }
+  const hideLabel = (el: HTMLDivElement) => {
+    if (el.style.display !== 'none') el.style.display = 'none'
   }
 
   const overlaps = (rect: Rect, list: Rect[]) =>
@@ -313,10 +369,23 @@ function AnnotationLabels({
     // ① 部件包围盒（世界）→ 中心 / 朝外法线 / 半径
     const boxes = new Map<string, BoxEntry>()
     const counts = new Map<string, number>()
+    // 每块网格的世界 AABB：投影后就是"形体占用"，标签的硬约束
+    const meshBounds = tmp.meshBounds
+    let meshCount = 0
     root.traverse(node => {
       if (!(node instanceof THREE.Mesh) || !node.name) return
       tmp.box.setFromObject(node)
       if (tmp.box.isEmpty()) return
+      if (meshCount < MESH_BOUND_CAP) {
+        const o = meshCount * 6
+        meshBounds[o] = tmp.box.min.x
+        meshBounds[o + 1] = tmp.box.min.y
+        meshBounds[o + 2] = tmp.box.min.z
+        meshBounds[o + 3] = tmp.box.max.x
+        meshBounds[o + 4] = tmp.box.max.y
+        meshBounds[o + 5] = tmp.box.max.z
+        meshCount++
+      }
       tmp.box.getCenter(tmp.nodeCenter)
       tmp.box.getSize(tmp.size)
       const entry =
@@ -347,48 +416,112 @@ function AnnotationLabels({
       }
     }
 
-    const occupied: Rect[] = []
-    /** 软占用：模型自身的屏幕范围。首选位要避开它，兜底位可以压上去。 */
-    const softOccupied: Rect[] = []
     // 本帧已放置的标签（循环结束后用 DOM 实测矩形复核一遍，杜绝视觉叠字）
     const settled: { el: HTMLDivElement; group: THREE.Group }[] = []
 
-    // 先把模型自身的屏幕包围盒占住：标签优先落在形体之外，引线指进去
-    // （制图习惯：标注不压在物体上；也顺带解释了引线为什么存在）
-    {
-      tmp.box.setFromObject(root)
-      if (!tmp.box.isEmpty()) {
-        const min = tmp.box.min
-        const max = tmp.box.max
-        let l = Infinity
-        let r = -Infinity
-        let t = Infinity
-        let b = -Infinity
-        for (let i = 0; i < 8; i++) {
-          const corner = tmp.scratch.set(
-            i & 1 ? max.x : min.x,
-            i & 2 ? max.y : min.y,
-            i & 4 ? max.z : min.z,
-          )
-          const sc = toScreen(corner)
-          l = Math.min(l, sc.x)
-          r = Math.max(r, sc.x)
-          t = Math.min(t, sc.y)
-          b = Math.max(b, sc.y)
-        }
-        softOccupied.push({ left: l - 8, right: r + 8, top: t - 8, bottom: b + 8 })
+    /** 从 8 个角投影出屏幕矩形 */
+    const projectRect = (minX: number, minY: number, minZ: number, maxX: number, maxY: number, maxZ: number, pad: number): Rect => {
+      let l = Infinity
+      let r = -Infinity
+      let t = Infinity
+      let b = -Infinity
+      for (let i = 0; i < 8; i++) {
+        const sc = toScreen(
+          tmp.scratch.set(i & 1 ? maxX : minX, i & 2 ? maxY : minY, i & 4 ? maxZ : minZ),
+        )
+        l = Math.min(l, sc.x)
+        r = Math.max(r, sc.x)
+        t = Math.min(t, sc.y)
+        b = Math.max(b, sc.y)
       }
+      return { left: l - pad, right: r + pad, top: t - pad, bottom: b + pad }
     }
-    const order = thing.parts.map((_, i) => i)
-    const distanceOf = thing.parts.map(part => {
-      const entry = boxes.get(part.id)
-      const c = entry?.center ?? tmp.dot.set(...part.position)
-      return camera.position.distanceToSquared(c)
-    })
-    order.sort((a, b) => {
-      const p = labelPriority(thing.parts[a].id) - labelPriority(thing.parts[b].id)
-      return p !== 0 ? p : distanceOf[a] - distanceOf[b]
-    })
+
+    /**
+     * 硬占用：每块网格自己的屏幕矩形（并集 ≈ 模型剪影）。
+     * 早先用"整个模型的包围盒"当占用，结果那一个矩形吃掉了画布 x103–647 / 694 —— 
+     * 28 个候选位全部判定失败，所有标注都退化成"压在图上 + 淡排"。
+     * 逐网格判定才有解：穹顶上方、塔体左右这些真空区都能落字。
+     */
+    const meshRects: Rect[] = []
+    for (let i = 0; i < meshCount; i++) {
+      const o = i * 6
+      meshRects.push(
+        projectRect(meshBounds[o], meshBounds[o + 1], meshBounds[o + 2], meshBounds[o + 3], meshBounds[o + 4], meshBounds[o + 5], MESH_PAD),
+      )
+    }
+
+    /** 软占用：整个模型的屏幕包围盒。只用来"优先落在形体之外"，不做失败判定。 */
+    let modelRect: Rect | null = null
+    tmp.box.setFromObject(root)
+    if (!tmp.box.isEmpty()) {
+      const min = tmp.box.min
+      const max = tmp.box.max
+      modelRect = projectRect(min.x, min.y, min.z, max.x, max.y, max.z, 8)
+    }
+    // 顺序必须**稳定**：只按优先级（激活 > 悬停 > 常态）分档，档内按固定的部件序号。
+    // 早先档内按"近相机优先"排，相机动一点顺序就换人，同一个坑位换来换去 —— 视觉上就是标签在闪。
+    const order = thing.parts
+      .map((part, i) => ({ i, p: labelPriority(part.id) }))
+      .sort((a, b) => (a.p !== b.p ? a.p - b.p : a.i - b.i))
+      .map(x => x.i)
+
+    /** 由「槽位」算出引线三点与标签矩形；判定与绘制共用同一套几何，保证一致 */
+    const pointsFor = (
+      ctx: Ctx,
+      slot: LabelSlot,
+      into: { edge: THREE.Vector3; shoulder: THREE.Vector3; label: THREE.Vector3 },
+    ): Placement => {
+      // 注意：法线/朝向必须逐部件取（ctx.normal / ctx.vis）。
+      // 早先直接读 tmp.normal / tmp.vis —— 那是构建 ctxList 时留下的"最后一个部件"的值，
+      // 于是除末位以外所有标注的锚点都按错误的朝外方向外推，落点漂移。
+      const { entry } = ctx
+      into.edge
+        .copy(entry.center)
+        .addScaledVector(ctx.normal, ctx.radius * ANCHOR_EDGE_T[slot.anchor])
+      into.shoulder
+        .copy(into.edge)
+        .addScaledVector(ctx.dirs[slot.dir], LABEL_REACH_CANDIDATES[slot.reach])
+      // 文字朝向取"槽位里已定的 textRight"，不能用现场算的符号位：
+      // 当方向几乎垂直于相机右轴时点积 ≈ ±1e-9，符号逐帧翻转，
+      // 标签就在 translateY(-50%) 与 translate(-100%,-50%) 之间横跳一整个标签宽度 —— 看着就是"字在闪"。
+      into.label
+        .copy(into.shoulder)
+        .addScaledVector(tmp.right, (slot.textRight ? 1 : -1) * LABEL_TAIL)
+      const s = toScreen(into.label)
+      const { estWidth, estHeight } = ctx
+      const left = slot.textRight ? s.x : s.x - estWidth
+      // 四周留 LABEL_GUTTER：相邻标签首尾相接会被读成一行字
+      const rect: Rect = {
+        left: left - LABEL_GUTTER,
+        right: left + estWidth + LABEL_GUTTER,
+        top: s.y - estHeight / 2 - 3,
+        bottom: s.y + estHeight / 2 + 3,
+      }
+      // 不再 clone：调用方要么只读 rect（每次新建对象），要么读完 label 立刻用掉。
+      // 一次决策最多 6 部件 × 84 候选，clone 会白白产生上千个 Vector3。
+      return { edge: into.edge, shoulder: into.shoulder, label: into.label, rect }
+    }
+
+    // 每帧都要准备的公共量（两遍共用）
+    type Ctx = {
+      part: (typeof thing.parts)[number]
+      index: number
+      line: LineElement
+      htmlGroup: THREE.Group
+      labelEl: HTMLDivElement
+      entry: BoxEntry
+      normal: THREE.Vector3
+      vis: THREE.Vector3
+      /** 屏幕平面内的候选引线方向（下标见 DIR_COST） */
+      dirs: THREE.Vector3[]
+      radius: number
+      estWidth: number
+      estHeight: number
+      dotWorld: THREE.Vector3
+      scratch: { edge: THREE.Vector3; shoulder: THREE.Vector3; label: THREE.Vector3 }
+    }
+    const ctxList: Ctx[] = []
 
     for (const index of order) {
       const part = thing.parts[index]
@@ -396,6 +529,7 @@ function AnnotationLabels({
       const htmlGroup = htmlRefs.current[index]
       const labelEl = labelRefs.current[index]
       if (!line || !htmlGroup || !labelEl) continue
+
       // 无几何的部件退化：用数据里的 position 当锚点
       const entry =
         boxes.get(part.id) ??
@@ -419,6 +553,18 @@ function AnnotationLabels({
       if (tmp.vis.lengthSq() < 1e-6) tmp.vis.copy(tmp.up)
       tmp.vis.normalize()
 
+      const normal = tmp.normal.clone()
+      const vis = tmp.vis.clone()
+      // 屏幕平面内的候选方向：朝外 / 反向 / 左右 / 上下
+      const dirs = [
+        vis.clone(),
+        vis.clone().negate(),
+        tmp.right.clone(),
+        tmp.right.clone().negate(),
+        tmp.up.clone(),
+        tmp.up.clone().negate(),
+      ]
+
       const rows = part.realName ? 2 : 1
       const longest = Math.max(part.label.length, part.realName?.length ?? 0)
       // 实测优先：标签是 DOM，直接量真实尺寸（首帧量不到时退回估算）
@@ -429,99 +575,173 @@ function AnnotationLabels({
       tmp.localPart.set(part.position[0], part.position[1], part.position[2])
       const dotWorld = root.localToWorld(tmp.localPart.clone())
 
-      type Placement = {
-        edge: THREE.Vector3
-        shoulder: THREE.Vector3
-        label: THREE.Vector3
-        rect: Rect
-      }
-      let placed: Placement | null = null
-      let nearest: (Placement & { dist: number }) | null = null
+      ctxList.push({
+        part,
+        index,
+        line,
+        htmlGroup,
+        labelEl,
+        entry,
+        normal,
+        vis,
+        dirs,
+        radius,
+        estWidth,
+        estHeight,
+        dotWorld,
+        // 每帧复用的三个向量（pointsFor 往里写）
+        scratch: {
+          edge: new THREE.Vector3(),
+          shoulder: new THREE.Vector3(),
+          label: new THREE.Vector3(),
+        },
+      })
+    }
 
-      const sideCandidates = [1, -1]
-      for (const t of ANCHOR_EDGE_T) {
-        const edgeWorld = entry.center.clone().addScaledVector(tmp.normal, radius * t)
-        if (!toScreen(edgeWorld).visible) continue
-
-        for (const side of sideCandidates) {
-        for (const reach of LABEL_REACH_CANDIDATES) {
-          const shoulderWorld = edgeWorld.clone().addScaledVector(tmp.vis, reach * side)
-          const labelWorld = shoulderWorld
-            .clone()
-            .addScaledVector(tmp.right, (sx >= 0 ? 1 : -1) * LABEL_TAIL)
-          const s = toScreen(labelWorld)
-          if (!s.visible) continue
-
-          const left = sx >= 0 ? s.x : s.x - estWidth
-          // 四周留 LABEL_GUTTER：相邻标签首尾相接会被读成同一行字
-          const rect: Rect = {
-            left: left - LABEL_GUTTER,
-            right: left + estWidth + LABEL_GUTTER,
-            top: s.y - estHeight / 2 - 3,
-            bottom: s.y + estHeight / 2 + 3,
-          }
-          const outOfView =
-            rect.left < 6 ||
-            rect.right > size.width - 6 ||
-            rect.top < 6 ||
-            rect.bottom > size.height - 6
-          // 出画布的候选直接丢弃（宁可这个标签不出现，也不留半截）
-          if (outOfView) continue
-
-          const candidate = { edge: edgeWorld, shoulder: shoulderWorld, label: labelWorld, rect }
-          const dist = toScreen(edgeWorld).x - s.x
-          if (!nearest || Math.abs(dist) < Math.abs(nearest.dist)) {
-            nearest = { ...candidate, dist }
-          }
-          if (overlaps(rect, occupied)) continue
-          // 标签之间绝不允许叠；模型范围只是"优先避开"
-          if (overlaps(rect, softOccupied)) continue
-          placed = candidate
-          occupied.push(rect)
-          break
+    // ── 第一遍：选位（节流）─────────────────────────────────────────────
+    // 选位是"决策"，只有相机明显动了 / 优先级变了 / 隔一段时间才重算。
+    // 逐帧重算会让两个标签为同一个坑位互相顶，形成周期性的位置横跳。
+    const priorityKey =
+      `${highlightPartId ?? ''}|${activePartIds.join(',')}|${hovered ?? ''}`
+    const now = performance.now()
+    const decision = decisionRef.current
+    if (
+      now - decision.at > LABEL_SOLVE_MS ||
+      decision.key !== priorityKey ||
+      decision.count !== ctxList.length
+    ) {
+      const occupied: Rect[] = []
+      const slots = new Map<string, LabelSlot | null>()
+      const fades = new Map<string, boolean>()
+      for (const ctx of ctxList) {
+        const all: { slot: LabelSlot; placement: Placement; inView: boolean; cost: number }[] = []
+        // 文字横向延伸方向：按方向的水平分量定；落在死区里就退回"朝外方向"的水平分量
+        const textRightFor = (dir: number) => {
+          const h = ctx.dirs[dir].dot(tmp.right)
+          if (Math.abs(h) > TEXT_SIDE_DEADBAND) return h > 0
+          const hv = ctx.vis.dot(tmp.right)
+          if (Math.abs(hv) > TEXT_SIDE_DEADBAND) return hv > 0
+          // 两个判据都落在死区（方向几乎与屏幕垂直）：按固定约定朝右排。
+          // 这里若写成 `hv >= 0`，hv ≈ ±1e-9 就会逐轮翻符号，等于把闪动换个地方复现。
+          return true
         }
-        if (placed) break
+        for (let ai = 0; ai < ANCHOR_EDGE_T.length; ai++) {
+          for (let di = 0; di < DIR_COST.length; di++) {
+            const textRight = textRightFor(di)
+            for (let ri = 0; ri < LABEL_REACH_CANDIDATES.length; ri++) {
+              const slot: LabelSlot = { anchor: ai, dir: di, reach: ri, textRight }
+              const placement = pointsFor(ctx, slot, ctx.scratch)
+              const r = placement.rect
+              all.push({
+                slot,
+                placement,
+                inView:
+                  r.left >= 6 &&
+                  r.right <= size.width - 6 &&
+                  r.top >= 6 &&
+                  r.bottom <= size.height - 6,
+                // 成本：先求"整体落在形体之外"，再求引线短、朝外、靠边缘出线。
+                // 用打分而不是"枚举序里第一个合格" —— 后者会让标签被拉得很远，
+                // 只因为远的那档恰好排在前面。
+                cost:
+                  (modelRect && overlaps(r, [modelRect]) ? COST_OUTSIDE_BODY : 0) +
+                  DIR_COST[di] +
+                  ri * 2 +
+                  (ai === 1 ? 0.5 : 0),
+              })
+            }
+          }
         }
-        if (placed) break
-      }
 
-      // 兜底位也要过碰撞检测：过不了宁可不显示，也不许两个标签叠在一起
-      let pick: Placement | null = placed
-      if (!pick && nearest && !overlaps(nearest.rect, occupied)) {
-        pick = nearest
-        occupied.push(nearest.rect)
+        // 硬约束：不压形体、不压已放置的标签
+        const clear = (c: (typeof all)[number]) =>
+          c.inView &&
+          !overlaps(c.placement.rect, meshRects) &&
+          !overlaps(c.placement.rect, occupied)
+        // 退让：形体实在无可落之处时，允许压形体，但仍不许叠字（淡排）
+        const clearOfLabels = (c: (typeof all)[number]) =>
+          c.inView && !overlaps(c.placement.rect, occupied)
+
+        const pickBest = (ok: (c: (typeof all)[number]) => boolean) => {
+          let best: (typeof all)[number] | null = null
+          for (const c of all) if (ok(c) && (!best || c.cost < best.cost)) best = c
+          return best
+        }
+
+        // 粘滞优先：上一轮的坑还站得住就继续用（读 '上一轮' 的 slots，不是本轮正在建的）
+        const prev = decision.slots.get(ctx.part.id) ?? null
+        let pick: (typeof all)[number] | null = null
+        if (prev) {
+          const same = all.find(
+            c =>
+              c.slot.anchor === prev.anchor &&
+              c.slot.dir === prev.dir &&
+              c.slot.reach === prev.reach,
+          )
+          if (same) {
+            // 文字朝向沿用上一轮：死区内的方向本就没有明确左右，跟着重算只会引入抖动。
+            // 改完必须用新槽位重算 rect —— 否则"校验的矩形"和"实际落笔的矩形"差一个标签宽度，
+            // 会和上一个已占位的标签叠字（改前就是这个表现）。
+            same.slot.textRight = prev.textRight
+            same.placement = pointsFor(ctx, same.slot, ctx.scratch)
+            if (clearOfLabels(same)) pick = same
+          }
+        }
+        if (!pick) pick = pickBest(clear)
+        const faded = !!pick && !clear(pick)
+        if (!pick) pick = pickBest(clearOfLabels)
+
+        slots.set(ctx.part.id, pick ? pick.slot : null)
+        fades.set(ctx.part.id, faded)
+        if (pick) occupied.push(pick.placement.rect)
       }
-      const faded = !placed && pick !== null
-      const isActive = highlightPartId === part.id || activePartIds.includes(part.id)
-      const isHovered = hovered === part.id
+      decision.at = now
+      decision.key = priorityKey
+      decision.count = ctxList.length
+      decision.slots = slots
+      decision.fades = fades
+    }
+
+    // ── 第二遍：每帧按已定槽位重建几何并落笔 ────────────────────────────
+    for (const ctx of ctxList) {
+      const slot = decision.slots.get(ctx.part.id) ?? null
+      const faded = decision.fades.get(ctx.part.id) ?? false
+      const isActive = highlightPartId === ctx.part.id || activePartIds.includes(ctx.part.id)
+      const isHovered = hovered === ctx.part.id
       const show = isActive || isHovered
 
       // 注意：drei 的 <Html> 渲染进 DOM portal，不受父 group.visible 影响，
       // 必须直接切 labelEl.style.display，否则"隐藏"的标签照样画在屏幕上。
-      if (pick) {
-        labelEl.style.display = ''
+      if (slot) {
+        const pl = pointsFor(ctx, slot, ctx.scratch)
+        showLabel(ctx.labelEl)
         // 引线：部件点 → 出形点 → 斜段肩点 → 水平尾巴终点（4 点 3 段）
-        line.geometry.setPositions([
-          dotWorld.x, dotWorld.y, dotWorld.z,
-          pick.edge.x, pick.edge.y, pick.edge.z,
-          pick.shoulder.x, pick.shoulder.y, pick.shoulder.z,
-          pick.label.x, pick.label.y, pick.label.z,
+        ctx.line.geometry.setPositions([
+          ctx.dotWorld.x, ctx.dotWorld.y, ctx.dotWorld.z,
+          pl.edge.x, pl.edge.y, pl.edge.z,
+          pl.shoulder.x, pl.shoulder.y, pl.shoulder.z,
+          pl.label.x, pl.label.y, pl.label.z,
         ])
-        line.computeLineDistances?.()
-        htmlGroup.position.copy(pick.label)
-        htmlGroup.visible = true
-        settled.push({ el: labelEl, group: htmlGroup })
+        ctx.line.computeLineDistances?.()
+        ctx.htmlGroup.position.copy(pl.label)
+        ctx.htmlGroup.visible = true
+        settled.push({ el: ctx.labelEl, group: ctx.htmlGroup })
       } else {
-        htmlGroup.visible = false
-        labelEl.style.display = 'none'
+        ctx.htmlGroup.visible = false
+        hideLabel(ctx.labelEl)
       }
 
-      labelEl.style.opacity = String(faded ? 0.35 : show ? 1 : 0.78)
-      labelEl.style.transform =
-        sx >= 0 ? 'translateY(-50%)' : 'translate(-100%, -50%)'
-      labelEl.style.textAlign = sx >= 0 ? 'left' : 'right'
-      labelEl.style.color = isActive ? accent : isHovered ? '#3ECFCF' : '#5A554C'
-      setMaterialOpacity(line, dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5)
+      ctx.labelEl.style.opacity = String(faded ? 0.35 : show ? 1 : 0.78)
+      const textRight = slot ? slot.textRight : true
+      ctx.labelEl.style.transform =
+        textRight ? 'translateY(-50%)' : 'translate(-100%, -50%)'
+      ctx.labelEl.style.textAlign = textRight ? 'left' : 'right'
+      ctx.labelEl.style.color = isActive ? accent : isHovered ? '#3ECFCF' : '#5A554C'
+      // 没有落点就整条引线也不画（否则会留一截浮线在空中）
+      setMaterialOpacity(
+        ctx.line,
+        !slot ? 0 : dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5,
+      )
     }
 
     // 复核（ground truth）：拿标签的真实 DOM 矩形再查一次交叠，
@@ -538,9 +758,16 @@ function AnnotationLabels({
           bottom: r.bottom - canvasRect.top,
         }
         if (overlaps(rect, taken)) {
-          item.group.visible = false
-          item.el.style.display = 'none'
+          // 去抖：连续 LABEL_HIDE_FRAMES 帧都撞才真的隐藏，
+          // 单帧的判定抖动（DOM 位置滞后一帧）不该让标签闪
+          const n = (missRef.current.get(item.el) ?? 0) + 1
+          missRef.current.set(item.el, n)
+          if (n >= LABEL_HIDE_FRAMES) {
+            item.group.visible = false
+            hideLabel(item.el)
+          }
         } else {
+          missRef.current.set(item.el, 0)
           taken.push(rect)
         }
       }
