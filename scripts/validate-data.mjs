@@ -96,7 +96,7 @@ for (const thing of things) {
       .filter(s => typeof s !== 'string' && s.part)
       .map(s => s.part),
   )
-  const FINISHES = new Set(['hull', 'cold', 'titanium', 'warning'])
+  const FINISHES = new Set(['hull', 'cold', 'titanium', 'warning', 'shell'])
   let warnings = 0
   for (const part of thing.parts) {
     if (!markedParts.has(part.id)) {

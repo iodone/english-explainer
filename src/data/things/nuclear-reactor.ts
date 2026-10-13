@@ -22,7 +22,7 @@ export const nuclearReactor: ThingData = {
     { id: 'water', label: 'Hot Water Box', realName: 'Coolant System', position: [1.5, 0, 0], finish: 'cold' },
     { id: 'steam', label: 'Steam Maker', realName: 'Steam Generator', position: [2.5, 1, 0] },
     { id: 'wheel', label: 'Power Wheel', realName: 'Turbine', position: [3.5, 1, 0], finish: 'warning' },
-    { id: 'building', label: 'Big Round House', realName: 'Containment Dome', position: [0, 3, 0], finish: 'titanium' },
+    { id: 'building', label: 'Big Round House', realName: 'Containment Dome', position: [0, 3, 0], finish: 'shell' },
   ],
   article: [
     {

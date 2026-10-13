@@ -30,18 +30,34 @@
 | 外壳/包裹类（伞盖、箱体、穹顶） | 纸面明暗 + 屏幕空间排线 + 反向外壳描边——双层表达 | `makePaperMaterial(finish)` 纸面 shader + `makeHullMaterial` BackSide 描边 + Edges |
 | 结构件（臂、杆、触手、执行器） | 同上，靠明度档区分（钛白最亮/冷灰居中/外壳最暗），带纵向低多边形结构线 | 纸面 shader（`PAPER_TONES`）+ Edges 纵线 |
 
-**纸面材质（2026-09-29 · blueprint 技法移植）**：
-表面从 `meshBasicMaterial` 升级为 `src/geometry/paperSurface.ts` 的纸面 shader——固定 half-lambert
-主光 + 4 档量化明暗 + 屏幕空间交叉排线（暗部自动长出淡墨斜线，线宽恒定像钢笔），
-体量感来自明暗层次而非仅轮廓线。`finish` 角色映射纸面明度档（`PAPER_TONES`），
-激活走统一 `uEmphasis` 通道混向 thing accent、压暗走 `uDim`。
-外壳/钛白件额外叠一层反向外壳描边（BackSide 沿法线外扩）给出连续剪影边；
+**纸面材质（2026-09-29 blueprint 技法 + 2026-10-13 anatomy 技法）**：
+表面走 `src/geometry/paperSurface.ts` 的纸面 shader。四条纪律：
+
+1. **4 档 + 顶面档**：固定 half-lambert 主光量化成 4 档侧面明暗，**朝上的面走独立的 top 色档**
+   （`smoothstep(0.62, 0.72, n.y)`）——等距读法能读成实体的关键；顶面同时抑制排线。
+2. **点亮 = 换调色板**：每档配一套 `lit{base,dark,top}`，激活时在整套色板间插值，
+   accent 只做 16% 染色（身份不变，只是"被照亮了"），压暗走 `uDim`。
+3. **线宽屏幕恒定**：反向外壳描边的 `uWidth` 每帧按「世界单位/像素」换算（透视按相机距离、
+   正交按 zoom），目标 1.1 CSS px——放大缩小墨线都不变粗。
+4. **屏幕空间交叉排线**：暗部自动长出淡墨斜线（阈值 0.30 / 0.54，混合 0.34），线宽恒定像钢笔。
+
+`finish` 角色映射纸面明度档（`PAPER_TONES`，同一份值也导出 DOM 侧 `PAPER_SWATCH` 供图例用）。
+外壳/钛白/透明壳件额外叠一层反向外壳描边（BackSide 沿法线外扩）给出连续剪影边；
 结构件只靠 Edges 纵线——两者分工即上表「双层表达」。
-调研详情见 `design/blueprint-3d-drawing-research.md`。
+调研详情见 `design/blueprint-3d-drawing-research.md` 与 `design/anatomy-figures-research.md`。
+
+**细节原语（2026-10-13）**：精细度来自**零件密度**而非多边形数。`primitives.tsx` 提供
+`BoltCircle`（螺栓圈）/ `SeamRing`（箍带·环缝）/ `PanelLines`（面板分缝）/ `TickRing`（刻度圈，
+长短刻度交替，批量线段）/ `Gear`（真齿形 + 倒边，可配齿数/齿深）；均带 `partId` 参与图↔词高亮。
+**落地阴影**：`ContactShadows` 每帧贴模型底面、按足印给 `scale/far`（不可缩放外层 group，
+否则其正交视锥被一并放大成一块灰板）。
+
+**透明壳角色（2026-10-13）**：`finish: 'shell'` —— 纸面 22% 不透明、仍给剪影边。
+安全壳/玻璃罩/护罩类用它，内部结构透出来（§1.5「双层表达」的正解，`nuclear-reactor` 穹顶已改）。
 
 **色彩**：军工灰 / 冷灰 / 钛白 + 微弱泛黄复古图纸调（纸面 #F4F1EA 承担）；
 点缀色 = 高饱和工业警示红 `#E8453C`，仅用于核心舱 / 传感器 / 推进器末端等功能指示位。
-**已落地（2026-09-09）**：`ThingPart.finish?: 'hull' | 'cold' | 'titanium' | 'warning'` 数据角色
+**已落地（2026-09-09，2026-10-13 增 `shell`）**：`ThingPart.finish?: 'hull' | 'cold' | 'titanium' | 'warning' | 'shell'` 数据角色
 驱动渲染（FINISH_POOL 单源：面/线色 + 透明度），校验脚本约束每件 warning ≤ 2 处。
 激活态一律覆盖为 thing accent（学习聚焦语义），常态红件标注 dot 同红。
 当前标注：reactor = core+wheel 红 / dome 钛白 / water 冷灰；helicopter = engine+window 红 / body 钛白 / rotor 冷灰；
@@ -113,11 +129,24 @@ wave-power = power-maker 红 / turn-pin 钛白 / sea-rider 外壳灰（余冷灰
 - 标注（2026-09-29 重做 · 工程图 leader line）：锚点 = 部件包围盒的**朝外点**（不再用部件中心 + 固定偏移），
   引线走真图纸语法 `部件点 → 出形 → 斜段 → 水平尾巴`；标签用 DOM 渲染（drei `Html`），
   可读设计字体令牌、**两行显示「简单名 / 真名」**（教学习得契约）、横排不随相机旋转
-- 标注防重叠：沿部件朝外方向逐级外推（`LABEL_REACH_CANDIDATES`）+ 屏幕矩形占用检测，
-  按优先级（激活 > 悬停 > 常态，同级近相机优先）取槽；全部冲突时淡至 .35 而非叠字
+- 标注防重叠（2026-10-13 加固，anatomy 图版纪律）：
+  ① 沿朝外方向**两侧**逐级外推（`LABEL_REACH_CANDIDATES` 0.95→3.9 世界单位）+ 屏幕矩形占用检测，
+  按优先级（激活 > 悬停 > 常态，同级近相机优先）取槽；② 候选矩形**出画布直接丢弃**（不留半截字）；
+  ③ 标签之间留 `LABEL_GUTTER = 12px`，首尾相接会被读成一行连续的英文；
+  ④ 模型自身的屏幕包围盒进「软占用」——首选位避开形体（引线指进去），实在没位置才淡排压上去；
+  ⑤ 兜底候选同样过碰撞，过不了就隐藏；⑥ 循环结束后用**真实 DOM 矩形**复核一遍
+  （估算宽高与实测有偏差时兜住）；⑦ 宽度优先取 `labelEl.offsetWidth` 实测值
+- **坑（必记）**：drei `<Html>` 渲染进 DOM portal，**不受父 group `visible` 控制**——
+  "隐藏标签"必须切 `labelEl.style.display`，否则被判定隐藏的标签照样画在屏幕上
 - HUD：右上角**制图室轴标**（墨线细杆 + 纸色圆底 X/Y/Z 贴图轴头 + 原点 HUD 青点，
   点轴头可对齐视角）——替代默认 R/G/B `GizmoViewport`（彩色控件与纸面语言冲突）；
-  顶部视角朝向指示器 P1
+  轴标与 MODEL 读数错开（`margin=[72,112]`）
+- **图版四角**（anatomy plate-corner 体系）：左上 SPECIMEN + 真名 · 右上 MODEL + 图号 ·
+  左下操作提示 · 右下实时读数（`PARTS 07` / `AZ 046° · EL +24°`）+ 视角切换。
+  四角统一 `.plate-corner` 样式（10.5px 等宽、`tabular-nums`、字距 .02em），
+  与 `.micro-label`（10px、大写字距 .08em）区分开。读数值每帧直接写 `textContent`，不进 React 状态
+- **图例符号**（`PartGlyph`）：部件对照表每行左侧一枚等距小立方，三面用该部件实际的纸面色
+  （`PAPER_SWATCH`）+ 墨线——图例符号本身是图上那块实体的缩略，不是抽象色块
 - 标签横排朝向屏幕（DOM 渲染，不随相机旋转倾斜），位置随模型旋转实时重排
 
 **技术红线**：线框只用于外壳类部件（不是全模型 wireframe）；

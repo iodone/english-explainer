@@ -27,8 +27,10 @@ export interface ArticleParagraph {
  * 部件配色角色（JX-7b 色彩规范，DESIGN §1.5）：
  * - hull 军工灰（默认）· cold 冷灰 · titanium 钛白 —— 三灰阶层次
  * - warning 警示红 —— 仅核心舱/传感器/推进器类功能指示位（每件 1-2 处）
+ * - shell   透明壳 —— 安全壳/玻璃罩/防护罩类：纸面保持低透明度，
+ *           内部结构要透出来（DESIGN §1.5 双层表达）。默认不透明，此角色显式破例。
  */
-export type PartFinish = 'hull' | 'cold' | 'titanium' | 'warning'
+export type PartFinish = 'hull' | 'cold' | 'titanium' | 'warning' | 'shell'
 
 export interface ThingPart {
   id: string

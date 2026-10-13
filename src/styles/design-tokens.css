@@ -215,6 +215,16 @@
   color: var(--color-ink-faint);
 }
 
+/* 图版角标（anatomy-figures plate-corner）：读数/图号统一等宽 10.5px，
+   数字走 tabular-nums，字母不加字距（与 HUD 微标签区分开） */
+.plate-corner {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Annotation line */
 .annotation-line {
   position: relative;

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { ThingData } from '../data/types'
+import PartGlyph from './PartGlyph'
 
 /**
  * PracticePanel — 复述练习态主体（DESIGN §5.5）
@@ -58,10 +59,12 @@ export default function PracticePanel({ thing, onPartHover }: PracticePanelProps
           {thing.parts.map(part => (
             <div
               key={part.id}
-              className="flex items-baseline gap-3 cursor-pointer"
+              className="flex items-center gap-3 cursor-pointer"
               onMouseEnter={() => onPartHover(part.id)}
               onMouseLeave={() => onPartHover(null)}
             >
+              {/* 图例符号 = 该部件在图上那块实体的缩略（同一套纸面色 + 墨线） */}
+              <PartGlyph finish={part.finish} />
               <span className="font-display text-base text-word-part">
                 {part.label}
               </span>

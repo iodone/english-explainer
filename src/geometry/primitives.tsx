@@ -23,6 +23,9 @@ import { makeHullMaterial, makePaperMaterial } from './paperSurface'
  * - 外壳类（hull）额外加反向外壳描边，给出连续剪影边
  */
 
+/** 反向外壳描边的目标屏幕线宽（CSS 像素）——屏幕恒定，不随缩放变化 */
+const HULL_WIDTH_PX = 1.1
+
 const INK = '#2C2A25'
 const INK_SOFT = '#5A554C'
 /** JX-7b 军工灰：外壳半透明实体面 */
@@ -70,6 +73,13 @@ const FINISH_POOL: Record<
     line: new THREE.Color(WARNING_RED),
     lineOpacity: 0.95,
   },
+  // 透明壳：纸面极淡 + 墨线仍在（剪影照旧清楚）
+  shell: {
+    face: new THREE.Color(TITANIUM),
+    faceOpacity: 0.06,
+    line: new THREE.Color(INK),
+    lineOpacity: 0.7,
+  },
 }
 
 /** 图→词点击 + 部件配色查询：SketchMesh（几何深处）经 context 触达，不逐层传 prop */
@@ -111,9 +121,20 @@ export function usePartHighlight(
     return m
   }, [thing])
 
-  useFrame(() => {
+  const scratchScale = useMemo(() => new THREE.Vector3(), [])
+  const scratchPos = useMemo(() => new THREE.Vector3(), [])
+
+  useFrame(({ camera, size }) => {
     const group = root.current
     if (!group) return
+
+    // 屏幕恒定线宽（anatomy 的 vector-effect: non-scaling-stroke）：
+    // 世界单位/像素 = 视锥在该深度的高度 ÷ 画布高度；正交按 zoom 换算。
+    const worldPerPx = (depth: number) =>
+      camera instanceof THREE.PerspectiveCamera
+        ? (2 * Math.tan((camera.fov * Math.PI) / 360) * depth) / Math.max(size.height, 1)
+        : 1 / Math.max(camera.zoom, 0.0001)
+
     group.traverse(node => {
       if (!(node instanceof THREE.Mesh)) return
       const partId = node.name
@@ -151,6 +172,13 @@ export function usePartHighlight(
         dim = 0.5
       }
 
+      // 反向外壳描边（子 mesh，同几何体）：每帧重算世界单位线宽
+      const hull = node.children.find(
+        c =>
+          c instanceof THREE.Mesh &&
+          (c.material as THREE.Material | undefined)?.type === 'ShaderMaterial',
+      ) as THREE.Mesh | undefined
+
       if (isPaper) {
         const u = (faceMat as THREE.ShaderMaterial).uniforms
         u.uEmphasis.value = THREE.MathUtils.lerp(u.uEmphasis.value, emphasis, 0.15)
@@ -164,6 +192,17 @@ export function usePartHighlight(
       lineMat.opacity = THREE.MathUtils.lerp(lineMat.opacity, lineOpacity, 0.15)
       lineMat.color.lerp(lineColor, 0.15)
       lineMat.linewidth = THREE.MathUtils.lerp(lineMat.linewidth, lineWidth, 0.15)
+
+      if (hull && hull.material instanceof THREE.ShaderMaterial) {
+        const hu = hull.material.uniforms
+        hu.uEmphasis.value = emphasis
+        hu.uDim.value = dim
+        const scale = node.getWorldScale(scratchScale).x || 1
+        node.getWorldPosition(scratchPos)
+        const depth = camera.position.distanceTo(scratchPos)
+        const target = (hu.uWidthPx.value as number) * worldPerPx(depth) / scale
+        hu.uWidth.value = THREE.MathUtils.clamp(target, 0.002, 0.05)
+      }
     })
   })
 
@@ -196,7 +235,7 @@ export function SketchMesh({
   )
   const materials = useMemo(() => {
     const surface = makePaperMaterial(finish, accent ?? FALLBACK_ACCENT, dpr)
-    const hull = makeHullMaterial(0.022, new THREE.Color(INK))
+    const hull = makeHullMaterial(HULL_WIDTH_PX, new THREE.Color(INK))
     return { surface, hull }
   }, [finish, accent, dpr])
 
@@ -230,8 +269,8 @@ export function SketchMesh({
     >
       {children}
       <primitive object={materials.surface} attach="material" />
-      {/* 反向外壳描边：只外壳/钛白类给剪影边，结构件靠 Edges 纵线（JX-7b 双层表达） */}
-      {(finish === 'hull' || finish === 'titanium') && (
+      {/* 反向外壳描边：外壳/钛白/透明壳给剪影边，结构件靠 Edges 纵线（JX-7b 双层表达） */}
+      {(finish === 'hull' || finish === 'titanium' || finish === 'shell') && (
         <mesh renderOrder={1}>
           {children}
           <primitive object={materials.hull} attach="material" />
@@ -283,15 +322,283 @@ export function Rod({
   )
 }
 
+/** 淡墨线段集合 —— 多条独立线段合成一次绘制（刻度圈/分缝批量走这条，省 draw call） */
+export function DraftSegments({
+  points,
+  opacity = 0.4,
+}: {
+  points: [number, number, number][]
+  opacity?: number
+}) {
+  return (
+    <Line
+      points={points}
+      segments
+      color={INK}
+      lineWidth={1}
+      transparent
+      opacity={opacity}
+    />
+  )
+}
+
 /** 淡墨辅助线（面板格线等，不参与高亮） */
-export function DraftLine({ points }: { points: [number, number, number][] }) {
+export function DraftLine({
+  points,
+  opacity = 0.4,
+}: {
+  points: [number, number, number][]
+  opacity?: number
+}) {
   return (
     <Line
       points={points}
       color={INK}
       lineWidth={1}
       transparent
-      opacity={0.4}
+      opacity={opacity}
     />
+  )
+}
+
+/* ─── Detail primitives（anatomy-figures 技法移植，2026-10-13） ───
+ *
+ * anatomy 的"精细"不是更多多边形，而是**零件多、细节密**：每个面都有分缝、
+ * 螺栓、刻度、圆角倒边。这一组原语专门用来补这层密度。
+ * 全部走 SketchMesh，因此照样能带 name={partId} 参与图↔词高亮。
+ */
+
+type Vec3 = [number, number, number]
+
+/**
+ * 螺栓圈 —— 沿圆周均布的小圆柱（法兰/盖板/轮毂的紧固件）。
+ * axis='z' 时圈在 XY 平面，axis='y' 时在 XZ 平面。
+ */
+export function BoltCircle({
+  partId,
+  center = [0, 0, 0],
+  radius,
+  count = 8,
+  boltRadius = 0.022,
+  height = 0.04,
+  axis = 'z',
+}: {
+  partId?: string
+  center?: Vec3
+  radius: number
+  count?: number
+  boltRadius?: number
+  height?: number
+  axis?: 'x' | 'y' | 'z'
+}) {
+  return (
+    <group>
+      {Array.from({ length: count }, (_, i) => {
+        const a = (i / count) * Math.PI * 2
+        const c = Math.cos(a) * radius
+        const sn = Math.sin(a) * radius
+        const position: Vec3 =
+          axis === 'z'
+            ? [center[0] + c, center[1] + sn, center[2]]
+            : axis === 'y'
+              ? [center[0] + c, center[1], center[2] + sn]
+              : [center[0], center[1] + c, center[2] + sn]
+        const rotation: Vec3 = axis === 'z' ? [Math.PI / 2, 0, 0] : axis === 'x' ? [0, 0, Math.PI / 2] : [0, 0, 0]
+        return (
+          <SketchMesh key={i} partId={partId} position={position} rotation={rotation}>
+            <cylinderGeometry args={[boltRadius, boltRadius, height, 6]} />
+          </SketchMesh>
+        )
+      })}
+    </group>
+  )
+}
+
+/**
+ * 环缝 —— 筒体对接缝 / 加强环 / 箍带（细圆环）。
+ * axis 是环面法线方向：'y' = 水平箍带，'z' = 立面上的圆环。
+ */
+export function SeamRing({
+  partId,
+  center = [0, 0, 0],
+  radius,
+  tube = 0.018,
+  axis = 'y',
+}: {
+  partId?: string
+  center?: Vec3
+  radius: number
+  tube?: number
+  axis?: 'x' | 'y' | 'z'
+}) {
+  const rotation: Vec3 =
+    axis === 'y' ? [Math.PI / 2, 0, 0] : axis === 'x' ? [0, Math.PI / 2, 0] : [0, 0, 0]
+  return (
+    <SketchMesh partId={partId} position={center} rotation={rotation}>
+      <torusGeometry args={[radius, tube, 6, 44]} />
+    </SketchMesh>
+  )
+}
+
+/**
+ * 面板分缝线 —— 一组淡墨直线（钣金分块、检修口、舱段分隔）。
+ * 纯草稿线，不参与高亮（与 DESIGN 的 DraftLine 同族）。
+ */
+export function PanelLines({
+  lines,
+  opacity = 0.32,
+}: {
+  lines: [Vec3, Vec3][]
+  opacity?: number
+}) {
+  return (
+    <group>
+      {lines.map((points, i) => (
+        <DraftLine key={i} points={points} opacity={opacity} />
+      ))}
+    </group>
+  )
+}
+
+/**
+ * 刻度圈 —— 表盘/量程/旋钮的一圈细刻度（长短刻度交替，anatomy 的 tick 密度）。
+ */
+export function TickRing({
+  partId,
+  center = [0, 0, 0],
+  radius,
+  count = 12,
+  longEvery = 3,
+  long = 0.11,
+  short = 0.06,
+  axis = 'z',
+  asPart = false,
+}: {
+  partId?: string
+  center?: Vec3
+  radius: number
+  count?: number
+  longEvery?: number
+  long?: number
+  short?: number
+  axis?: 'x' | 'y' | 'z'
+  /** true = 走 SketchMesh（刻度随部件高亮）；false = 淡墨草稿线 */
+  asPart?: boolean
+}) {
+  const items = Array.from({ length: count }, (_, i) => {
+    const a = (i / count) * Math.PI * 2
+    const isLong = i % longEvery === 0
+    const len = isLong ? long : short
+    const inner = radius - len
+    const outer = radius + len * 0.35
+    const p = (r: number): Vec3 =>
+      axis === 'z'
+        ? [center[0] + Math.cos(a) * r, center[1] + Math.sin(a) * r, center[2]]
+        : axis === 'y'
+          ? [center[0] + Math.cos(a) * r, center[1], center[2] + Math.sin(a) * r]
+          : [center[0], center[1] + Math.cos(a) * r, center[2] + Math.sin(a) * r]
+    return { key: i, points: [p(inner), p(outer)] as [Vec3, Vec3], isLong }
+  })
+
+  if (!asPart) {
+    // 长刻度与短刻度各合成一次绘制（60 分刻度也只有两条 Line2）
+    const longPts = items.filter(it => it.isLong).flatMap(it => it.points)
+    const shortPts = items.filter(it => !it.isLong).flatMap(it => it.points)
+    return (
+      <group>
+        {shortPts.length > 0 && <DraftSegments points={shortPts} opacity={0.3} />}
+        {longPts.length > 0 && <DraftSegments points={longPts} opacity={0.5} />}
+      </group>
+    )
+  }
+
+  return (
+    <group>
+      {items.map(it => (
+        <Rod
+          key={it.key}
+          partId={partId}
+          from={it.points[0]}
+          to={it.points[1]}
+          radius={it.isLong ? 0.012 : 0.008}
+        />
+      ))}
+    </group>
+  )
+}
+
+/**
+ * 齿轮几何 —— 真齿形（渐开线的直线近似：齿根→齿顶→齿顶→齿根），带倒边。
+ * anatomy 的 ft() 齿轮发生器思路；本仓用 ExtrudeGeometry 拿到倒角厚度。
+ */
+function makeGearGeometry(
+  teeth: number,
+  radius: number,
+  toothDepth: number,
+  depth: number,
+): THREE.ExtrudeGeometry {
+  const shape = new THREE.Shape()
+  const step = (Math.PI * 2) / teeth
+  const rTip = radius + toothDepth
+  const rRoot = radius
+  const pts: [number, number][] = []
+  for (let i = 0; i < teeth; i++) {
+    const a0 = i * step
+    const at = (f: number, r: number) => {
+      const a = a0 + step * f
+      return [Math.cos(a) * r, Math.sin(a) * r] as [number, number]
+    }
+    pts.push(
+      at(0.0, rRoot),
+      at(0.14, rRoot),
+      at(0.22, rTip),
+      at(0.44, rTip),
+      at(0.52, rRoot),
+      at(0.94, rRoot),
+    )
+  }
+  shape.moveTo(pts[0][0], pts[0][1])
+  for (const [x, y] of pts.slice(1)) shape.lineTo(x, y)
+  shape.closePath()
+  const hole = new THREE.Path()
+  hole.absarc(0, 0, Math.max(radius * 0.16, 0.01), 0, Math.PI * 2, true)
+  shape.holes.push(hole)
+
+  return new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: true,
+    bevelThickness: Math.min(depth * 0.25, 0.012),
+    bevelSize: Math.max(radius * 0.02, 0.004),
+    bevelSegments: 1,
+    curveSegments: 4,
+  })
+}
+
+/** 齿轮 —— teeth 个真齿、中心带轴孔、带倒边 */
+export function Gear({
+  partId,
+  teeth = 14,
+  radius = 0.4,
+  toothDepth = 0.08,
+  depth = 0.06,
+  position,
+  rotation,
+}: {
+  partId?: string
+  teeth?: number
+  radius?: number
+  toothDepth?: number
+  depth?: number
+  position?: Vec3
+  rotation?: Vec3
+}) {
+  const geometry = useMemo(
+    () => makeGearGeometry(teeth, radius, toothDepth, depth),
+    [teeth, radius, toothDepth, depth],
+  )
+  return (
+    <SketchMesh partId={partId} position={position} rotation={rotation}>
+      <primitive object={geometry} attach="geometry" />
+    </SketchMesh>
   )
 }
