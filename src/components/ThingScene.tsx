@@ -7,8 +7,9 @@ import {
   GizmoHelper,
   ContactShadows,
   useGizmoContext,
+  useBounds,
 } from '@react-three/drei'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentRef } from 'react'
 import * as THREE from 'three'
 import type { ThingData } from '../data/types'
@@ -24,6 +25,18 @@ import type { HighlightState, PartMeta } from '../geometry'
 
 /** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
 const PAPER = '#F4F1EA'
+/**
+ * 模型世界跨度的基准值（基准图版 camera≈1.6 / clock≈2.0 / nuclear-reactor≈3.5）。
+ *
+ * 为什么必须归一：标注点（r=0.07 的球）、引线外推档（0.95→6.6 世界单位）、
+ * 原语默认半径（Rod 0.03 / SeamRing 0.018）都是**世界单位**的绝对尺寸，
+ * 它们默认模型跨度约 2。而产线上生成的一大批 thing 是从 0.04–0.8 的小世界
+ * （零件 position 跨度中位数只有 0.46），于是同一套绝对尺寸落到它们身上：
+ * 标注点直径占到形体的 30%，相邻的点直接粘成一串黑球，引线外推档也甩出画布。
+ * 把跨度小于基准的模型整体放大到基准（**只放大不缩小**，基准及以上的图版保持原样），
+ * 世界空间的一切辅助件就都回到正确比例。
+ */
+const MODEL_SPAN = 2.2
 /** 标签落点候选：沿部件包围盒"朝外方向"的试探距离（世界单位，逐级外推找空位） */
 const LABEL_REACH_CANDIDATES = [0.95, 1.3, 1.7, 2.15, 2.65, 3.2, 3.9, 4.7, 5.6, 6.6]
 /** 包围盒朝外点的试探比例（0=中心，1=盒边缘） */
@@ -126,6 +139,13 @@ export default function ThingScene({
   const accentColor = useMemo(() => new THREE.Color(thing.color), [thing.color])
   // 几何根组：标注层读它的包围盒来算部件边缘锚点
   const partsRef = useRef<THREE.Group>(null)
+  // 模型跨度归一（见 MODEL_SPAN）。几何是静态的，量一次就够。
+  // 跨度必须在**帧循环里**量：R3F 的 <Canvas> 子节点走独立 reconciler，
+  // 父组件的 useLayoutEffect 跑的时候 mesh 还没建好（partsRef.current 还是 null）。
+  // 连同 id 一起存：换 thing 时立刻失效，不会拿上一件的跨度去缩放这一件。
+  const [measured, setMeasured] = useState<{ id: string; span: number } | null>(null)
+  const span = measured && measured.id === thing.id ? measured.span : 0
+  const modelScale = span > 1e-6 ? Math.max(1, MODEL_SPAN / span) : 1
   // 右下角读数（每帧写 DOM，不触发 React 重渲染）
   const readoutRef = useRef<HTMLDivElement>(null)
 
@@ -179,18 +199,29 @@ export default function ThingScene({
           <PartMetaContext.Provider value={partMeta}>
             {/* key=thing.id：切模型时 Bounds 重新 fit；margin 略松给标注留空间 */}
             <Bounds key={thing.id} fit clip observe margin={1.28}>
-              <SketchModel
-                thing={thing}
+              {/* 跨度归一：小世界放大到基准，世界空间的标注件/原语才回到正确比例 */}
+              <ModelSpanProbe
+                key={thing.id}
+                thingId={thing.id}
+                modelScale={modelScale}
                 partsRef={partsRef}
-                highlightPartId={highlightPartId}
-                activePartIds={activePartIds}
-                pastPartIds={pastPartIds}
-                dimOthers={dimOthers}
+                onMeasure={setMeasured}
               />
+              <group scale={modelScale}>
+                <SketchModel
+                  thing={thing}
+                  partsRef={partsRef}
+                  highlightPartId={highlightPartId}
+                  activePartIds={activePartIds}
+                  pastPartIds={pastPartIds}
+                  dimOthers={dimOthers}
+                />
+              </group>
             </Bounds>
           </PartMetaContext.Provider>
           <AnnotationLabels
             thing={thing}
+            modelScale={modelScale}
             partsRef={partsRef}
             highlightPartId={highlightPartId}
             activePartIds={activePartIds}
@@ -216,6 +247,62 @@ export default function ThingScene({
       </Canvas>
     </div>
   )
+}
+
+/**
+ * 量一次模型的跨度，交给 ThingScene 换算归一系数（见 MODEL_SPAN），
+ * 并在缩放落地后补一次取景（Bounds 自己不会重跑，理由见函数内注释）。
+ * 放在 Canvas 内：要等 R3F 把 mesh 建出来才量得到。
+ */
+function ModelSpanProbe({
+  thingId,
+  modelScale,
+  partsRef,
+  onMeasure,
+}: {
+  thingId: string
+  modelScale: number
+  partsRef: React.RefObject<THREE.Group | null>
+  onMeasure: (m: { id: string; span: number }) => void
+}) {
+  const bounds = useBounds()
+  const done = useRef(false)
+  const size = useMemo(() => new THREE.Vector3(), [])
+  useFrame(() => {
+    if (done.current) return
+    const root = partsRef.current
+    if (!root) return
+    root.updateWorldMatrix(true, false)
+    const box = new THREE.Box3().setFromObject(root)
+    if (box.isEmpty()) return
+    done.current = true
+    box.getSize(size)
+    // 量到的是**已缩放**的盒（partsRef 在归一组里面），除掉当前系数才是模型自身跨度，
+    // 否则"拿缩放后的尺寸反算缩放"会来回震荡。
+    onMeasure({ id: thingId, span: Math.max(size.x, size.y, size.z) / modelScale })
+  })
+
+  // Bounds 的取景只挂在 [size, clip, fit, observe, camera, controls] 上（见 drei
+  // Bounds.js 的 useLayoutEffect）——我们改的是子组 scale，它一无所知。不补这一下，
+  // 放大后的小模型仍按"缩放前的盒"取景，会溢出画布。
+  //
+  // 必须 refresh → clip → fit 三步一起补：
+  //  · refresh 重量盒（不然拿的是旧盒）；
+  //  · clip 重算 near/far 与 **controls.maxDistance**——挂载时那次 clip 是按缩放前
+  //    的小盒算的（maxDistance 会小于 OrbitControls 的 minDistance 2.5），范围一倒挂
+  //    相机就被每帧钉死在 minDistance 上，怎么 fit 都拉不出去；
+  //  · fit 才是真正取景。
+  // 首帧不动：那时缩放还是 1，交给 Bounds 自己的挂载取景。
+  const fitted = useRef<number | null>(null)
+  useEffect(() => {
+    const first = fitted.current === null
+    if (fitted.current === modelScale) return
+    fitted.current = modelScale
+    if (first) return
+    bounds.refresh().clip().fit()
+  }, [modelScale, bounds])
+
+  return null
 }
 
 /**
@@ -277,6 +364,7 @@ interface Rect {
  */
 function AnnotationLabels({
   thing,
+  modelScale,
   partsRef,
   highlightPartId,
   activePartIds,
@@ -284,6 +372,8 @@ function AnnotationLabels({
   onPartClick,
 }: {
   thing: ThingData
+  /** 模型跨度归一系数：部件点在世界空间里位置要跟着乘 */
+  modelScale: number
   partsRef: React.RefObject<THREE.Group | null>
   highlightPartId: string | null
   activePartIds: string[]
@@ -787,7 +877,11 @@ function AnnotationLabels({
           <group key={part.id}>
             {/* 部件点 — 可点击（图→词），留在模型坐标系内 */}
             <mesh
-              position={part.position}
+              position={[
+                part.position[0] * modelScale,
+                part.position[1] * modelScale,
+                part.position[2] * modelScale,
+              ]}
               scale={show ? 1.5 : 1}
               onPointerOver={e => {
                 e.stopPropagation()

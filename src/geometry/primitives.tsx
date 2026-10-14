@@ -201,7 +201,10 @@ export function usePartHighlight(
         node.getWorldPosition(scratchPos)
         const depth = camera.position.distanceTo(scratchPos)
         const target = (hu.uWidthPx.value as number) * worldPerPx(depth) / scale
-        hu.uWidth.value = THREE.MathUtils.clamp(target, 0.002, 0.05)
+        // 下限放到 1e-5：uWidth 是**物体空间**偏移，模型跨度归一后（小世界最多放大 ~50×）
+        // 物体空间的偏移量会小到 1e-4 量级，旧下限 0.002 会把它顶上去，
+        // 于是缩放越大墨线越粗（放 50× 能粗到几十像素）。上限不动，防止退化值炸开。
+        hu.uWidth.value = THREE.MathUtils.clamp(target, 1e-5, 0.05)
       }
     })
   })

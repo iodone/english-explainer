@@ -88,5 +88,10 @@ ThingScene.tsx 只做 Canvas 编排与标注层，不再放几何体。
 - GlooLine（drei Line）不参与部件高亮——需要高亮的"线"用 `Rod` 组件（细圆柱 mesh + name）
 - drei `<Html>` 渲染进 DOM portal，**不受父 group `visible` 控制**——隐藏标签必须切
   `labelEl.style.display`（标注层细节见 `.agents/skills/figure-craft/references/annotate.md`）
+- 标注点半径（0.07）/ 引线外推档（`LABEL_REACH_CANDIDATES`）/ 原语默认半径（`Rod` 0.03、
+  `SeamRing` 0.018）都是**世界单位的绝对尺寸**，按"模型跨度 ≈ 2"调的；跨度小于 `MODEL_SPAN`
+  的 thing 由 `ThingScene` 归一放大。动取景逻辑时记住：**缩放不经过 `Bounds`**，
+  改完必须自己 `bounds.refresh().clip().fit()` —— 漏了 `clip()` 就是 `controls.maxDistance`
+  小于 `minDistance`，相机被每帧钉死（见 `.agents/skills/figure-craft/references/craft.md` §5）
 - 逐帧重算的结果**不能**用在二值判断上：`sx >= 0` 这类浮点符号在 0 附近会逐帧翻转，
   表现为"标注字一直在闪"（同一个坑有三个变体，见 annotate.md §5）

@@ -71,6 +71,8 @@ node $S labels <这件>                    # 标注稳定
 | 隐藏的标签照旧画在屏幕上 | drei `<Html>` 是 DOM portal，不受父 group `visible` 控制 | 切 `labelEl.style.display`；`annotate.md` §6 |
 | 透明壳把内部机构全挡住 | 用了不透明材质 | `finish: 'shell'`（纸面 22% + 剪影边） |
 | 落地阴影糊成一块灰板 | 缩放外层 group，把 `ContactShadows` 的正交视锥一起放大了 | 改 `scale/far`，别缩放容器（`GroundShadow` 已这么做） |
+| 小东西上标注点糊成一串黑球 / 标签飞出画布 | 世界空间的绝对尺寸（点半径 0.07、外推档 0.95→6.6）落到跨度只有 0.1–0.5 的小模型上 | `ThingScene` 的跨度归一（`MODEL_SPAN`）：把模型放大到基准，别去改绝对尺寸 |
+| 归一之后模型还是溢出画布、相机像被钉死 | 缩放不经过 `Bounds`，它的 `fit` 没重跑；且挂载那次 `clip()` 把 `controls.maxDistance` 算成了小于 `minDistance 2.5` | 归一后补一次 `bounds.refresh().clip().fit()`——`clip` 不能省 |
 | 某根"线"点击不高亮 | 用了 drei `Line`（GlooLine 不参与部件高亮） | 该用 `Rod`（细圆柱 mesh + `name`） |
 | 图整体变平、没有体量 | 新几何绕开了顶面档，或面材质被换成了 basic | 走 `SketchMesh`，别自己拼材质；确认 `smoothstep(0.62,0.72,n.y)` 生效 |
 | 线在缩放后变粗/变细 | 写死了 `lineWidth` | 用屏幕恒定换算（`HULL_WIDTH_PX`） |
