@@ -88,8 +88,10 @@ upstream 的一句判断标准，直接搬过来用：
 
 ## 5. 取景与构图
 
-- 取景交给 `ModelSpanProbe`（`ThingScene`）+ drei `Bounds` 的 api，**调 margin 别调相机**，
-  margin 比默认松（1.28），是给标注层留的余地。它量的是**部件盒**（`partsBounds`：带 `name` 的
+- 取景全在 `ModelSpanProbe`（`ThingScene`）里，**调 `FIT_MARGIN` 别调相机**，
+  它比默认松（1.28），是给标注层留的余地。**别改回 drei `Bounds` 的 `fit()`**：
+  `fit()` 只写 goal，而 `Bounds` 自己的 `refresh()` 会把 goal 清空（`size/controls` 一变就发生），
+  取景会在加载期随机丢失 —— 相机停在初始机位、模型缩成画面中间一个小点。它量的是**部件盒**（`partsBounds`：带 `name` 的
   mesh），**不是整组**——几何里的草稿线/地面线是装饰，作者给它们写多长全凭手感
   （power-socket 的墙线是插座本体的 10×，345 件里 69 件装饰跨度 > 2× 部件跨度）。
   拿整组取景，这些图里的物件就是画面上一个小点。装饰线超出画布是正常的（草稿线就该出画布）。
@@ -102,7 +104,9 @@ upstream 的一句判断标准，直接搬过来用：
   **小于 2 就是小世界**，同一套绝对尺寸会立刻露馅——标注点直径占到形体的三成、相邻点粘成一串黑球、
   标签被外推档甩出画布。`ThingScene` 现在会自动把跨度 < `MODEL_SPAN = 2.2` 的模型放大到基准
   （只放大不缩小），所以不必再改几何坐标；但**改了取景/缩放相关代码就要连着改这边**：
-  缩放不经过 `Bounds`，得自己 `bounds.refresh().clip().fit()`。
+  归一与取景都是 `ModelSpanProbe` 在帧循环里**命令式**写完的（量部件盒 → 写
+  `modelGroupRef.current.scale` → 摆机位 + `near/far` + `controls.maxDistance`），
+  没有中间 state、也不经过 drei `Bounds`；改完记得窄画布 + 宽画布各看一眼。
   量跨度的老办法：`things.map(t => Math.max(...t.parts.map(p => p.position[0])))` 之流，
   拿分位数看整体（当前 p50 = 0.46）。
 - 相机默认透视 `[5, 3, 5] fov 50`，可切正交（工程图观看方式）。

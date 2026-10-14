@@ -76,7 +76,8 @@ node $S labels <这件>                    # 标注稳定
 | 落地阴影糊成一块灰板 | 缩放外层 group，把 `ContactShadows` 的正交视锥一起放大了 | 改 `scale/far`，别缩放容器（`GroundShadow` 已这么做） |
 | 小东西上标注点糊成一串黑球 / 标签飞出画布 | 世界空间的绝对尺寸（点半径 0.07、外推档 0.95→6.6）落到跨度只有 0.1–0.5 的小模型上 | `ThingScene` 的跨度归一（`MODEL_SPAN`）：把模型放大到基准，别去改绝对尺寸 |
 | 物件在画面上只是一个小点，四周空一片 | 取景按**整组**算了，几何文件里的草稿线/地面线把盒子撑大（常有 2–11×） | 取景与影子都按**部件盒**（`partsBounds`：带 `name` 的 mesh）；装饰线出画布是正常的 |
-| 归一之后模型还是溢出画布、相机像被钉死 | 缩放不经过 `Bounds`，它的 `fit` 没重跑；且挂载那次 `clip()` 把 `controls.maxDistance` 算成了小于 `minDistance 2.5` | 归一后补一次 `bounds.refresh().clip().fit()`——`clip` 不能省 |
+| 归一之后模型还是溢出画布、相机像被钉死 | `controls.maxDistance` 还是按缩放前的小盒算的，小于 `minDistance 2.5`，OrbitControls 每帧把相机拉回来 | 取景时同时重算 `near/far` 与 `maxDistance`（`ModelSpanProbe` 已这么做） |
+| 同一件东西刷新几次，取景时好时坏（有时缩成一个小点） | 用了 drei `Bounds` 的 `fit()`：它只写 goal，而它自己的 `refresh()` 会清掉 goal | 别用 `Bounds.fit()`，取景自己算（`ModelSpanProbe`） |
 | 某根"线"点击不高亮 | 用了 drei `Line`（GlooLine 不参与部件高亮） | 该用 `Rod`（细圆柱 mesh + `name`） |
 | 图整体变平、没有体量 | 新几何绕开了顶面档，或面材质被换成了 basic | 走 `SketchMesh`，别自己拼材质；确认 `smoothstep(0.62,0.72,n.y)` 生效 |
 | 线在缩放后变粗/变细 | 写死了 `lineWidth` | 用屏幕恒定换算（`HULL_WIDTH_PX`） |

@@ -3,11 +3,9 @@ import {
   OrbitControls,
   Line,
   Html,
-  Bounds,
   GizmoHelper,
   ContactShadows,
   useGizmoContext,
-  useBounds,
 } from '@react-three/drei'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentRef } from 'react'
@@ -37,6 +35,8 @@ const PAPER = '#F4F1EA'
  * 世界空间的一切辅助件就都回到正确比例。
  */
 const MODEL_SPAN = 2.2
+/** 取景留白系数：1.28（drei `Bounds` 默认 1.2 的稍松版），给标注层留出落字空间 */
+const FIT_MARGIN = 1.28
 /** 标签落点候选：沿部件包围盒"朝外方向"的试探距离（世界单位，逐级外推找空位） */
 const LABEL_REACH_CANDIDATES = [0.95, 1.3, 1.7, 2.15, 2.65, 3.2, 3.9, 4.7, 5.6, 6.6]
 /** 包围盒朝外点的试探比例（0=中心，1=盒边缘） */
@@ -96,7 +96,7 @@ function setMaterialOpacity(object: unknown, opacity: number) {
  * - 外壳/结构件 = 半透明灰实体面（体量感）+ 墨 Edges 轮廓（四边形拓扑感）
  * - 地面 = 3D 透视网格（CAD 虚空工作区）+ 虚线中心轴
  * - 右上角坐标轴 gizmo；标注走工程图 leader line（包围盒边缘出线 + 折角 + 两行中英）
- * - 取景 = Bounds 自适应（fit + observe，分栏拖动后自动重取景）
+ * - 取景 = ModelSpanProbe：量**部件盒** → 乘归一系数 → 摆机位（分栏拖动后自动重取景）
  *
  * 几何体按 thing.id 从 GEOMETRY map 分发（src/geometry/<slug>.tsx，一 thing 一文件）；
  * 本文件只保留场景编排：Canvas、标注层（AnnotationLabels）、环境（轴/网格）、相机控制。
@@ -139,14 +139,14 @@ export default function ThingScene({
   const accentColor = useMemo(() => new THREE.Color(thing.color), [thing.color])
   // 几何根组：标注层读它的包围盒来算部件边缘锚点
   const partsRef = useRef<THREE.Group>(null)
-  // 模型跨度归一（见 MODEL_SPAN）。几何是静态的，量一次就够。
-  // 跨度必须在**帧循环里**量：R3F 的 <Canvas> 子节点走独立 reconciler，
-  // 父组件的 useLayoutEffect 跑的时候 mesh 还没建好（partsRef.current 还是 null）。
-  // 连同 id 一起存：换 thing 时立刻失效，不会拿上一件的跨度去缩放这一件。
-  const [measured, setMeasured] = useState<{ id: string; span: number } | null>(null)
-  const span = measured && measured.id === thing.id ? measured.span : 0
-  const modelScale = span > 1e-6 ? Math.max(1, MODEL_SPAN / span) : 1
-  // 量到的**部件**世界包围盒（未缩放）。取景与落地阴影都用它 —— 见 partsBounds 的说明
+  // 模型归一组：ModelSpanProbe 每帧把"放大到基准跨度"的系数**直接写进它的 scale**。
+  // 不走 React state 是刻意的：R3F 的 <Canvas> 是另一个 reconciler，它把 children
+  // 通过 `await configure()` 之后的 `root.render()` 灌进去（react-three-fiber 的
+  // CanvasImpl），谁来收尾和渲染时机不一定 —— 拿 state 传递归一系数会时灵时不灵
+  // （实测：正交画布下一半的加载拿不到新系数，模型缩成一个小点）。帧循环里算、帧循环里用，
+  // 顺手把结果写给标注层和落地阴影（都是每帧读，不需要重渲染）。
+  const modelGroupRef = useRef<THREE.Group>(null)
+  // **世界**空间的部件盒（已含归一缩放）：取景与落地阴影共用 —— 见 partsBounds 的说明
   const partsBoxRef = useRef<THREE.Box3 | null>(null)
   // 右下角读数（每帧写 DOM，不触发 React 重渲染）
   const readoutRef = useRef<HTMLDivElement>(null)
@@ -199,34 +199,27 @@ export default function ThingScene({
       >
         <AccentContext.Provider value={accentColor}>
           <PartMetaContext.Provider value={partMeta}>
-            {/* key=thing.id：切模型时重新量一次；margin 略松给标注留空间。
-                取景/裁剪交给 ModelSpanProbe（按**部件盒**，见 partsBounds）：
-                Bounds 自带的取景量的是整组，几何里的草稿线会把物件挤成一个小点 */}
-            <Bounds key={thing.id} margin={1.28}>
-              <ModelSpanProbe
-                key={thing.id}
-                thingId={thing.id}
-                modelScale={modelScale}
-                span={span}
+            {/* 取景由 ModelSpanProbe 负责（按**部件盒**，见它的注释） */}
+            <ModelSpanProbe
+              key={thing.id}
+              thingId={thing.id}
+              groupRef={modelGroupRef}
+              partsRef={partsRef}
+              boxRef={partsBoxRef}
+            />
+            <group ref={modelGroupRef}>
+              <SketchModel
+                thing={thing}
                 partsRef={partsRef}
-                boxRef={partsBoxRef}
-                onMeasure={setMeasured}
+                highlightPartId={highlightPartId}
+                activePartIds={activePartIds}
+                pastPartIds={pastPartIds}
+                dimOthers={dimOthers}
               />
-              <group scale={modelScale}>
-                <SketchModel
-                  thing={thing}
-                  partsRef={partsRef}
-                  highlightPartId={highlightPartId}
-                  activePartIds={activePartIds}
-                  pastPartIds={pastPartIds}
-                  dimOthers={dimOthers}
-                />
-              </group>
-            </Bounds>
+            </group>
           </PartMetaContext.Provider>
           <AnnotationLabels
             thing={thing}
-            modelScale={modelScale}
             partsRef={partsRef}
             highlightPartId={highlightPartId}
             activePartIds={activePartIds}
@@ -234,7 +227,7 @@ export default function ThingScene({
             onPartClick={onPartClick}
           />
         </AccentContext.Provider>
-        <GroundShadow partsRef={partsRef} boxRef={partsBoxRef} modelScale={modelScale} />
+        <GroundShadow partsRef={partsRef} boxRef={partsBoxRef} />
         <ViewReadout readoutRef={readoutRef} />
         <CenterAxes />
         <GroundGrid />
@@ -278,68 +271,141 @@ function partsBounds(root: THREE.Object3D, into: THREE.Box3): THREE.Box3 {
 }
 
 /**
- * 量一次**部件**的跨度（见 MODEL_SPAN）并负责取景。
+ * 图版的量尺与机位 —— 全场景只有这里动相机，且**一切都在帧循环里算完**：
+ * 量部件盒 → 换算归一系数（见 MODEL_SPAN）写进组的 scale → 按世界盒摆机位。
  *
- * 两块职责凑在一起是因为它们共用同一个盒：
- *  · 跨度 → 交给 ThingScene 换算归一系数（小世界放大到基准）；
- *  · 取景 → 归一后的盒交给 Bounds 的 api（refresh → clip → fit）。
- * 取景必须在**缩放落地之后**重来一次：Bounds 的 fit 只挂在
- * [size, clip, fit, observe, camera, controls] 上，我们改的是子组 scale，它一无所知。
- * 三步缺一不可，尤其是 `clip()`：它按盒重算 near/far 与 controls.maxDistance，
- * 挂载那次是拿"缩放前的小盒"算的，maxDistance 会小于 OrbitControls 的 minDistance 2.5，
- * 范围一倒挂相机就被每帧钉死在 minDistance 上，怎么 fit 都拉不出来。
+ * 为什么不用 React state 传归一系数：R3F 的 `<Canvas>` 是另一个 reconciler，
+ * children 是它 `await configure()` 之后再 `root.render()` 灌进去的（CanvasImpl），
+ * 收尾时机不一定；拿 state 传系数实测会时灵时不灵（正交画布约一半的加载拿不到，
+ * 模型缩成一个小点）。帧循环里量、帧循环里用，就不存在这个竞态。
+ *
+ * 为什么不用 drei `Bounds` 的 `fit()`：`fit()` 只是把目标机位写进它内部的 goal，
+ * 等它自己的帧循环插值过去；而它的 `useLayoutEffect` 只要 `[size, controls, …]` 一变
+ * 就会 `refresh()`，`refresh()` 会把 goal 清空（Bounds.js: `goal.current.camPos = undefined`）。
+ * 取景与"布局安定 / OrbitControls 注册"撞在一起时目标机位就被抹掉，相机留在初始 [5,3,5]。
+ *
+ * 取景的三条纪律（都是踩出来的）：
+ *  · 量**部件盒**不是整组（`partsBounds`）：装饰草稿线常是物件的 2–11×；
+ *  · 乘上归一系数再取景：不然小世界放大后还按缩放前的盒取景，模型溢出画布；
+ *  · near/far 与 `controls.maxDistance` 跟着盒重算：漏了这一步，OrbitControls 的
+ *    minDistance 2.5 会大于按小盒算出的 maxDistance，范围一倒挂相机就被每帧钉死。
  */
 function ModelSpanProbe({
   thingId,
-  modelScale,
-  span,
+  groupRef,
   partsRef,
   boxRef,
-  onMeasure,
 }: {
   thingId: string
-  modelScale: number
-  /** 已量到的跨度（0 = 还没量到）；它的变化就是"该取景了"的信号 */
-  span: number
+  groupRef: React.RefObject<THREE.Group | null>
   partsRef: React.RefObject<THREE.Group | null>
   boxRef: React.RefObject<THREE.Box3 | null>
-  onMeasure: (m: { id: string; span: number }) => void
 }) {
-  const bounds = useBounds()
-  const size = useThree(state => state.size)
   const done = useRef(false)
+  const lastFit = useRef('')
   const box = useMemo(() => new THREE.Box3(), [])
-  const scaled = useMemo(() => new THREE.Box3(), [])
+  const worldBox = useMemo(() => new THREE.Box3(), [])
   const sizeVec = useMemo(() => new THREE.Vector3(), [])
-  const scaleMatrix = useMemo(() => new THREE.Matrix4(), [])
+  const center = useMemo(() => new THREE.Vector3(), [])
+  const dir = useMemo(() => new THREE.Vector3(), [])
+  const corner = useMemo(() => new THREE.Vector3(), [])
+  const camMat = useMemo(() => new THREE.Matrix4(), [])
+  const scaleMat = useMemo(() => new THREE.Matrix4(), [])
 
   // 换 thing 时立刻作废上一件的盒（组件带 key=thing.id，这里是重新挂载）
   useEffect(() => {
     boxRef.current = null
   }, [boxRef])
 
-  useFrame(() => {
-    if (done.current) return
+  useFrame(state => {
+    const { camera, size } = state
+    // R3F 的 controls 类型是 EventDispatcher，实际是 OrbitControls 实例
+    const controls = state.controls as unknown as {
+      maxDistance: number
+      target: THREE.Vector3
+      update: () => void
+    } | null
+    const group = groupRef.current
     const root = partsRef.current
-    if (!root) return
-    root.updateWorldMatrix(true, false)
-    partsBounds(root, box)
-    if (box.isEmpty()) return
-    done.current = true
-    boxRef.current = box
-    // 量到的是**已缩放**的盒（partsRef 在归一组里面），除掉当前系数才是模型自身跨度，
-    // 否则"拿缩放后的尺寸反算缩放"会来回震荡。
-    box.getSize(sizeVec)
-    onMeasure({ id: thingId, span: Math.max(sizeVec.x, sizeVec.y, sizeVec.z) / modelScale })
-  })
+    if (!group || !root) return
 
-  // 取景：跨度一变（量到了）或画布尺寸一变（分栏拖动）就重来一次
-  useEffect(() => {
-    const measuredBox = boxRef.current
-    if (!measuredBox || measuredBox.isEmpty()) return
-    scaled.copy(measuredBox).applyMatrix4(scaleMatrix.makeScale(modelScale, modelScale, modelScale))
-    bounds.refresh(scaled).clip().fit()
-  }, [modelScale, span, size, bounds, boxRef, scaled, scaleMatrix])
+    // ① 量（几何是静态的，量一次就够）+ 归一（只放大不缩小）
+    if (!done.current) {
+      group.scale.setScalar(1)
+      root.updateWorldMatrix(true, true)
+      partsBounds(root, box)
+      if (box.isEmpty()) return
+      done.current = true
+      box.getSize(sizeVec)
+      const span = Math.max(sizeVec.x, sizeVec.y, sizeVec.z)
+      group.scale.setScalar(span > 1e-6 ? Math.max(1, MODEL_SPAN / span) : 1)
+      group.updateWorldMatrix(false, true)
+    }
+
+    // ② 世界盒（含归一缩放）：取景与落地阴影共用同一个
+    const groupScale = group.scale.x
+    worldBox.copy(box).applyMatrix4(scaleMat.makeScale(groupScale, groupScale, groupScale))
+    boxRef.current = worldBox
+    worldBox.getSize(sizeVec)
+    worldBox.getCenter(center)
+    const maxSize = Math.max(sizeVec.x, sizeVec.y, sizeVec.z, 1e-4)
+
+    // ③ 取景：换件 / 画布尺寸变了（分栏拖动）就重来一次
+    const key = `${thingId}|${size.width}×${size.height}`
+    if (key === lastFit.current) return
+    lastFit.current = key
+
+    let distance: number
+    if (camera instanceof THREE.OrthographicCamera) {
+      // 正交：视锥高度 = maxSize × 4（与 drei 同口径），再乘留白
+      distance = FIT_MARGIN * maxSize * 4
+    } else {
+      // 注意这里是 **Math.atan**，不是 tan —— drei Bounds.getSize() 用的就是 atan
+      // （fov50 时它比 tan 大 13%）。整套图版的取景标尺都是照它调出来的，
+      // 换成"数学上更对"的 tan 会把每一件都放大 13%，直接溢出画布。
+      const fitHeight = maxSize / (2 * Math.atan((camera.fov * Math.PI) / 360))
+      const fitWidth = fitHeight / Math.max(camera.aspect, 1e-4)
+      distance = FIT_MARGIN * Math.max(fitHeight, fitWidth)
+    }
+
+    // 机位方向沿用"当前机位相对盒中心"的那条线（保留初始的三分之四视角）
+    dir.copy(camera.position).sub(center)
+    if (dir.lengthSq() < 1e-9) dir.set(1, 0.6, 1)
+    dir.normalize()
+    camera.position.copy(center).addScaledVector(dir, distance)
+
+    if (camera instanceof THREE.OrthographicCamera) {
+      // 正交还要定 zoom：与 drei Bounds.fit 同法，把盒的 8 个角变换到相机空间取所需宽高
+      camMat.lookAt(camera.position, center, camera.up).setPosition(camera.position).invert()
+      let maxH = 0
+      let maxW = 0
+      for (let i = 0; i < 8; i++) {
+        corner
+          .set(
+            i & 1 ? worldBox.max.x : worldBox.min.x,
+            i & 2 ? worldBox.max.y : worldBox.min.y,
+            i & 4 ? worldBox.max.z : worldBox.min.z,
+          )
+          .applyMatrix4(camMat)
+        maxH = Math.max(maxH, Math.abs(corner.y))
+        maxW = Math.max(maxW, Math.abs(corner.x))
+      }
+      camera.zoom =
+        Math.min(
+          (camera.top - camera.bottom) / (maxH * 2),
+          (camera.right - camera.left) / (maxW * 2),
+        ) / FIT_MARGIN
+    }
+
+    camera.near = distance / 100
+    camera.far = distance * 100
+    camera.updateProjectionMatrix()
+    if (controls) {
+      controls.maxDistance = distance * 10
+      controls.target.copy(center)
+      controls.update()
+    }
+  })
 
   return null
 }
@@ -403,7 +469,6 @@ interface Rect {
  */
 function AnnotationLabels({
   thing,
-  modelScale,
   partsRef,
   highlightPartId,
   activePartIds,
@@ -411,8 +476,6 @@ function AnnotationLabels({
   onPartClick,
 }: {
   thing: ThingData
-  /** 模型跨度归一系数：部件点在世界空间里位置要跟着乘 */
-  modelScale: number
   partsRef: React.RefObject<THREE.Group | null>
   highlightPartId: string | null
   activePartIds: string[]
@@ -974,16 +1037,12 @@ function AnnotationLabels({
         return (
           <group key={part.id}>
             {/* 部件点 — 可点击（图→词）。position 只是挂载时的兜底落点，
-                每帧由标注层把真实落点（几何表面）写进来 */}
+                每帧由标注层把真实落点（几何表面，含归一缩放）写进来 */}
             <mesh
               ref={node => {
                 dotRefs.current[index] = node
               }}
-              position={[
-                part.position[0] * modelScale,
-                part.position[1] * modelScale,
-                part.position[2] * modelScale,
-              ]}
+              position={part.position}
               scale={show ? 1.5 : 1}
               onPointerOver={e => {
                 e.stopPropagation()
@@ -1061,17 +1120,14 @@ function AnnotationLabels({
 function GroundShadow({
   partsRef,
   boxRef,
-  modelScale,
 }: {
   partsRef: React.RefObject<THREE.Group | null>
   boxRef: React.RefObject<THREE.Box3 | null>
-  modelScale: number
 }) {
   const groupRef = useRef<THREE.Group>(null)
   const box = useMemo(() => new THREE.Box3(), [])
   const size = useMemo(() => new THREE.Vector3(), [])
   const center = useMemo(() => new THREE.Vector3(), [])
-  const scaleMatrix = useMemo(() => new THREE.Matrix4(), [])
   // ContactShadows 的 scale/far 必须用世界尺寸传入（缩放外层 group 会把
   // 它的正交视锥一起放大，导致整块阴影面糊成一片灰板）。
   const [extent, setExtent] = useState({ scale: 8, far: 4 })
@@ -1080,11 +1136,10 @@ function GroundShadow({
     const root = partsRef.current
     const group = groupRef.current
     if (!root || !group) return
-    // 用部件盒（装饰线不算），否则草稿线把阴影面撑成一大块灰板
+    // 用部件盒（装饰线不算，且已含归一缩放），否则草稿线把阴影面撑成一大块灰板
     const partsBox = boxRef.current
-    if (partsBox && !partsBox.isEmpty()) {
-      box.copy(partsBox).applyMatrix4(scaleMatrix.makeScale(modelScale, modelScale, modelScale))
-    } else box.setFromObject(root)
+    if (partsBox && !partsBox.isEmpty()) box.copy(partsBox)
+    else box.setFromObject(root)
     if (box.isEmpty()) return
     box.getSize(size)
     box.getCenter(center)

@@ -90,10 +90,11 @@ ThingScene.tsx 只做 Canvas 编排与标注层，不再放几何体。
   `labelEl.style.display`（标注层细节见 `.agents/skills/figure-craft/references/annotate.md`）
 - 标注点半径（0.07）/ 引线外推档（`LABEL_REACH_CANDIDATES`）/ 原语默认半径（`Rod` 0.03、
   `SeamRing` 0.018）都是**世界单位的绝对尺寸**，按"模型跨度 ≈ 2"调的；跨度小于 `MODEL_SPAN`
-  的 thing 由 `ThingScene` 归一放大。动取景逻辑时记住：**缩放不经过 `Bounds`**，
-  改完必须自己 `bounds.refresh().clip().fit()` —— 漏了 `clip()` 就是 `controls.maxDistance`
-  小于 `minDistance`，相机被每帧钉死；取景量的是**部件盒**（`partsBounds`：带 `name` 的 mesh），
-  装饰性草稿线不算（它常常是物件的 10×，按整组取景物件就成一个小点）
+  的 thing 由 `ThingScene` 归一放大。取景/裁剪**不用 drei `Bounds`**（它的 `fit()` 只是写 goal，
+  而它自己的 `refresh()` 会把 goal 清空 —— 会时好时坏地丢取景），改由 `ModelSpanProbe`
+  在帧循环里自己算：量**部件盒**（`partsBounds`：带 `name` 的 mesh；装饰草稿线常是物件的 10×）、
+  乘归一系数、摆机位，并顺手重算 `camera.near/far` 与 `controls.maxDistance`
+  （漏了后者：OrbitControls 的 `minDistance 2.5` 会大于按小盒算出的 `maxDistance`，相机被每帧钉死）
   （见 `.agents/skills/figure-craft/references/craft.md` §5）
 - 逐帧重算的结果**不能**用在二值判断上：`sx >= 0` 这类浮点符号在 0 附近会逐帧翻转，
   表现为"标注字一直在闪"（同一个坑有三个变体，见 annotate.md §5）
