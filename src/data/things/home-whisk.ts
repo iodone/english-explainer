@@ -19,7 +19,7 @@ export const homeWhisk: ThingData = {
     { id: 'body', label: 'Hold Body', realName: 'Handle', position: [0, 0.18, 0], finish: 'hull' },
     { id: 'end', label: 'Mix End', realName: 'Wire Loop', position: [0, -0.2, 0], finish: 'cold' },
     { id: 'top', label: 'Top Ring', realName: 'Handle Ring', position: [0, 0.36, 0], finish: 'titanium' },
-    { id: 'inside', label: 'Center Space', realName: 'Center Gap', position: [0, -0.18, 0], finish: 'warning' },
+    { id: 'inside', label: 'Center Space', realName: 'Center Gap', position: [0, -0.18, 0], finish: 'shell' },
     { id: 'plug', label: 'Wire Holder', realName: 'Ferrule', position: [0, 0.02, 0], finish: 'titanium' },
     { id: 'wire', label: 'Loop Wire', realName: 'Whisk Wire', position: [0, -0.28, 0], finish: 'cold' }
   ],
