@@ -158,6 +158,9 @@ wave-power = power-maker 红 / turn-pin 钛白 / sea-rider 外壳灰（余冷灰
   `bounds.refresh().clip().fit()`；三步缺一不可，**尤其是 `clip()`**：
   挂载那次 clip 是按缩放前的小盒算的，`controls.maxDistance` 会小于 `minDistance 2.5`，
   范围一倒挂相机就被每帧钉死在 minDistance 上，怎么 fit 都拉不出来。
+  取景量的是**部件盒**（`partsBounds`：带 `name` 的 mesh）而不是整组：几何文件里的草稿线是装饰，
+  作者给的长短全凭手感（power-socket 的墙线 10× 于插座本体；345 件里 69 件装饰跨度 > 2× 部件跨度），
+  按整组取景会把物件挤成画面上一个小点。装饰线超出画布是草稿线的正常用法。
 - **坑（必记）· 文字朝向**：标签"朝左排 / 朝右排"由**槽位里的 `textRight`** 决定，
   绝不能用现场算的方向符号（`sx = 法线·相机右轴 >= 0`）。部件朝外方向与相机右轴近乎垂直时
   `sx ≈ ±1e-9`，符号逐帧翻转，标签就在 `translateY(-50%)` 与 `translate(-100%,-50%)` 之间

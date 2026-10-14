@@ -146,6 +146,8 @@ export default function ThingScene({
   const [measured, setMeasured] = useState<{ id: string; span: number } | null>(null)
   const span = measured && measured.id === thing.id ? measured.span : 0
   const modelScale = span > 1e-6 ? Math.max(1, MODEL_SPAN / span) : 1
+  // 量到的**部件**世界包围盒（未缩放）。取景与落地阴影都用它 —— 见 partsBounds 的说明
+  const partsBoxRef = useRef<THREE.Box3 | null>(null)
   // 右下角读数（每帧写 DOM，不触发 React 重渲染）
   const readoutRef = useRef<HTMLDivElement>(null)
 
@@ -197,14 +199,17 @@ export default function ThingScene({
       >
         <AccentContext.Provider value={accentColor}>
           <PartMetaContext.Provider value={partMeta}>
-            {/* key=thing.id：切模型时 Bounds 重新 fit；margin 略松给标注留空间 */}
-            <Bounds key={thing.id} fit clip observe margin={1.28}>
-              {/* 跨度归一：小世界放大到基准，世界空间的标注件/原语才回到正确比例 */}
+            {/* key=thing.id：切模型时重新量一次；margin 略松给标注留空间。
+                取景/裁剪交给 ModelSpanProbe（按**部件盒**，见 partsBounds）：
+                Bounds 自带的取景量的是整组，几何里的草稿线会把物件挤成一个小点 */}
+            <Bounds key={thing.id} margin={1.28}>
               <ModelSpanProbe
                 key={thing.id}
                 thingId={thing.id}
                 modelScale={modelScale}
+                span={span}
                 partsRef={partsRef}
+                boxRef={partsBoxRef}
                 onMeasure={setMeasured}
               />
               <group scale={modelScale}>
@@ -229,7 +234,7 @@ export default function ThingScene({
             onPartClick={onPartClick}
           />
         </AccentContext.Provider>
-        <GroundShadow partsRef={partsRef} />
+        <GroundShadow partsRef={partsRef} boxRef={partsBoxRef} modelScale={modelScale} />
         <ViewReadout readoutRef={readoutRef} />
         <CenterAxes />
         <GroundGrid />
@@ -250,57 +255,91 @@ export default function ThingScene({
 }
 
 /**
- * 量一次模型的跨度，交给 ThingScene 换算归一系数（见 MODEL_SPAN），
- * 并在缩放落地后补一次取景（Bounds 自己不会重跑，理由见函数内注释）。
- * 放在 Canvas 内：要等 R3F 把 mesh 建出来才量得到。
+ * 量**部件**的世界包围盒。
+ *
+ * 为什么不量整组：几何文件里的草稿线/地面线是装饰，作者给它们写多长全凭手感——
+ * power-socket 的墙线横跨 0.8 世界单位，而插座本体只有 0.08（10×）；space-antenna 11×。
+ * 345 件里有 69 件（20%）的装饰跨度超过部件跨度的两倍。拿整组取景，这些图里的物件
+ * 就是画面上一个小点；量部件才是"图纸上的那件东西"，装饰线超出画布也无所谓
+ * （草稿线的用法本来就是让它出画布）。
+ *
+ * 一个带 name 的 mesh 都没有时（几何没挂 partId）退回整组，不量出空盒。
+ */
+function partsBounds(root: THREE.Object3D, into: THREE.Box3): THREE.Box3 {
+  into.makeEmpty()
+  let named = 0
+  root.traverse(node => {
+    if (!(node instanceof THREE.Mesh) || !node.name) return
+    named++
+    into.expandByObject(node)
+  })
+  if (!named) into.setFromObject(root)
+  return into
+}
+
+/**
+ * 量一次**部件**的跨度（见 MODEL_SPAN）并负责取景。
+ *
+ * 两块职责凑在一起是因为它们共用同一个盒：
+ *  · 跨度 → 交给 ThingScene 换算归一系数（小世界放大到基准）；
+ *  · 取景 → 归一后的盒交给 Bounds 的 api（refresh → clip → fit）。
+ * 取景必须在**缩放落地之后**重来一次：Bounds 的 fit 只挂在
+ * [size, clip, fit, observe, camera, controls] 上，我们改的是子组 scale，它一无所知。
+ * 三步缺一不可，尤其是 `clip()`：它按盒重算 near/far 与 controls.maxDistance，
+ * 挂载那次是拿"缩放前的小盒"算的，maxDistance 会小于 OrbitControls 的 minDistance 2.5，
+ * 范围一倒挂相机就被每帧钉死在 minDistance 上，怎么 fit 都拉不出来。
  */
 function ModelSpanProbe({
   thingId,
   modelScale,
+  span,
   partsRef,
+  boxRef,
   onMeasure,
 }: {
   thingId: string
   modelScale: number
+  /** 已量到的跨度（0 = 还没量到）；它的变化就是"该取景了"的信号 */
+  span: number
   partsRef: React.RefObject<THREE.Group | null>
+  boxRef: React.RefObject<THREE.Box3 | null>
   onMeasure: (m: { id: string; span: number }) => void
 }) {
   const bounds = useBounds()
+  const size = useThree(state => state.size)
   const done = useRef(false)
-  const size = useMemo(() => new THREE.Vector3(), [])
+  const box = useMemo(() => new THREE.Box3(), [])
+  const scaled = useMemo(() => new THREE.Box3(), [])
+  const sizeVec = useMemo(() => new THREE.Vector3(), [])
+  const scaleMatrix = useMemo(() => new THREE.Matrix4(), [])
+
+  // 换 thing 时立刻作废上一件的盒（组件带 key=thing.id，这里是重新挂载）
+  useEffect(() => {
+    boxRef.current = null
+  }, [boxRef])
+
   useFrame(() => {
     if (done.current) return
     const root = partsRef.current
     if (!root) return
     root.updateWorldMatrix(true, false)
-    const box = new THREE.Box3().setFromObject(root)
+    partsBounds(root, box)
     if (box.isEmpty()) return
     done.current = true
-    box.getSize(size)
+    boxRef.current = box
     // 量到的是**已缩放**的盒（partsRef 在归一组里面），除掉当前系数才是模型自身跨度，
     // 否则"拿缩放后的尺寸反算缩放"会来回震荡。
-    onMeasure({ id: thingId, span: Math.max(size.x, size.y, size.z) / modelScale })
+    box.getSize(sizeVec)
+    onMeasure({ id: thingId, span: Math.max(sizeVec.x, sizeVec.y, sizeVec.z) / modelScale })
   })
 
-  // Bounds 的取景只挂在 [size, clip, fit, observe, camera, controls] 上（见 drei
-  // Bounds.js 的 useLayoutEffect）——我们改的是子组 scale，它一无所知。不补这一下，
-  // 放大后的小模型仍按"缩放前的盒"取景，会溢出画布。
-  //
-  // 必须 refresh → clip → fit 三步一起补：
-  //  · refresh 重量盒（不然拿的是旧盒）；
-  //  · clip 重算 near/far 与 **controls.maxDistance**——挂载时那次 clip 是按缩放前
-  //    的小盒算的（maxDistance 会小于 OrbitControls 的 minDistance 2.5），范围一倒挂
-  //    相机就被每帧钉死在 minDistance 上，怎么 fit 都拉不出去；
-  //  · fit 才是真正取景。
-  // 首帧不动：那时缩放还是 1，交给 Bounds 自己的挂载取景。
-  const fitted = useRef<number | null>(null)
+  // 取景：跨度一变（量到了）或画布尺寸一变（分栏拖动）就重来一次
   useEffect(() => {
-    const first = fitted.current === null
-    if (fitted.current === modelScale) return
-    fitted.current = modelScale
-    if (first) return
-    bounds.refresh().clip().fit()
-  }, [modelScale, bounds])
+    const measuredBox = boxRef.current
+    if (!measuredBox || measuredBox.isEmpty()) return
+    scaled.copy(measuredBox).applyMatrix4(scaleMatrix.makeScale(modelScale, modelScale, modelScale))
+    bounds.refresh(scaled).clip().fit()
+  }, [modelScale, span, size, bounds, boxRef, scaled, scaleMatrix])
 
   return null
 }
@@ -393,6 +432,7 @@ function AnnotationLabels({
   // 隐藏去抖计数
   const missRef = useRef<Map<HTMLDivElement, number>>(new Map())
   const lineRefs = useRef<(LineElement | null)[]>([])
+  const dotRefs = useRef<(THREE.Mesh | null)[]>([])
   const htmlRefs = useRef<(THREE.Group | null)[]>([])
   const labelRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -414,6 +454,9 @@ function AnnotationLabels({
       shoulder: new THREE.Vector3(),
       label: new THREE.Vector3(),
       localPart: new THREE.Vector3(),
+      nLocal: new THREE.Vector3(),
+      quat: new THREE.Quaternion(),
+      point: new THREE.Vector3(),
     }),
     [],
   )
@@ -459,6 +502,8 @@ function AnnotationLabels({
     // ① 部件包围盒（世界）→ 中心 / 朝外法线 / 半径
     const boxes = new Map<string, BoxEntry>()
     const counts = new Map<string, number>()
+    // 部件 id → 它的全部 mesh（落点用；同名多 mesh 的部件要点在最朝外的那块上）
+    const meshesByPart = new Map<string, THREE.Mesh[]>()
     // 每块网格的世界 AABB：投影后就是"形体占用"，标签的硬约束
     const meshBounds = tmp.meshBounds
     let meshCount = 0
@@ -483,6 +528,10 @@ function AnnotationLabels({
         { center: new THREE.Vector3(), normal: new THREE.Vector3(), radius: 0 }
       entry.center.add(tmp.nodeCenter)
       entry.radius = Math.max(entry.radius, tmp.size.length() / 2)
+      // 同名的每一块 mesh 都留一份：部件点的落点要逐块按"自己的盒子"算（见 dotFor）
+      const list = meshesByPart.get(node.name) ?? []
+      list.push(node as THREE.Mesh)
+      meshesByPart.set(node.name, list)
       tmp.scratch.copy(tmp.nodeCenter).sub(tmp.rootWorld)
       if (tmp.scratch.lengthSq() > 1e-8) entry.normal.add(tmp.scratch.normalize())
       boxes.set(node.name, entry)
@@ -557,6 +606,41 @@ function AnnotationLabels({
       .map(x => x.i)
 
     /** 由「槽位」算出引线三点与标签矩形；判定与绘制共用同一套几何，保证一致 */
+    /**
+     * 部件点的落点：部件几何在"朝外方向"上的**面心**。
+     *
+     * 为什么不用数据里的 `position`：数据坐标常年和几何对不齐（tooth-brush 的 head 写在
+     * 盒顶之上 0.06，归一放大 18× 后点就浮在半空），点浮着就读不出"词找到了物件"。
+     * 为什么不用世界 AABB 的支撑点：旋转过的部件（时钟指针）AABB 是斜着包出去的一大块，
+     * 角点会飘到形体外的空白里。逐块用自己的**局部盒**取"主轴面上的中心"才是真落在部件上，
+     * 也不会陷进几何里（面心永远在表面）。
+     */
+    const dotFor = (meshes: THREE.Mesh[], normal: THREE.Vector3, into: THREE.Vector3) => {
+      let bestAlong = -Infinity
+      for (const mesh of meshes) {
+        const bb = (mesh.geometry as THREE.BufferGeometry).boundingBox
+        if (!bb) continue
+        // 主轴 = 朝外方向在该块 mesh 局部空间里分量最大的那根
+        tmp.nLocal.copy(normal).applyQuaternion(mesh.getWorldQuaternion(tmp.quat).invert())
+        const ax = Math.abs(tmp.nLocal.x)
+        const ay = Math.abs(tmp.nLocal.y)
+        const az = Math.abs(tmp.nLocal.z)
+        const axis = ax >= ay && ax >= az ? 0 : ay >= az ? 1 : 2
+        bb.getCenter(tmp.point)
+        tmp.point.setComponent(
+          axis,
+          tmp.nLocal.getComponent(axis) >= 0 ? bb.max.getComponent(axis) : bb.min.getComponent(axis),
+        )
+        mesh.localToWorld(tmp.point)
+        const along = tmp.point.dot(normal)
+        if (along > bestAlong) {
+          bestAlong = along
+          into.copy(tmp.point)
+        }
+      }
+      return bestAlong > -Infinity
+    }
+
     const pointsFor = (
       ctx: Ctx,
       slot: LabelSlot,
@@ -598,6 +682,7 @@ function AnnotationLabels({
       part: (typeof thing.parts)[number]
       index: number
       line: LineElement
+      dot: THREE.Mesh
       htmlGroup: THREE.Group
       labelEl: HTMLDivElement
       entry: BoxEntry
@@ -608,6 +693,7 @@ function AnnotationLabels({
       radius: number
       estWidth: number
       estHeight: number
+      /** 部件点落点（世界，几何表面） */
       dotWorld: THREE.Vector3
       scratch: { edge: THREE.Vector3; shoulder: THREE.Vector3; label: THREE.Vector3 }
     }
@@ -618,13 +704,17 @@ function AnnotationLabels({
       const line = lineRefs.current[index]
       const htmlGroup = htmlRefs.current[index]
       const labelEl = labelRefs.current[index]
-      if (!line || !htmlGroup || !labelEl) continue
+      const dot = dotRefs.current[index]
+      if (!line || !dot || !htmlGroup || !labelEl) continue
 
-      // 无几何的部件退化：用数据里的 position 当锚点
+      // 无几何的部件退化：用数据里的 position 当锚点。
+      // 注意它是**模型局部**坐标，必须 localToWorld —— 其余 entry 的 center 都来自
+      // setFromObject（世界），混着用会让这种部件在归一大图上锚点差出几十倍。
+      const geom = boxes.get(part.id) ?? null
       const entry =
-        boxes.get(part.id) ??
+        geom ??
         {
-          center: new THREE.Vector3(...part.position),
+          center: root.localToWorld(new THREE.Vector3(...part.position)),
           normal: new THREE.Vector3(0, 1, 0),
           radius: 0.2,
         }
@@ -661,14 +751,19 @@ function AnnotationLabels({
       const estWidth = labelEl.offsetWidth || longest * LABEL_CHAR_PX + 8
       const estHeight = labelEl.offsetHeight || rows * LABEL_ROW_PX
 
-      // 部件点（模型局部 → 世界）：引线从这里出发
-      tmp.localPart.set(part.position[0], part.position[1], part.position[2])
-      const dotWorld = root.localToWorld(tmp.localPart.clone())
+      // 部件点的世界落点：贴几何表面（见 dotFor）；没有几何的部件才用数据坐标兜底。
+      const dotWorld = new THREE.Vector3()
+      const meshes = meshesByPart.get(part.id)
+      if (!(meshes && dotFor(meshes, tmp.normal, dotWorld))) {
+        tmp.localPart.set(part.position[0], part.position[1], part.position[2])
+        dotWorld.copy(root.localToWorld(tmp.localPart))
+      }
 
       ctxList.push({
         part,
         index,
         line,
+        dot,
         htmlGroup,
         labelEl,
         entry,
@@ -800,6 +895,9 @@ function AnnotationLabels({
       const isHovered = hovered === ctx.part.id
       const show = isActive || isHovered
 
+      // 部件点跟着几何表面走：数据 position 只在挂载时兜个底（见 ctx.dotWorld）
+      ctx.dot.position.copy(ctx.dotWorld)
+
       // 注意：drei 的 <Html> 渲染进 DOM portal，不受父 group.visible 影响，
       // 必须直接切 labelEl.style.display，否则"隐藏"的标签照样画在屏幕上。
       if (slot) {
@@ -875,8 +973,12 @@ function AnnotationLabels({
         const dotOpacity = dimOthers && !isActive ? 0.2 : show ? 1 : 0.85
         return (
           <group key={part.id}>
-            {/* 部件点 — 可点击（图→词），留在模型坐标系内 */}
+            {/* 部件点 — 可点击（图→词）。position 只是挂载时的兜底落点，
+                每帧由标注层把真实落点（几何表面）写进来 */}
             <mesh
+              ref={node => {
+                dotRefs.current[index] = node
+              }}
               position={[
                 part.position[0] * modelScale,
                 part.position[1] * modelScale,
@@ -956,11 +1058,20 @@ function AnnotationLabels({
  * 落地阴影（anatomy 的 iso-halo：模糊的软影，把物件"按"在纸面上）。
  * 每帧读模型世界包围盒，把阴影面贴在模型底部，尺寸跟随足印。
  */
-function GroundShadow({ partsRef }: { partsRef: React.RefObject<THREE.Group | null> }) {
+function GroundShadow({
+  partsRef,
+  boxRef,
+  modelScale,
+}: {
+  partsRef: React.RefObject<THREE.Group | null>
+  boxRef: React.RefObject<THREE.Box3 | null>
+  modelScale: number
+}) {
   const groupRef = useRef<THREE.Group>(null)
   const box = useMemo(() => new THREE.Box3(), [])
   const size = useMemo(() => new THREE.Vector3(), [])
   const center = useMemo(() => new THREE.Vector3(), [])
+  const scaleMatrix = useMemo(() => new THREE.Matrix4(), [])
   // ContactShadows 的 scale/far 必须用世界尺寸传入（缩放外层 group 会把
   // 它的正交视锥一起放大，导致整块阴影面糊成一片灰板）。
   const [extent, setExtent] = useState({ scale: 8, far: 4 })
@@ -969,7 +1080,11 @@ function GroundShadow({ partsRef }: { partsRef: React.RefObject<THREE.Group | nu
     const root = partsRef.current
     const group = groupRef.current
     if (!root || !group) return
-    box.setFromObject(root)
+    // 用部件盒（装饰线不算），否则草稿线把阴影面撑成一大块灰板
+    const partsBox = boxRef.current
+    if (partsBox && !partsBox.isEmpty()) {
+      box.copy(partsBox).applyMatrix4(scaleMatrix.makeScale(modelScale, modelScale, modelScale))
+    } else box.setFromObject(root)
     if (box.isEmpty()) return
     box.getSize(size)
     box.getCenter(center)
