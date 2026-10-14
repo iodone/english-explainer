@@ -78,6 +78,9 @@ node $S labels <这件>                    # 标注稳定
 | 物件在画面上只是一个小点，四周空一片 | 取景按**整组**算了，几何文件里的草稿线/地面线把盒子撑大（常有 2–11×） | 取景与影子都按**部件盒**（`partsBounds`：带 `name` 的 mesh）；装饰线出画布是正常的 |
 | 归一之后模型还是溢出画布、相机像被钉死 | `controls.maxDistance` 还是按缩放前的小盒算的，小于 `minDistance 2.5`，OrbitControls 每帧把相机拉回来 | 取景时同时重算 `near/far` 与 `maxDistance`（`ModelSpanProbe` 已这么做） |
 | 同一件东西刷新几次，取景时好时坏（有时缩成一个小点） | 用了 drei `Bounds` 的 `fit()`：它只写 goal，而它自己的 `refresh()` 会清掉 goal | 别用 `Bounds.fit()`，取景自己算（`ModelSpanProbe`） |
+| 往盆/锅/桶里看是一片**黑洞**（其实是透到地面影子上） | 纸面材质单面：凹面是背面，被剔掉了 | 纸面走 `DoubleSide` + `gl_FrontFacing` 翻法线（`paperSurface.ts`）；空腔件只画外壳就够 |
+| 部件点浮在盆口正中的**空腔里**（一颗黑球） | 落点取的是包围盒面心，空心件的盒顶面心就是开口正中 | 落点改取**真顶点极值**（`dotFor` + `extremePoints`） |
+| 宽画布下标签压在右上角 `MODEL / SKETCH-*` 上 | 四角块是 DOM，标注层看不见 | 画布尺寸变化时实测 `[data-plate-corner]` 矩形，当 `occupied` 初值（见 annotate.md §4） |
 | 某根"线"点击不高亮 | 用了 drei `Line`（GlooLine 不参与部件高亮） | 该用 `Rod`（细圆柱 mesh + `name`） |
 | 图整体变平、没有体量 | 新几何绕开了顶面档，或面材质被换成了 basic | 走 `SketchMesh`，别自己拼材质；确认 `smoothstep(0.62,0.72,n.y)` 生效 |
 | 线在缩放后变粗/变细 | 写死了 `lineWidth` | 用屏幕恒定换算（`HULL_WIDTH_PX`） |

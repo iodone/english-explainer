@@ -180,7 +180,10 @@ wave-power = power-maker 红 / turn-pin 钛白 / sea-rider 外壳灰（余冷灰
   与 `.micro-label`（10px、大写字距 .08em）区分开。读数值每帧直接写 `textContent`，不进 React 状态
 - **图例符号**（`PartGlyph`）：部件对照表每行左侧一枚等距小立方，三面用该部件实际的纸面色
   （`PAPER_SWATCH`）+ 墨线——图例符号本身是图上那块实体的缩略，不是抽象色块
-- 标签横排朝向屏幕（DOM 渲染，不随相机旋转倾斜），位置随模型旋转实时重排
+- 标签横排朝向屏幕（DOM 渲染，不随相机旋转倾斜），位置随模型旋转实时重排；
+  选位把**图版四角块**（SPECIMEN / MODEL / 操作提示 / 读数）也当占用 —— 标签不许压在上面
+- **纸上实体是双面的**（`paperSurface` 的 `DoubleSide` + `gl_FrontFacing` 翻法线）：
+  盆 / 锅 / 桶 / 管这类**空腔件**只画外壳，内壁照样受光可见；单面渲染会让"往里看"变成一片黑洞
 
 **技术红线**：线框只用于外壳类部件（不是全模型 wireframe）；
 哑光材质禁止高光反射（meshBasicMaterial unlit）；透明外壳 depthWrite 关闭防排序瑕疵。

@@ -98,3 +98,8 @@ ThingScene.tsx 只做 Canvas 编排与标注层，不再放几何体。
   （见 `.agents/skills/figure-craft/references/craft.md` §5）
 - 逐帧重算的结果**不能**用在二值判断上：`sx >= 0` 这类浮点符号在 0 附近会逐帧翻转，
   表现为"标注字一直在闪"（同一个坑有三个变体，见 annotate.md §5）
+- 纸面材质是**双面**的（`DoubleSide` + `gl_FrontFacing` 翻法线）：盆/锅/桶/管只画外壳，
+  内壁自动可见。**改回单面**会让所有空腔件"往里看是一片黑洞"
+- 部件点落在**真顶点**上（`dotFor` + `extremePoints`）：空心件的包围盒面心落在空腔正中，
+  用面心会让点浮在盆口中央
+- 图版四角块是 DOM（`[data-plate-corner]`），标注层要靠它占位，否则宽画布下标签会压在上面

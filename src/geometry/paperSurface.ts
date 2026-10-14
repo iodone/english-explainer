@@ -92,6 +92,9 @@ export function makePaperMaterial(
   return new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: true,
+    // 双面：盆/锅/桶/管这类**空腔件**的内表面是背面，单面渲染会被剔掉 ——
+    // 往里看是一个"黑洞"（其实是透到地面影子上去了）。背面在片元里翻法线照样受光。
+    side: THREE.DoubleSide,
     uniforms: {
       uLight: { value: PAPER_LIGHT.clone() },
       uPx: { value: dpr },
@@ -123,6 +126,8 @@ export function makePaperMaterial(
 
       void main() {
         vec3 n = normalize(vNormal);
+        // 背面（壳体内壁）：法线翻过来，明暗与顶面档才对得上
+        if (!gl_FrontFacing) n = -n;
 
         // 被点亮 = 换调色板（anatomy 的 data-lit），不是叠色
         vec3 cBase = mix(uBase, uLitBase, uEmphasis);

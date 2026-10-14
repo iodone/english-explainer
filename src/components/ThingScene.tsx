@@ -155,24 +155,24 @@ export default function ThingScene({
     <div className="w-full h-full reticle">
       {/* 图版四角（anatomy-figures 的 plate-corner 体系）：
           左上 = 标本号+真名 · 右上 = 图号 · 左下 = 操作提示 · 右下 = 实时读数 */}
-      <div className="absolute top-4 left-4 z-10 pointer-events-none">
+      <div data-plate-corner className="absolute top-4 left-4 z-10 pointer-events-none">
         <div className="micro-label text-hud-cyan">SPECIMEN</div>
         <div className="plate-corner text-ink-soft mt-1">
           {thing.realName.toUpperCase()}
         </div>
       </div>
-      <div className="absolute top-4 right-4 z-10 pointer-events-none text-right">
+      <div data-plate-corner className="absolute top-4 right-4 z-10 pointer-events-none text-right">
         <div className="micro-label">MODEL</div>
         <div className="plate-corner text-ink-faint mt-1">
           SKETCH-{thing.id.slice(0, 8).toUpperCase()}
         </div>
       </div>
-      <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
+      <div data-plate-corner className="absolute bottom-4 left-4 z-10 pointer-events-none">
         <div className="micro-label">DRAG TO ROTATE · SCROLL TO ZOOM · CLICK A PART</div>
       </div>
 
       {/* 右下读数：实时方位角/仰角 + 部件数（等宽数字，制图室读数板） */}
-      <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-2">
+      <div data-plate-corner className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-2">
         <div className="pointer-events-none plate-corner text-ink-faint text-right leading-relaxed">
           <div>PARTS {String(thing.parts.length).padStart(2, '0')}</div>
           <div ref={readoutRef}>AZ ---° · EL --°</div>
@@ -456,6 +456,48 @@ interface Rect {
 }
 
 /**
+ * 每块几何的 6 个轴向极值顶点（局部空间，按 geometry 缓存一次）。
+ * 部件点的落点从这 6 个候选里挑"最朝外"的一个 —— 见 dotFor 里关于面心/空腔的说明。
+ */
+const extremeCache = new WeakMap<THREE.BufferGeometry, THREE.Vector3[]>()
+function extremePoints(geometry: THREE.BufferGeometry): THREE.Vector3[] {
+  const cached = extremeCache.get(geometry)
+  if (cached) return cached
+  const position = geometry.getAttribute('position')
+  const points: THREE.Vector3[] = []
+  if (position && position.count > 0) {
+    for (let axis = 0; axis < 3; axis++) {
+      for (const sign of [1, -1]) {
+        let best = -Infinity
+        let bestIndex = 0
+        for (let i = 0; i < position.count; i++) {
+          const value = position.getComponent(i, axis) * sign
+          if (value > best) {
+            best = value
+            bestIndex = i
+          }
+        }
+        points.push(new THREE.Vector3().fromBufferAttribute(position, bestIndex))
+      }
+    }
+  } else {
+    geometry.computeBoundingBox()
+    const box = geometry.boundingBox
+    if (box) {
+      for (let axis = 0; axis < 3; axis++) {
+        for (const sign of [1, -1]) {
+          const point = box.getCenter(new THREE.Vector3())
+          point.setComponent(axis, sign > 0 ? box.max.getComponent(axis) : box.min.getComponent(axis))
+          points.push(point)
+        }
+      }
+    }
+  }
+  extremeCache.set(geometry, points)
+  return points
+}
+
+/**
  * 工程图标注层（2026-09-29 重做 · A/D 方案）
  *
  * 与旧版的区别：
@@ -492,6 +534,10 @@ function AnnotationLabels({
     slots: Map<string, LabelSlot | null>
     fades: Map<string, boolean>
   }>({ at: 0, key: '', count: -1, slots: new Map(), fades: new Map() })
+  // 图版四角（SPECIMEN / MODEL / 操作提示 / 读数）的占位矩形：
+  // 标签不许压在这些块上 —— 宽画布下模型铺得开，标签尾巴会甩到右上角。
+  // 只在画布尺寸变化时用 DOM 实测一次（getBoundingClientRect 会强制 layout，别每帧做）。
+  const plateCorners = useRef<{ key: string; rects: Rect[] }>({ key: '', rects: [] })
   // 隐藏去抖计数
   const missRef = useRef<Map<HTMLDivElement, number>>(new Map())
   const lineRefs = useRef<(LineElement | null)[]>([])
@@ -517,8 +563,6 @@ function AnnotationLabels({
       shoulder: new THREE.Vector3(),
       label: new THREE.Vector3(),
       localPart: new THREE.Vector3(),
-      nLocal: new THREE.Vector3(),
-      quat: new THREE.Quaternion(),
       point: new THREE.Vector3(),
     }),
     [],
@@ -557,6 +601,24 @@ function AnnotationLabels({
   useFrame(({ camera, size, gl }) => {
     const root = partsRef.current
     if (!root) return
+
+    // 画布尺寸变了才重测四角块的位置（含 12px 余量：标签首尾相接会被读成一行）
+    const cornerKey = `${size.width}x${size.height}`
+    if (plateCorners.current.key !== cornerKey) {
+      plateCorners.current.key = cornerKey
+      const canvasRect = gl.domElement.getBoundingClientRect()
+      plateCorners.current.rects = Array.from(
+        document.querySelectorAll('[data-plate-corner]'),
+      ).map(node => {
+        const r = node.getBoundingClientRect()
+        return {
+          left: r.left - canvasRect.left - LABEL_GUTTER,
+          right: r.right - canvasRect.left + LABEL_GUTTER,
+          top: r.top - canvasRect.top - LABEL_GUTTER,
+          bottom: r.bottom - canvasRect.top + LABEL_GUTTER,
+        }
+      })
+    }
 
     // root 的世界矩阵（Bounds 每帧改它的 scale，必须显式刷新）
     root.updateWorldMatrix(true, false)
@@ -670,35 +732,29 @@ function AnnotationLabels({
 
     /** 由「槽位」算出引线三点与标签矩形；判定与绘制共用同一套几何，保证一致 */
     /**
-     * 部件点的落点：部件几何在"朝外方向"上的**面心**。
+     * 部件点的落点：部件几何在"朝外方向"上**最外面的那个真顶点**。
      *
      * 为什么不用数据里的 `position`：数据坐标常年和几何对不齐（tooth-brush 的 head 写在
      * 盒顶之上 0.06，归一放大 18× 后点就浮在半空），点浮着就读不出"词找到了物件"。
      * 为什么不用世界 AABB 的支撑点：旋转过的部件（时钟指针）AABB 是斜着包出去的一大块，
-     * 角点会飘到形体外的空白里。逐块用自己的**局部盒**取"主轴面上的中心"才是真落在部件上，
-     * 也不会陷进几何里（面心永远在表面）。
+     * 角点会飘到形体外的空白里。
+     * 为什么不用包围盒的**面心**（2026-10-14 改）：空心件的面心落在**空腔正中**——
+     * 勺盆/滤盆/锅/桶/杯的盒顶面心就是开口的正中央，点浮在盆里读成一颗黑球；
+     * 顶点极值是真几何上的点，落哪儿都在表面上（勺盆→落在口沿，锅→落在锅沿）。
      */
     const dotFor = (meshes: THREE.Mesh[], normal: THREE.Vector3, into: THREE.Vector3) => {
       let bestAlong = -Infinity
       for (const mesh of meshes) {
-        const bb = (mesh.geometry as THREE.BufferGeometry).boundingBox
-        if (!bb) continue
-        // 主轴 = 朝外方向在该块 mesh 局部空间里分量最大的那根
-        tmp.nLocal.copy(normal).applyQuaternion(mesh.getWorldQuaternion(tmp.quat).invert())
-        const ax = Math.abs(tmp.nLocal.x)
-        const ay = Math.abs(tmp.nLocal.y)
-        const az = Math.abs(tmp.nLocal.z)
-        const axis = ax >= ay && ax >= az ? 0 : ay >= az ? 1 : 2
-        bb.getCenter(tmp.point)
-        tmp.point.setComponent(
-          axis,
-          tmp.nLocal.getComponent(axis) >= 0 ? bb.max.getComponent(axis) : bb.min.getComponent(axis),
-        )
-        mesh.localToWorld(tmp.point)
-        const along = tmp.point.dot(normal)
-        if (along > bestAlong) {
-          bestAlong = along
-          into.copy(tmp.point)
+        const geometry = mesh.geometry as THREE.BufferGeometry | undefined
+        if (!geometry) continue
+        for (const vertex of extremePoints(geometry)) {
+          tmp.point.copy(vertex)
+          mesh.localToWorld(tmp.point)
+          const along = tmp.point.dot(normal)
+          if (along > bestAlong) {
+            bestAlong = along
+            into.copy(tmp.point)
+          }
         }
       }
       return bestAlong > -Infinity
@@ -858,7 +914,8 @@ function AnnotationLabels({
       decision.key !== priorityKey ||
       decision.count !== ctxList.length
     ) {
-      const occupied: Rect[] = []
+      // 四角块先占位：候选位压到它们就换一个（退让档也不要压，它只允许压形体）
+      const occupied: Rect[] = [...plateCorners.current.rects]
       const slots = new Map<string, LabelSlot | null>()
       const fades = new Map<string, boolean>()
       for (const ctx of ctxList) {
