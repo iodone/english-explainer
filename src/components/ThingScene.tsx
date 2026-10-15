@@ -37,8 +37,11 @@ const PAPER = '#F4F1EA'
 const MODEL_SPAN = 2.2
 /** 取景留白系数：1.28（drei `Bounds` 默认 1.2 的稍松版），给标注层留出落字空间 */
 const FIT_MARGIN = 1.28
-/** 标签落点候选：沿部件包围盒"朝外方向"的试探距离（世界单位，逐级外推找空位） */
-const LABEL_REACH_CANDIDATES = [0.95, 1.3, 1.7, 2.15, 2.65, 3.2, 3.9, 4.7, 5.6, 6.6]
+/** 标签落点候选：沿部件"朝外方向"的试探距离（世界单位，逐级外推找空位）。
+ *  开头两档是"贴着形体出线"的短引线档 —— 真图纸的引线都短；
+ *  早先从 0.95 起步，宽而矮的形体（降落伞的伞衣）会被这一档直接顶出画布，
+ *  于是整件图的标签全被挤到同一侧排成一列。 */
+const LABEL_REACH_CANDIDATES = [0.4, 0.65, 0.95, 1.3, 1.7, 2.15, 2.65, 3.2, 3.9, 4.7, 5.6, 6.6]
 /** 包围盒朝外点的试探比例（0=中心，1=盒边缘） */
 const ANCHOR_EDGE_T = [0.72, 1.0]
 /** 引线水平尾巴长度（世界单位） */
@@ -843,7 +846,6 @@ function AnnotationLabels({
       if (tmp.normal.lengthSq() < 1e-8) tmp.normal.copy(entry.center).sub(tmp.rootWorld)
       if (tmp.normal.lengthSq() < 1e-8) tmp.normal.set(0, 1, 0)
       tmp.normal.normalize()
-      const radius = Math.max(entry.radius, 0.14)
 
       // 屏幕朝向（相机右/上基分解）；折角因此横平竖直，读起来像图纸
       const sx = tmp.normal.dot(tmp.right)
@@ -877,6 +879,13 @@ function AnnotationLabels({
         tmp.localPart.set(part.position[0], part.position[1], part.position[2])
         dotWorld.copy(root.localToWorld(tmp.localPart))
       }
+
+      // ③ 锚点半径 = **真实支撑距离**：部件顶点极值在朝外方向上的投影。
+      // 早先用"包围盒半对角线"（`entry.radius`），对宽而矮的形体（降落伞伞衣：
+      // 局部盒 0.6×0.3×0.6、半对角线 0.45，而朝上的真实高度只有 0.30）会**越过形体一大截**，
+      // 引线起点飘在形体之外，再叠一档外推就顶出画布，整件图的标签被挤到同一侧。
+      tmp.scratch.copy(dotWorld).sub(entry.center)
+      const radius = Math.max(tmp.scratch.dot(tmp.normal), 0.14)
 
       ctxList.push({
         part,
@@ -951,7 +960,7 @@ function AnnotationLabels({
                 cost:
                   (modelRect && overlaps(r, [modelRect]) ? COST_OUTSIDE_BODY : 0) +
                   DIR_COST[di] +
-                  ri * 2 +
+                  LABEL_REACH_CANDIDATES[ri] * 2 +
                   (ai === 1 ? 0.5 : 0),
               })
             }
