@@ -10,7 +10,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentRef } from 'react'
 import * as THREE from 'three'
-import type { ThingData } from '../data/types'
+import type { PartFinish, ThingData } from '../data/types'
 import {
   GEOMETRY,
   AccentContext,
@@ -532,6 +532,9 @@ function AnnotationLabels({
   // 标注层用的 accent 墨色：thing.color 是浅粉彩身份色，当文字/点阵色在纸面上不可读
   // （hover 会重渲染这一层，换算带个 memo）
   const accentMark = useMemo(() => accentInkHex(thing.color), [thing.color])
+  // 红件的记号色是它自己的红（红是语义色，见 primitives.usePartHighlight 的 markInk）
+  const markFor = (finish: PartFinish | undefined) =>
+    finish === 'warning' ? WARNING_RED : accentMark
   // 阅读态点选（非 flow）：被点中之外的一切向纸面退开 —— 与 3D 材质同一套语义
   const focus = !!highlightPartId && !dimOthers
   // 选位决策（节流）：slots = 每个部件选中的槽位，fades = 是否淡排
@@ -1061,7 +1064,7 @@ function AnnotationLabels({
         textRight ? 'translateY(-50%)' : 'translate(-100%, -50%)'
       ctx.labelEl.style.textAlign = textRight ? 'left' : 'right'
       ctx.labelEl.style.color = isActive
-        ? accentMark
+        ? markFor(ctx.part.finish)
         : isHovered
           ? '#2AA8A8'
           : '#5A554C'
@@ -1109,7 +1112,11 @@ function AnnotationLabels({
         const isActive = highlightPartId === part.id || activePartIds.includes(part.id)
         const show = hoveredNow || isActive
         const idleColor = part.finish === 'warning' ? WARNING_RED : INK
-        const dotColor = isActive ? accentMark : hoveredNow ? '#2AA8A8' : idleColor
+        const dotColor = isActive
+          ? markFor(part.finish)
+          : hoveredNow
+            ? '#2AA8A8'
+            : idleColor
         const dotOpacity = dimOthers && !isActive ? 0.2 : focus && !isActive ? 0.35 : show ? 1 : 0.85
         return (
           <group key={part.id}>

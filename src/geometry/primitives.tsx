@@ -161,7 +161,13 @@ export function usePartHighlight(
       const lineMat = edges.material as THREE.MeshBasicMaterial & { linewidth: number }
 
       // 常态 = 配色角色
-      const base = FINISH_POOL[finishMap.get(partId) ?? 'hull']
+      const finish = finishMap.get(partId) ?? 'hull'
+      const base = FINISH_POOL[finish]
+      // 被点亮的"记号色"：**红件保持自己的红**——红是语义色（功能/警示位，每件 ≤2），
+      // 被 thing 的身份色覆盖会让"这个部件是热的/带电的"这层意思凭空消失
+      // （2026-10-15 用户反馈：点测电表的红线圈，红变成 accent 的土黄）。
+      // 其余三档是纸面灰阶（无彩），拿 accent 墨色上色不冲突——那是给灰阶件显色相的。
+      const markInk = finish === 'warning' ? base.line : accentInk
       let lineOpacity = base.lineOpacity
       let lineColor: THREE.Color = base.line
       let lineWidth = 1
@@ -169,13 +175,13 @@ export function usePartHighlight(
       let dim = 0
 
       if (state.activePartIds.includes(partId)) {
-        lineOpacity = 1; lineColor = accentInk; lineWidth = 2.5; emphasis = 1
+        lineOpacity = 1; lineColor = markInk; lineWidth = 2.5; emphasis = 1
       } else if (state.pastPartIds.includes(partId)) {
         lineOpacity = 0.45; lineWidth = 0.9; dim = 0.6
       } else if (state.dimOthers) {
         lineOpacity = 0.12; dim = 1
       } else if (state.highlightPartId === partId) {
-        lineOpacity = 1; lineColor = accentInk; lineWidth = 2.5; emphasis = 1
+        lineOpacity = 1; lineColor = markInk; lineWidth = 2.5; emphasis = 1
       } else if (state.highlightPartId) {
         // 阅读态点选：其余部件向纸面退开。**面和线一起退** ——
         // 只降面不降线会留下"淡面 + 硬墨边"的鬼影，比不退还乱。

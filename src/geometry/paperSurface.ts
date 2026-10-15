@@ -98,6 +98,16 @@ export const PAPER_SWATCH: Record<PartFinish, { top: string; face: string; side:
  * 0.2 → 对纸（Y≈0.88）约 3.7:1。
  */
 const ACCENT_INK_Y = 0.2
+/**
+ * 黄色相（40°–70°）**不许压过 Y 0.28**。
+ * sRGB 里低明度的黄本来就走橄榄——金 accent（#FFD700）压到 Y 0.2 变成 `#8f7800` 土黄，
+ * 一眼看不出它跟金色是同一个身份了（2026-10-15 用户："为啥要用黄色"）。
+ * 这一档换回 2.9:1 的琥珀/古铜：线宽 2.5px + 点阵 + 标注三重记号，
+ * 少那 0.9 的对比度换回色相身份，值。
+ */
+const ACCENT_INK_Y_YELLOW = 0.28
+const YELLOW_HUE_MIN = 40 / 360
+const YELLOW_HUE_MAX = 70 / 360
 /** 明度下限：再压就纯黑了，accent 会失去身份 */
 const ACCENT_INK_L_MIN = 0.14
 
@@ -150,9 +160,11 @@ export function accentInkOf(color: THREE.Color | string): THREE.Color {
   const hex = normalizeHex(color instanceof THREE.Color ? color.getHexString() : color)
   const [h, rawS, rawL] = hexToHsl(hex)
   const s = rawS > 0.05 ? Math.min(1, Math.max(rawS, 0.45)) : rawS
+  const targetY =
+    h >= YELLOW_HUE_MIN && h <= YELLOW_HUE_MAX ? ACCENT_INK_Y_YELLOW : ACCENT_INK_Y
   let l = Math.min(rawL, 0.42)
   let ink = hslToHex(h, s, l)
-  while (l > ACCENT_INK_L_MIN && relativeLuminance(ink) > ACCENT_INK_Y) {
+  while (l > ACCENT_INK_L_MIN && relativeLuminance(ink) > targetY) {
     l -= 0.01
     ink = hslToHex(h, s, l)
   }
