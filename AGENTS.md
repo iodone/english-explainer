@@ -16,8 +16,8 @@ npx tsx scripts/validate-data.mjs  # 数据一致性校验（句数/partId/dict 
 npx tsx scripts/check-simple-words.mjs  # Munroe ~1000 词闸门（article/flow/keyExpressions/funFacts 四通道）
 
 # 图版走查（需要 npm run dev 开着；自己起 headless Chrome，零依赖）
-node .agents/skills/figure-craft/scripts/figure.mjs shot   <thing>            # 截图
-node .agents/skills/figure-craft/scripts/figure.mjs labels <thing> [--click .word-part]
+node .agents/skills/figure-craft/scripts/figure.mjs shot   <thing> [--click-at x,y]   # 截图（可先点中一个部件）
+node .agents/skills/figure-craft/scripts/figure.mjs labels <thing> [--click .word-part | --click-at x,y]
 ```
 
 ## 结构

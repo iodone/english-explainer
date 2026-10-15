@@ -96,7 +96,10 @@ S=.agents/skills/figure-craft/scripts/figure.mjs
 node $S shot   clock --out tmp/shot.png          # 整体：形体关系 / 取景 / 遮挡
 node $S shot   clock --scale 2 --clip 800,200,600,500   # 局部放大：4× 判据用
 node $S labels nuclear-reactor                   # 标注逐帧采样：跳变 / 显隐
+node $S shot   tooth-brush --click-at 1200,500   # 点画布上的部件本体（图→词激活态）
 node $S labels nuclear-reactor --click .word-part # 激活态再采一遍（最容易抖）
+node $S labels tooth-brush --click-at 1050,400   # 点中部件之后，标注层再采一遍
+node $S shot   tooth-brush --click .hud-panel --click-has "HOW IT WORKS"  # 造 flow 态
 node $S eval   clock "document.querySelectorAll('[data-label]').length"
 ```
 

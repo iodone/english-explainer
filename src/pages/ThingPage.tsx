@@ -120,9 +120,11 @@ export default function ThingPage() {
     }
   }
 
-  // 点击 segment → 只做词→图部件关联（词条卡改悬停触发）
+  // 点击 segment → 只做词→图部件关联（词条卡改悬停触发）；
+  // 再点同一个词 = 取消选中（回到常态图，阅读时不用靠"点别的部件"来解焦）
   const handleSegmentClick = (seg: MarkedSeg) => {
-    if (seg.part) setActivePartId(seg.part)
+    const partId = seg.part
+    if (partId) setActivePartId(prev => (prev === partId ? null : partId))
   }
 
   // 悬停 2s → 词条卡（ArticleView 内计时）
@@ -138,8 +140,12 @@ export default function ThingPage() {
     closeTimerRef.current = window.setTimeout(() => setWordPopup(null), 250)
   }
 
-  // 图→词：点击图上部件标注点 → 文章滚动到该部件句
+  // 图→词：点击图上部件 → 文章滚动到该部件句；再点同一部件 = 取消选中
   const handlePartClick = (partId: string) => {
+    if (activePartId === partId) {
+      setActivePartId(null)
+      return
+    }
     setActivePartId(partId)
     const idx = findSentenceIndexByPart(thing, partId)
     if (idx !== null) articleRef.current?.scrollToSentence(idx)

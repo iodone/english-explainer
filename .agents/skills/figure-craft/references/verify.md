@@ -14,11 +14,20 @@ node $S shot   clock --scale 2 --clip 800,200,600,500 # 局部 2×（配合截�
 node $S shot   clock --width 900                     # 窄画布：分栏拖窄后标注还成不成立
 node $S labels nuclear-reactor --wait 7000           # 标注层逐帧采样
 node $S labels nuclear-reactor --click .word-part    # 激活态（优先级重排）再采一遍
+node $S shot   tooth-brush --click-at 1200,500       # 点画布上的部件本体（图→词激活态）
+node $S labels tooth-brush --click-at 1050,400       # 点中部件之后，标注层再采一遍
+node $S shot   tooth-brush --click .hud-panel --click-has "HOW IT WORKS"   # 点 DOM 按钮造 flow 态
 node $S eval   clock "document.querySelectorAll('[data-label]').length"
 
 # 静态盘点（不开浏览器）：谁在小世界里、谁的装饰线长过头
 node .agents/skills/figure-craft/scripts/span-audit.mjs
 ```
+
+**激活态一定要单独走一遍**：点选会触发优先级重排（被点中的标签升到最高优先级、其余退开），
+这是最容易抖的状态。`--click-at x,y` 是往 canvas 上补一次真 pointerdown/up/click
+（部件不是 DOM 元素，只有真事件走到 canvas 上 R3F 才会射线拾取）；坐标用 `shot` 的输出
+反推——它会把 canvas 的 `[left, top, w, h]` 打出来。`--click <css>` 则是点 DOM 元素，
+`--click-has 文案` 用来在一堆同 class 的按钮里挑那一个。
 
 `labels` 的判据是**相邻采样的跳变**，不是位移总量：`autoRotate` 会让标签平滑漂移
 （1–2px/次，正常），**抖动是一步跳一整个标签宽度**。所以看 `最大跳变` 那一列。
@@ -74,6 +83,9 @@ node $S labels <这件>                    # 标注稳定
 | 隐藏的标签照旧画在屏幕上 | drei `<Html>` 是 DOM portal，不受父 group `visible` 控制 | 切 `labelEl.style.display`；`annotate.md` §6 |
 | 透明壳把内部机构全挡住 | 用了不透明材质 | `finish: 'shell'`（纸面 22% + 剪影边） |
 | 落地阴影糊成一块灰板 | 缩放外层 group，把 `ContactShadows` 的正交视锥一起放大了 | 改 `scale/far`，别缩放容器（`GroundShadow` 已这么做） |
+| **点中的部件变灰/褪色，像被洗掉了** | 激活档走的是"提亮"（旧 `lit` 档是近白色），纸底本来就亮，(面 → 近白) 就是**对比度下降** | lit 档改成更深一档 + 排线加重（`craft.md` §2 纪律 2）；"被照亮"在制图语境里 = 墨更实 |
+| **点中的部件只有一圈极浅的彩色线，几乎看不见** | accent 是浅粉彩身份色（`#87CEEB` 这类），拿来当线色对比度 1.5:1 | 线/点阵/标注过 `accentInkOf()`；别用 `THREE.Color.getHSL` 换算（三 r185 默认线性空间，压了明度还是浅的，`craft.md` §2 纪律 2b） |
+| **点了部件之后整张图都灰蒙蒙** | 其余部件只降了面（`uDim`）没降线，淡面 + 硬墨边 = 鬼影；或者"压暗"被写成给面加深色 | 面和线成对退开（线 ×0.4），标注层同步（`craft.md` §2 激活态三条通道） |
 | 小东西上标注点糊成一串黑球 / 标签飞出画布 | 世界空间的绝对尺寸（点半径 0.07、外推档 0.95→6.6）落到跨度只有 0.1–0.5 的小模型上 | `ThingScene` 的跨度归一（`MODEL_SPAN`）：把模型放大到基准，别去改绝对尺寸 |
 | 物件在画面上只是一个小点，四周空一片 | 取景按**整组**算了，几何文件里的草稿线/地面线把盒子撑大（常有 2–11×） | 取景与影子都按**部件盒**（`partsBounds`：带 `name` 的 mesh）；装饰线出画布是正常的 |
 | 归一之后模型还是溢出画布、相机像被钉死 | `controls.maxDistance` 还是按缩放前的小盒算的，小于 `minDistance 2.5`，OrbitControls 每帧把相机拉回来 | 取景时同时重算 `near/far` 与 `maxDistance`（`ModelSpanProbe` 已这么做） |

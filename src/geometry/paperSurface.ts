@@ -30,10 +30,16 @@ export interface PaperTone {
   top: THREE.Color
   /** 排线墨色 */
   hatch: THREE.Color
-  /** 激活（被点亮）时的调色板——不混色，换档 */
+  /**
+   * 激活档调色板——**不是"提亮"，是"加重上墨"**：base/dark/top 都比常态更深一档。
+   * 纸底本身是亮的（#F4F1EA），往亮走 = 对比度下降 = 读成"褪色/变灰"；
+   * 制图语境里"聚焦"只有一种表达：墨更实、线更粗。
+   */
   lit: { base: THREE.Color; dark: THREE.Color; top: THREE.Color }
   /** 面透明度 */
   alpha: number
+  /** 激活时的面透明度（透明壳被点亮 = 壳本身也上墨，默认与 alpha 相同） */
+  litAlpha: number
   /** 排线起始阈值偏移（越大排线越早出现、越密） */
   hatchBias: number
 }
@@ -46,6 +52,7 @@ const tone = (
   lit: [string, string, string],
   hatchBias = 0,
   alpha = 1,
+  litAlpha = alpha,
 ): PaperTone => ({
   base: new THREE.Color(base),
   dark: new THREE.Color(dark),
@@ -57,6 +64,7 @@ const tone = (
     top: new THREE.Color(lit[2]),
   },
   alpha,
+  litAlpha,
   hatchBias,
 })
 
@@ -65,12 +73,13 @@ const tone = (
  * 每档四色：顶面 / 侧面亮 / 侧面暗 / 排线墨，外加激活档。
  */
 export const PAPER_TONES: Record<PartFinish, PaperTone> = {
-  hull: tone('#EDE7D8', '#B9AE93', '#F7F3E8', '#7E7565', ['#FBF7EC', '#D6CBB2', '#FFFDF6']),
-  cold: tone('#F4EFE3', '#C7BDA5', '#FBF8F0', '#8A8070', ['#FDFBF5', '#DFD6C2', '#FFFFFF']),
-  titanium: tone('#FCFAF4', '#D8D0BD', '#FFFFFF', '#948A7A', ['#FFFDF8', '#EAE3D3', '#FFFFFF'], -0.04),
-  warning: tone('#E9A79E', '#C0605A', '#F2BDB5', '#7E3A34', ['#F6C3BB', '#D07C75', '#FFD8D2'], 0.12),
-  // 透明壳：纸面留 22% 不透明度，内部结构透出来（DESIGN §1.5 双层表达）
-  shell: tone('#F2EDE1', '#C3B9A2', '#FAF7EF', '#877E6E', ['#FDFAF3', '#DED5C1', '#FFFFFF'], 0, 0.22),
+  hull: tone('#EDE7D8', '#B9AE93', '#F7F3E8', '#7E7565', ['#E0D5BB', '#97896E', '#EDE5D1']),
+  cold: tone('#F4EFE3', '#C7BDA5', '#FBF8F0', '#8A8070', ['#E9DFC8', '#A79A7F', '#F1E9D6']),
+  titanium: tone('#FCFAF4', '#D8D0BD', '#FFFFFF', '#948A7A', ['#F3ECDC', '#BCB096', '#F8F3E6'], -0.04),
+  warning: tone('#E9A79E', '#C0605A', '#F2BDB5', '#7E3A34', ['#DA857C', '#9E453F', '#E49C93'], 0.12),
+  // 透明壳：纸面留 22% 不透明度，内部结构透出来（DESIGN §1.5 双层表达）；
+  // 激活时壳加重到 48% —— "被点亮"的壳应当更实，而不是更淡
+  shell: tone('#F2EDE1', '#C3B9A2', '#FAF7EF', '#877E6E', ['#E7DCC4', '#9C9077', '#F0E8D5'], 0, 0.22, 0.48),
 }
 
 /** DOM 侧色板（图例 swatch 与 3D 用同一套值，单一真源） */
@@ -80,6 +89,104 @@ export const PAPER_SWATCH: Record<PartFinish, { top: string; face: string; side:
   titanium: { top: '#FFFFFF', face: '#FCFAF4', side: '#D8D0BD', ink: '#948A7A' },
   warning: { top: '#F2BDB5', face: '#E9A79E', side: '#C0605A', ink: '#7E3A34' },
   shell: { top: '#FAF7EF', face: '#F2EDE1', side: '#C3B9A2', ink: '#877E6E' },
+}
+
+/**
+ * 目标**相对亮度**（Y）而不是明度 L：青 / 黄这类色相在同一个 L 上天生更亮
+ * （#E0FFFF 压到 L.4 仍是 #00cccc，对比度只有 1.8:1）。按 Y 压到底，
+ * 所有 accent 的墨色在纸面上就一样重 —— 制图要的是这个"一样重"。
+ * 0.2 → 对纸（Y≈0.88）约 3.7:1。
+ */
+const ACCENT_INK_Y = 0.2
+/** 明度下限：再压就纯黑了，accent 会失去身份 */
+const ACCENT_INK_L_MIN = 0.14
+
+/**
+ * sRGB ↔ HSL 手算 —— 不用 `THREE.Color.getHSL/setHSL`。
+ * 三 r185 这两个方法的默认 `colorSpace` 是 `workingColorSpace`（**线性** sRGB），
+ * 于是 `l = 0.42` 被当成线性值，出来是 0.68 的浅蓝：改了等于没改（实渲染像素 (140,195,210)）。
+ * 调色的事一律在 sRGB 里算，算完交给 `new THREE.Color(hex)` 自己转工作空间。
+ */
+function hexToHsl(hex: string): [number, number, number] {
+  const int = parseInt(normalizeHex(hex), 16)
+  const r = ((int >> 16) & 255) / 255
+  const g = ((int >> 8) & 255) / 255
+  const b = (int & 255) / 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const l = (max + min) / 2
+  if (max === min) return [0, 0, l]
+  const d = max - min
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+  const h =
+    max === r
+      ? ((g - b) / d + (g < b ? 6 : 0)) / 6
+      : max === g
+        ? ((b - r) / d + 2) / 6
+        : ((r - g) / d + 4) / 6
+  return [h, s, l]
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const f = (n: number) => {
+    const k = (n + h * 12) % 12
+    const a = s * Math.min(l, 1 - l)
+    const v = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))
+    return Math.round(v * 255)
+  }
+  return `#${[f(0), f(8), f(4)].map(v => v.toString(16).padStart(2, '0')).join('')}`
+}
+
+/**
+ * accent → **纸面墨色**（本仓的"图上 accent"只有这一个写法）。
+ *
+ * 每件 thing 的 `color` 是给纸卡片当身份色的**浅粉彩色**（#87CEEB / #E0FFFF / #FFFACD…），
+ * 直接拿来画线等于没有线：浅青/近白在 #F4F1EA 上对比度 ~1.4:1。
+ * 文中部件词的 `--color-word-part` 早就踩过同一个坑（hud 青加深 60% → #0E7C7B），
+ * 3D 侧照抄：保色相、压明度、并把彩度托到 0.45 —— 得到"同一支 accent 蘸了墨"。
+ * 灰阶 accent（彩度 ≈0）不动彩度，免得凭空长出一个色相。
+ */
+export function accentInkOf(color: THREE.Color | string): THREE.Color {
+  const hex = normalizeHex(color instanceof THREE.Color ? color.getHexString() : color)
+  const [h, rawS, rawL] = hexToHsl(hex)
+  const s = rawS > 0.05 ? Math.min(1, Math.max(rawS, 0.45)) : rawS
+  let l = Math.min(rawL, 0.42)
+  let ink = hslToHex(h, s, l)
+  while (l > ACCENT_INK_L_MIN && relativeLuminance(ink) > ACCENT_INK_Y) {
+    l -= 0.01
+    ink = hslToHex(h, s, l)
+  }
+  return new THREE.Color(ink)
+}
+
+/**
+ * 收成 6 位十六进制：`#abc` 这种三位写法 parseInt 出来是 0x000abc（几乎纯蓝），
+ * 换算之前先展开，免得悄悄换错色。
+ */
+function normalizeHex(hex: string): string {
+  const h = hex.replace('#', '').trim()
+  return h.length === 3
+    ? h.split('').map(c => c + c).join('')
+    : h.padStart(6, '0').slice(-6)
+}
+
+/** sRGB 十六进制 → 相对亮度 Y（WCAG 定义，线性空间） */
+function relativeLuminance(hex: string): number {
+  const int = parseInt(normalizeHex(hex), 16)
+  const lin = (v: number) => {
+    const c = v / 255
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  }
+  return (
+    0.2126 * lin((int >> 16) & 255) +
+    0.7152 * lin((int >> 8) & 255) +
+    0.0722 * lin(int & 255)
+  )
+}
+
+/** accentInkOf 的十六进制形态（DOM 标注层用；与 3D 侧同源） */
+export function accentInkHex(color: string): string {
+  return `#${accentInkOf(color).getHexString()}`
 }
 
 /** 三层堆叠的「表面」材质：纸面明暗 + 顶面独立档 + 屏幕空间交叉排线 */
@@ -107,6 +214,7 @@ export function makePaperMaterial(
       uLitTop: { value: t.lit.top.clone() },
       uAccent: { value: accent.clone() },
       uAlpha: { value: t.alpha },
+      uLitAlpha: { value: t.litAlpha },
       uHatchBias: { value: t.hatchBias },
       uEmphasis: { value: 0 },
       uDim: { value: 0 },
@@ -121,7 +229,7 @@ export function makePaperMaterial(
     fragmentShader: /* glsl */ `
       uniform vec3 uBase, uDark, uTop, uHatch, uAccent, uLight;
       uniform vec3 uLitBase, uLitDark, uLitTop;
-      uniform float uAlpha, uHatchBias, uEmphasis, uDim, uPx;
+      uniform float uAlpha, uLitAlpha, uHatchBias, uEmphasis, uDim, uPx;
       varying vec3 vNormal;
 
       void main() {
@@ -144,6 +252,9 @@ export function makePaperMaterial(
         col = mix(col, cTop, up);
 
         // 屏幕空间交叉排线：密度跟随明暗，线宽恒定（像钢笔）；顶面不排线
+        // 激活 = 排线提前出现 + 更重（"上墨加重"里最要紧的一半：
+        // 纸面图上"更实"读的是排线密度，不是面色的明暗）
+        float inkBoost = uEmphasis * 0.05;
         float dark = (1.0 - d) * (1.0 - up * 0.85);
         vec2 fc = gl_FragCoord.xy / uPx;
         float period = 6.0;
@@ -151,14 +262,15 @@ export function makePaperMaterial(
         float d1 = abs(fract((fc.x + fc.y) / period) - 0.5);
         float d2 = abs(fract((fc.x - fc.y) / period) - 0.5);
         float hatch = 0.0;
-        if (dark > 0.30 - uHatchBias) hatch += 1.0 - smoothstep(lw, lw + 0.07, d1);
-        if (dark > 0.54 - uHatchBias) hatch += 1.0 - smoothstep(lw, lw + 0.07, d2);
-        col = mix(col, uHatch, clamp(hatch, 0.0, 1.0) * 0.34);
+        if (dark > 0.30 - uHatchBias - inkBoost) hatch += 1.0 - smoothstep(lw, lw + 0.07, d1);
+        if (dark > 0.54 - uHatchBias - inkBoost) hatch += 1.0 - smoothstep(lw, lw + 0.07, d2);
+        col = mix(col, uHatch, clamp(hatch, 0.0, 1.0) * (0.34 + uEmphasis * 0.08));
 
         // accent 只做微量染色（身份由调色板给，颜色由墨线给）
-        col = mix(col, uAccent, uEmphasis * 0.16);
+        col = mix(col, uAccent, uEmphasis * 0.14);
 
-        float a = uAlpha * (1.0 - uDim * 0.82) * (1.0 + uEmphasis * 0.3);
+        // 压暗 = 向纸面退开（降不透明度）；激活 = 换档（透明壳变实），不再乘提亮系数
+        float a = mix(uAlpha, uLitAlpha, uEmphasis) * (1.0 - uDim * 0.82);
         gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
         #include <colorspace_fragment>
       }
@@ -171,7 +283,7 @@ export function makePaperMaterial(
  * 线宽屏幕恒定（anatomy 的 vector-effect: non-scaling-stroke）：
  * 由 usePartHighlight 每帧按「世界单位/像素」换算写入 uWidth，配合 uWidthPx 兜底。
  */
-export function makeHullMaterial(widthPx: number, ink: THREE.Color) {
+export function makeHullMaterial(widthPx: number, ink: THREE.Color, accent?: THREE.Color) {
   return new THREE.ShaderMaterial({
     side: THREE.BackSide,
     transparent: true,
@@ -184,7 +296,7 @@ export function makeHullMaterial(widthPx: number, ink: THREE.Color) {
       uColor: { value: ink.clone() },
       uOpacity: { value: 0.8 },
       uEmphasis: { value: 0 },
-      uAccent: { value: new THREE.Color('#3ECFCF') },
+      uAccent: { value: accent ? accent.clone() : new THREE.Color('#0E7C7B') },
       uDim: { value: 0 },
     },
     vertexShader: /* glsl */ `

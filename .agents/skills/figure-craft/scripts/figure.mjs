@@ -7,8 +7,9 @@
  * 只有把页面跑起来、逐帧采样才能回答。upstream 的规矩是"放大到 4× 逐个接头看"，
  * 本项目对应的就是这套工具。
  *
- *   node figure.mjs shot    <thing|url>   截图（可 --scale 2 --clip 看局部）
- *   node figure.mjs labels  <thing|url>   标注层逐帧采样：跳变 / 显隐 / 透明度翻转
+ *   node figure.mjs shot    <thing|url>   截图（可 --scale 2 --clip 看局部；
+ *                                          --click-at x,y 点画布 / --click <css> 点 DOM 按钮先造出激活态）
+ *   node figure.mjs labels  <thing|url>   标注层逐帧采样：跳变 / 显隐 / 透明度翻转（可先 --click-at 点中一个部件）
  *   node figure.mjs eval    <thing|url> "<js>"   在页面里跑任意 JS（临时探针用）
  *
  * 通用选项：
@@ -44,7 +45,9 @@ for (let i = 0; i < argv.length; i++) {
 const HELP = `figure-craft 走查工具
 
   node figure.mjs shot   <thing|url> [--out f.png] [--scale 2] [--clip x,y,w,h]
-  node figure.mjs labels <thing|url> [--n 14] [--every 300] [--jump 6] [--click <css>]
+                          [--click-at x,y | --click <css> [--click-has 文案]] [--click-wait ms]
+  node figure.mjs labels <thing|url> [--n 14] [--every 300] [--jump 6]
+                          [--click <css> | --click-at x,y]
   node figure.mjs eval   <thing|url> "<js>"
 
   --base <url>  dev server（默认 http://127.0.0.1:5173）
@@ -199,9 +202,48 @@ async function openPage() {
   return cdp
 }
 
-/* ─── 命令：shot ─── */
+/* ─── 共享：画布定点点击 ─── */
+/** 在视口坐标上补一次真点击（pointerdown/up + click）。
+ *  3D 部件不是 DOM 元素，只有真事件走到 canvas 上，R3F 才会做射线拾取 ——
+ *  "点了部件之后图变成什么样"只能这么验。 */
+const CLICK_AT = (x, y) => `(() => {
+  const el = document.querySelector('canvas')
+  if (!el) return 'no-canvas'
+  const base = { bubbles: true, cancelable: true, clientX: ${x}, clientY: ${y}, pointerId: 1, isPrimary: true, button: 0, buttons: 1 }
+  el.dispatchEvent(new PointerEvent('pointermove', base))
+  el.dispatchEvent(new PointerEvent('pointerdown', base))
+  el.dispatchEvent(new PointerEvent('pointerup', { ...base, buttons: 0 }))
+  el.dispatchEvent(new MouseEvent('click', { ...base, buttons: 0 }))
+  const r = el.getBoundingClientRect()
+  return JSON.stringify({ canvas: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)] })
+})()`
+
+/** 画布定点点击（--click-at）：部件不是 DOM 元素，只有真事件走到 canvas 上 R3F 才会射线拾取 */
+async function clickAt(cdp) {
+  const [x, y] = String(opt['click-at']).split(',').map(Number)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) throw new Error('--click-at 要 x,y')
+  console.log('click-at', x, y, await cdp.evaluate(CLICK_AT(x, y)))
+  await sleep(Number(opt['click-wait'] ?? 1200))
+}
+
 async function shot() {
   const cdp = await openPage()
+  // DOM 点击：造出"点了按钮之后"的状态（flow / practice 的激活态只能这么验）
+  if (opt.click) {
+    const hit = await cdp.evaluate(`(() => {
+      const has = ${JSON.stringify(opt['click-has'] ?? '')}
+      const els = [...document.querySelectorAll(${JSON.stringify(String(opt.click))})]
+        .filter(e => e.offsetParent && (!has || (e.textContent || '').includes(has)))
+      if (!els.length) return null
+      els[0].click()
+      return (els[0].textContent || '').trim()
+    })()`)
+    console.log(hit === null
+      ? `（--click 没命中任何可见元素：${opt.click}）`
+      : `click ${JSON.stringify(hit)}`)
+    await sleep(Number(opt['click-wait'] ?? 1500))
+  }
+  if (opt['click-at']) await clickAt(cdp)
   const params = { format: 'png', captureBeyondViewport: false }
   if (opt.clip) {
     const [x, y, w, h] = String(opt.clip).split(',').map(Number)
@@ -249,6 +291,7 @@ async function labels() {
       : `点了 ${JSON.stringify(clicked)} —— 激活态最容易触发重排抖动\n`)
     await sleep(700)
   }
+  if (opt['click-at']) await clickAt(cdp)
 
   const samples = []
   for (let i = 0; i < n; i++) { samples.push(await cdp.evaluate(LABEL_PROBE)); await sleep(every) }

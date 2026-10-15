@@ -20,6 +20,7 @@ import {
   WARNING_RED,
 } from '../geometry'
 import type { HighlightState, PartMeta } from '../geometry'
+import { accentInkHex } from '../geometry/paperSurface'
 
 /** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
 const PAPER = '#F4F1EA'
@@ -528,7 +529,11 @@ function AnnotationLabels({
   onPartClick?: (partId: string) => void
 }) {
   const [hovered, setHovered] = useState<string | null>(null)
-  const accent = thing.color
+  // 标注层用的 accent 墨色：thing.color 是浅粉彩身份色，当文字/点阵色在纸面上不可读
+  // （hover 会重渲染这一层，换算带个 memo）
+  const accentMark = useMemo(() => accentInkHex(thing.color), [thing.color])
+  // 阅读态点选（非 flow）：被点中之外的一切向纸面退开 —— 与 3D 材质同一套语义
+  const focus = !!highlightPartId && !dimOthers
   // 选位决策（节流）：slots = 每个部件选中的槽位，fades = 是否淡排
   const decisionRef = useRef<{
     at: number
@@ -1048,16 +1053,22 @@ function AnnotationLabels({
         hideLabel(ctx.labelEl)
       }
 
-      ctx.labelEl.style.opacity = String(faded ? 0.35 : show ? 1 : 0.78)
+      ctx.labelEl.style.opacity = String(
+        faded ? 0.35 : show ? 1 : focus ? 0.45 : 0.78,
+      )
       const textRight = slot ? slot.textRight : true
       ctx.labelEl.style.transform =
         textRight ? 'translateY(-50%)' : 'translate(-100%, -50%)'
       ctx.labelEl.style.textAlign = textRight ? 'left' : 'right'
-      ctx.labelEl.style.color = isActive ? accent : isHovered ? '#3ECFCF' : '#5A554C'
+      ctx.labelEl.style.color = isActive
+        ? accentMark
+        : isHovered
+          ? '#2AA8A8'
+          : '#5A554C'
       // 没有落点就整条引线也不画（否则会留一截浮线在空中）
       setMaterialOpacity(
         ctx.line,
-        !slot ? 0 : dimOthers && !isActive ? 0.15 : show ? 0.9 : 0.5,
+        !slot ? 0 : dimOthers && !isActive ? 0.15 : focus && !isActive ? 0.2 : show ? 0.9 : 0.5,
       )
     }
 
@@ -1098,8 +1109,8 @@ function AnnotationLabels({
         const isActive = highlightPartId === part.id || activePartIds.includes(part.id)
         const show = hoveredNow || isActive
         const idleColor = part.finish === 'warning' ? WARNING_RED : INK
-        const dotColor = isActive ? accent : hoveredNow ? '#3ECFCF' : idleColor
-        const dotOpacity = dimOthers && !isActive ? 0.2 : show ? 1 : 0.85
+        const dotColor = isActive ? accentMark : hoveredNow ? '#2AA8A8' : idleColor
+        const dotOpacity = dimOthers && !isActive ? 0.2 : focus && !isActive ? 0.35 : show ? 1 : 0.85
         return (
           <group key={part.id}>
             {/* 部件点 — 可点击（图→词）。position 只是挂载时的兜底落点，

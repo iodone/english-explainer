@@ -7,7 +7,7 @@ import {
 } from 'react'
 import * as THREE from 'three'
 import type { PartFinish, ThingData } from '../data/types'
-import { makeHullMaterial, makePaperMaterial } from './paperSurface'
+import { accentInkOf, makeHullMaterial, makePaperMaterial } from './paperSurface'
 
 /**
  * Sketch primitives —— 几何绘制原语层（从 ThingScene.tsx 抽出，2026-09-09）
@@ -105,7 +105,13 @@ export interface HighlightState {
  * 部件草稿线状态机：每帧 lerp 到目标（点亮有渐变，仪器感）。
  * 材质三件套：纸面排线面（体量/明暗）+ 反向外壳描边（剪影）+ 子级 drei <Edges> 轮廓线。
  * 常态目标 = 部件配色角色（FINISH_POOL / PAPER_TONES）；
- * 激活/已过/压暗覆盖透明度与线宽，激活色 = thing accent（学习聚焦语义）。
+ * 激活/已过/压暗覆盖透明度与线宽，激活色 = thing accent 的**墨色**（accentInkOf）。
+ *
+ * 2026-10-15 修：**纸底上的强调只能加墨，不能加亮**。
+ * 旧实现让被点中的部件切到"更亮"的 lit 档 + accent 原色（浅粉彩）画线，
+ * 结果是"点谁谁褪色"：面变近白、墨线变浅青，对比度掉到 1.4:1，
+ * 读起来是"整个部件变灰了"。同时"其余部件"只降面不降线，留下一圈硬墨边的鬼影。
+ * 现在两条都反过来：被点中 = 面加深 + 排线加密 + accent 墨线加粗；其余 = 面与线一起退开。
  */
 export function usePartHighlight(
   root: React.RefObject<THREE.Group | null>,
@@ -114,6 +120,8 @@ export function usePartHighlight(
 ) {
   const accent = useMemo(() => new THREE.Color(thing.color), [thing.color])
   const accentHex = useMemo(() => thing.color, [thing.color])
+  // 画线用的 accent 墨色（浅粉彩原色在纸面上不可读，见 accentInkOf）
+  const accentInk = useMemo(() => accentInkOf(accent), [accent])
 
   const finishMap = useMemo(() => {
     const m = new Map<string, PartFinish>()
@@ -161,15 +169,17 @@ export function usePartHighlight(
       let dim = 0
 
       if (state.activePartIds.includes(partId)) {
-        lineOpacity = 1; lineColor = accent; lineWidth = 2.5; emphasis = 1
+        lineOpacity = 1; lineColor = accentInk; lineWidth = 2.5; emphasis = 1
       } else if (state.pastPartIds.includes(partId)) {
-        lineOpacity = 0.5; dim = 0.55
+        lineOpacity = 0.45; lineWidth = 0.9; dim = 0.6
       } else if (state.dimOthers) {
         lineOpacity = 0.12; dim = 1
       } else if (state.highlightPartId === partId) {
-        lineOpacity = 1; lineColor = accent; lineWidth = 2.5; emphasis = 1
+        lineOpacity = 1; lineColor = accentInk; lineWidth = 2.5; emphasis = 1
       } else if (state.highlightPartId) {
-        dim = 0.5
+        // 阅读态点选：其余部件向纸面退开。**面和线一起退** ——
+        // 只降面不降线会留下"淡面 + 硬墨边"的鬼影，比不退还乱。
+        lineOpacity = base.lineOpacity * 0.4; lineWidth = 0.9; dim = 0.55
       }
 
       // 反向外壳描边（子 mesh，同几何体）：每帧重算世界单位线宽
@@ -238,7 +248,11 @@ export function SketchMesh({
   )
   const materials = useMemo(() => {
     const surface = makePaperMaterial(finish, accent ?? FALLBACK_ACCENT, dpr)
-    const hull = makeHullMaterial(HULL_WIDTH_PX, new THREE.Color(INK))
+    const hull = makeHullMaterial(
+      HULL_WIDTH_PX,
+      new THREE.Color(INK),
+      accentInkOf(accent ?? FALLBACK_ACCENT),
+    )
     return { surface, hull }
   }, [finish, accent, dpr])
 
