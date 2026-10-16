@@ -253,7 +253,9 @@ export function SketchMesh({
     2,
   )
   const materials = useMemo(() => {
-    const surface = makePaperMaterial(finish, accent ?? FALLBACK_ACCENT, dpr)
+    // 面染色用的也是**纸面可用色**（不是 thing.color 原色）：金 accent 原色往面上刷
+    // 就是一层黄，而它在纸上本来就没法当墨 —— 与线/点阵/标注保持同一支色
+    const surface = makePaperMaterial(finish, accentInkOf(accent ?? FALLBACK_ACCENT), dpr)
     const hull = makeHullMaterial(
       HULL_WIDTH_PX,
       new THREE.Color(INK),

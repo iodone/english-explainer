@@ -99,13 +99,17 @@ export const PAPER_SWATCH: Record<PartFinish, { top: string; face: string; side:
  */
 const ACCENT_INK_Y = 0.2
 /**
- * 黄色相（40°–70°）**不许压过 Y 0.28**。
- * sRGB 里低明度的黄本来就走橄榄——金 accent（#FFD700）压到 Y 0.2 变成 `#8f7800` 土黄，
- * 一眼看不出它跟金色是同一个身份了（2026-10-15 用户："为啥要用黄色"）。
- * 这一档换回 2.9:1 的琥珀/古铜：线宽 2.5px + 点阵 + 标注三重记号，
- * 少那 0.9 的对比度换回色相身份，值。
+ * 黄色相（40°–70°）**在纸面上无解，直接回落到"部件词青墨"**。
+ *
+ * 金 accent（#FFD700）压深是 `#8f7800` 橄榄土黄、压到 Y 0.28 是 `#a88e00` 深黄——
+ * 两条路读出来都还是"黄"（2026-10-15 用户两次反馈："为啥要用黄色""还是黄色的啊"）。
+ * 根子在 sRGB：低明度的黄只能往橄榄/棕走，色相身份注定保不住。
+ * 与其硬凑一个难看又认不出的黄，不如按**本仓自己的语言**换档：金色件不走 accent 上色，
+ * 改用文中部件词的青墨 `--color-word-part #0E7C7B` ——
+ * 图上被点中的部件与文中那个词同色，"词找到物"反而更直白（对比度 ≈4:1）。
+ * 只影响 25 件金/浅黄 accent，其余件照旧吃自己的 accent 墨色。
  */
-const ACCENT_INK_Y_YELLOW = 0.28
+const ACCENT_FALLBACK_INK = '#0E7C7B'
 const YELLOW_HUE_MIN = 40 / 360
 const YELLOW_HUE_MAX = 70 / 360
 /** 明度下限：再压就纯黑了，accent 会失去身份 */
@@ -160,11 +164,13 @@ export function accentInkOf(color: THREE.Color | string): THREE.Color {
   const hex = normalizeHex(color instanceof THREE.Color ? color.getHexString() : color)
   const [h, rawS, rawL] = hexToHsl(hex)
   const s = rawS > 0.05 ? Math.min(1, Math.max(rawS, 0.45)) : rawS
-  const targetY =
-    h >= YELLOW_HUE_MIN && h <= YELLOW_HUE_MAX ? ACCENT_INK_Y_YELLOW : ACCENT_INK_Y
+  // 黄色相没法在纸面上当墨（见 ACCENT_FALLBACK_INK），换青墨
+  if (h >= YELLOW_HUE_MIN && h <= YELLOW_HUE_MAX) {
+    return new THREE.Color(ACCENT_FALLBACK_INK)
+  }
   let l = Math.min(rawL, 0.42)
   let ink = hslToHex(h, s, l)
-  while (l > ACCENT_INK_L_MIN && relativeLuminance(ink) > targetY) {
+  while (l > ACCENT_INK_L_MIN && relativeLuminance(ink) > ACCENT_INK_Y) {
     l -= 0.01
     ink = hslToHex(h, s, l)
   }
