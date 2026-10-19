@@ -105,13 +105,15 @@ export interface HighlightState {
  * 部件草稿线状态机：每帧 lerp 到目标（点亮有渐变，仪器感）。
  * 材质三件套：纸面排线面（体量/明暗）+ 反向外壳描边（剪影）+ 子级 drei <Edges> 轮廓线。
  * 常态目标 = 部件配色角色（FINISH_POOL / PAPER_TONES）；
- * 激活/已过/压暗覆盖透明度与线宽，激活色 = thing accent 的**墨色**（accentInkOf）。
+ * 激活/已过/压暗覆盖透明度与线宽，激活色 = thing accent 的**墨色**（accentInkOf）；
+ * 纸面只换 lit 纸阶，不叠 accent —— 红件 lit 与常态同值，只加密排线（见 paperSurface）。
  *
  * 2026-10-15 修：**纸底上的强调只能加墨，不能加亮**。
  * 旧实现让被点中的部件切到"更亮"的 lit 档 + accent 原色（浅粉彩）画线，
  * 结果是"点谁谁褪色"：面变近白、墨线变浅青，对比度掉到 1.4:1，
  * 读起来是"整个部件变灰了"。同时"其余部件"只降面不降线，留下一圈硬墨边的鬼影。
- * 现在两条都反过来：被点中 = 面加深 + 排线加密 + accent 墨线加粗；其余 = 面与线一起退开。
+ * 现在两条都反过来：被点中 = 面加深 + 排线加密 + accent 墨线加粗（红件只加密排线）；
+ * 其余 = 面与线一起退开。
  */
 export function usePartHighlight(
   root: React.RefObject<THREE.Group | null>,
@@ -253,9 +255,9 @@ export function SketchMesh({
     2,
   )
   const materials = useMemo(() => {
-    // 面染色用的也是**纸面可用色**（不是 thing.color 原色）：金 accent 原色往面上刷
-    // 就是一层黄，而它在纸上本来就没法当墨 —— 与线/点阵/标注保持同一支色
-    const surface = makePaperMaterial(finish, accentInkOf(accent ?? FALLBACK_ACCENT), dpr)
+    // 纸面不吃 accent：身份色只走线/点/标注，面色按 finish 的纸阶走。
+    // 选中灰阶件不再洗上一层淡红，选中红件也不再换一档红（见 paperSurface 注释）。
+    const surface = makePaperMaterial(finish, dpr)
     const hull = makeHullMaterial(
       HULL_WIDTH_PX,
       new THREE.Color(INK),
@@ -312,7 +314,7 @@ export function SketchMesh({
   )
 }
 
-/** 每个 thing 的 accent（用于激活高亮 + 纸面材质的 uAccent），由 ThingScene 提供 */
+/** 每个 thing 的 accent（用于激活高亮/线色），由 ThingScene 提供 */
 export const AccentContext = createContext<THREE.Color | null>(null)
 
 /** 细杆 —— 可被部件高亮命中的"线"（4 面方杆，手绘粗线感） */

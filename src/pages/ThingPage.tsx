@@ -151,6 +151,13 @@ export default function ThingPage() {
     if (idx !== null) articleRef.current?.scrollToSentence(idx)
   }
 
+  // 点画布空白 = 取消选中（OrbitControls 拖拽不会触发 onPointerMissed）
+  const handleBackgroundClick = () => {
+    if (mode === 'flow') return
+    setActivePartId(null)
+    setWordPopup(null)
+  }
+
   // flow 步进：驱动图点亮 + 解说句滚动
   const handleFlowStep = (info: FlowStepInfo) => {
     setFlowStep(info)
@@ -207,7 +214,13 @@ export default function ThingPage() {
           ref={articleScrollRef}
           className="overflow-y-auto px-6 py-5 bg-canvas min-w-[420px]"
           style={{ width: `${splitPct}%` }}
-          onClick={() => setWordPopup(null)}
+          onClick={e => {
+            setWordPopup(null)
+            // 文章区空白也取消选中；点到部件词/词条/按钮时保留当前选择
+            const target = e.target as Element
+            if (target.closest('.word-part, .word-new, button, a')) return
+            setActivePartId(null)
+          }}
         >
           {mode === 'practice' ? (
             <PracticePanel
@@ -275,6 +288,7 @@ export default function ThingPage() {
             pastPartIds={scenePastParts}
             dimOthers={sceneDim}
             onPartClick={handlePartClick}
+            onBackgroundClick={handleBackgroundClick}
           />
           {mode === 'flow' && (
             <FlowPlayer

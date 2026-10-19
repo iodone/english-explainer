@@ -76,7 +76,10 @@ export const PAPER_TONES: Record<PartFinish, PaperTone> = {
   hull: tone('#EDE7D8', '#B9AE93', '#F7F3E8', '#7E7565', ['#E0D5BB', '#97896E', '#EDE5D1']),
   cold: tone('#F4EFE3', '#C7BDA5', '#FBF8F0', '#8A8070', ['#E9DFC8', '#A79A7F', '#F1E9D6']),
   titanium: tone('#FCFAF4', '#D8D0BD', '#FFFFFF', '#948A7A', ['#F3ECDC', '#BCB096', '#F8F3E6'], -0.04),
-  warning: tone('#E9A79E', '#C0605A', '#F2BDB5', '#7E3A34', ['#DA857C', '#9E453F', '#E49C93'], 0.12),
+  // 红件的 lit 档**与常态同值**：红是语义色（working part），被点中时只该
+  // "上墨更重"（线加粗、排线加密），不该换成一档更深的红——同一个部件在
+  // 选中前后变红，读者会把它当成两种状态色（2026-10-19 用户反馈）。
+  warning: tone('#E9A79E', '#C0605A', '#F2BDB5', '#7E3A34', ['#E9A79E', '#C0605A', '#F2BDB5'], 0.12),
   // 透明壳：纸面留 22% 不透明度，内部结构透出来（DESIGN §1.5 双层表达）；
   // 激活时壳加重到 48% —— "被点亮"的壳应当更实，而不是更淡
   shell: tone('#F2EDE1', '#C3B9A2', '#FAF7EF', '#877E6E', ['#E7DCC4', '#9C9077', '#F0E8D5'], 0, 0.22, 0.48),
@@ -207,12 +210,14 @@ export function accentInkHex(color: string): string {
   return `#${accentInkOf(color).getHexString()}`
 }
 
-/** 三层堆叠的「表面」材质：纸面明暗 + 顶面独立档 + 屏幕空间交叉排线 */
-export function makePaperMaterial(
-  finish: PartFinish,
-  accent: THREE.Color,
-  dpr: number,
-) {
+/**
+ * 三层堆叠的「表面」材质：纸面明暗 + 顶面独立档 + 屏幕空间交叉排线。
+ *
+ * 表面**不吃 accent**：身份色只走墨线/点阵/标注（像纸上的彩铅），
+ * 面色只在激活时加深一档。这样灰阶件被选中不会洗上一层淡红，
+ * 红件的浅红纸面也不会在选中后变成另一种红。
+ */
+export function makePaperMaterial(finish: PartFinish, dpr: number) {
   const t = PAPER_TONES[finish]
   return new THREE.ShaderMaterial({
     transparent: true,
@@ -230,7 +235,6 @@ export function makePaperMaterial(
       uLitBase: { value: t.lit.base.clone() },
       uLitDark: { value: t.lit.dark.clone() },
       uLitTop: { value: t.lit.top.clone() },
-      uAccent: { value: accent.clone() },
       uAlpha: { value: t.alpha },
       uLitAlpha: { value: t.litAlpha },
       uHatchBias: { value: t.hatchBias },
@@ -245,7 +249,7 @@ export function makePaperMaterial(
       }
     `,
     fragmentShader: /* glsl */ `
-      uniform vec3 uBase, uDark, uTop, uHatch, uAccent, uLight;
+      uniform vec3 uBase, uDark, uTop, uHatch, uLight;
       uniform vec3 uLitBase, uLitDark, uLitTop;
       uniform float uAlpha, uLitAlpha, uHatchBias, uEmphasis, uDim, uPx;
       varying vec3 vNormal;
@@ -283,9 +287,6 @@ export function makePaperMaterial(
         if (dark > 0.30 - uHatchBias - inkBoost) hatch += 1.0 - smoothstep(lw, lw + 0.07, d1);
         if (dark > 0.54 - uHatchBias - inkBoost) hatch += 1.0 - smoothstep(lw, lw + 0.07, d2);
         col = mix(col, uHatch, clamp(hatch, 0.0, 1.0) * (0.34 + uEmphasis * 0.08));
-
-        // accent 只做微量染色（身份由调色板给，颜色由墨线给）
-        col = mix(col, uAccent, uEmphasis * 0.14);
 
         // 压暗 = 向纸面退开（降不透明度）；激活 = 换档（透明壳变实），不再乘提亮系数
         float a = mix(uAlpha, uLitAlpha, uEmphasis) * (1.0 - uDim * 0.82);

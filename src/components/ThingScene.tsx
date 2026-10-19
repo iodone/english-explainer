@@ -20,7 +20,7 @@ import {
   WARNING_RED,
 } from '../geometry'
 import type { HighlightState, PartMeta } from '../geometry'
-import { accentInkHex } from '../geometry/paperSurface'
+import { accentInkHex, PAPER_SWATCH } from '../geometry/paperSurface'
 
 /** CAD viewport 纸色（Canvas 实底，与文章列纸面同源） */
 const PAPER = '#F4F1EA'
@@ -119,6 +119,8 @@ export interface ThingSceneProps {
   pastPartIds?: string[]
   dimOthers?: boolean
   onPartClick?: (partId: string) => void
+  /** 点击画布空白处（R3F onPointerMissed）——取消选中；拖拽旋转不会触发 */
+  onBackgroundClick?: () => void
 }
 
 export default function ThingScene({
@@ -128,6 +130,7 @@ export default function ThingScene({
   pastPartIds = [],
   dimOthers = false,
   onPartClick,
+  onBackgroundClick,
 }: ThingSceneProps) {
   // partId → 配色角色（数据驱动，几何层不重复配色知识）
   const partMeta = useMemo<PartMeta>(
@@ -173,6 +176,17 @@ export default function ThingScene({
       </div>
       <div data-plate-corner className="absolute bottom-4 left-4 z-10 pointer-events-none">
         <div className="micro-label">DRAG TO ROTATE · SCROLL TO ZOOM · CLICK A PART</div>
+        {/* 图内小注：把红件的语义直接拴在图版上（不是另起一块图例） */}
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <span
+            className="block w-2 h-2 rounded-full border"
+            style={{
+              backgroundColor: PAPER_SWATCH.warning.face,
+              borderColor: PAPER_SWATCH.warning.ink,
+            }}
+          />
+          <span className="plate-corner text-ink-faint">RED PARTS DO THE WORK</span>
+        </div>
       </div>
 
       {/* 右下读数：实时方位角/仰角 + 部件数（等宽数字，制图室读数板） */}
@@ -193,6 +207,7 @@ export default function ThingScene({
       {/* 3D Canvas — 纸色实底（CAD viewport），3D 地面网格提供透视参考 */}
       <Canvas
         key={ortho ? 'ortho' : 'persp'}
+        onPointerMissed={onBackgroundClick}
         orthographic={ortho}
         camera={
           ortho
