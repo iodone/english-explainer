@@ -21,11 +21,27 @@
  * 防止执行 agent 用"海量加词条"绕过简单词写作约束。
  *
  * 用法：npx tsx scripts/check-simple-words.mjs
+ * 独立解释页：npx tsx scripts/check-simple-words.mjs --entry <lesson/main.js>
+ * （额外覆盖 partExplanations 与自定义 tour captions）
  */
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { things } from '../src/data/things.ts'
 import { dictionary } from '../src/data/dictionary.ts'
 import { SIMPLE_WORDS } from '../src/data/word-list.ts'
+
+// Standalone english-explain lessons reuse the exact same gate. The default
+// invocation still checks only registered site things; --entry checks one page
+// module and additionally covers its per-part explanations.
+const entryFlag = process.argv.indexOf('--entry')
+let subjects = things
+if (entryFlag >= 0) {
+  const entry = process.argv[entryFlag + 1]
+  if (!entry) throw new Error('--entry needs a lesson module path')
+  const loaded = await import(pathToFileURL(resolve(entry)).href)
+  subjects = [loaded.lesson || loaded.default]
+}
 
 /* ─── 通道 1：xkcd 原表（权威） ─── */
 const ORIG = new Set(
@@ -138,7 +154,7 @@ function tokenize(text) {
 
 let errors = 0
 
-for (const thing of things) {
+for (const thing of subjects) {
   const offenders = []
   const dictRelied = new Set()
   const compoundRelied = new Set()
@@ -169,6 +185,15 @@ for (const thing of things) {
   for (const [i, expr] of thing.keyExpressions.entries()) check(expr.text, `keyExpressions[${i}]`)
   // 4. funFacts
   for (const [i, fact] of thing.funFacts.entries()) check(fact, `funFacts[${i}]`)
+  // 5. english-explain 独立页：点部件后显示的 simple-words 解释
+  if (thing.partExplanations) {
+    for (const [partId, explanation] of Object.entries(thing.partExplanations)) {
+      check(explanation, `partExplanations.${partId}`)
+    }
+  }
+  if (thing.tour) {
+    for (const [i, step] of thing.tour.entries()) check(step.caption, `tour[${i}] caption`)
+  }
 
   // 汇总：同词合并报
   const byWord = new Map()
