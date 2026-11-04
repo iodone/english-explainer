@@ -19,6 +19,12 @@ export const lesson = {
   flow: [{ partIds: ['moving-part'], caption: 'The moving part does the work.', sentenceRef: 0 }],
   keyExpressions: [{ text: 'does the work', partId: 'moving-part' }],
   funFacts: [],
+  // 所有实际渲染的提示语、HUD 标签和按钮文字；闸门会递归检查。
+  ui: {
+    showMe: 'SHOW ME',
+    yourTurn: 'YOUR TURN',
+    wordHint: 'Touch a word. Find its part.',
+  },
   partExplanations: {
     'moving-part': 'The moving part is the piece that does the work.',
   },
@@ -59,5 +65,7 @@ npx tsx scripts/check-simple-words.mjs --entry path/to/main.js
 ```
 
 它与站点共用 xkcd 原表、站内合并词表、dict 豁免和屈折逆推，不复制另一套较宽松规则。
-检查 article / flow / keyExpressions / funFacts / partExplanations。parts.realName 与 UI 是术语层，
+检查 article / flow / keyExpressions / funFacts / partExplanations / tour，以及 `ui` 中所有
+实际渲染的提示语、HUD 标签和按钮文字。不要把界面文案另藏在 runtime 字符串里绕过闸门。
+共享文案见 `ui.js`；自定义文案放进 lesson.ui 并直接用于渲染。parts.realName 是术语对照层，
 中文词典释义不受限。先用简单词改写；确需引入概念词时给明确 dict 词条，不要靠海量豁免掩盖难句。

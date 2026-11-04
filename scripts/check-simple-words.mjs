@@ -14,6 +14,7 @@
  *   - flow[].caption（过程解说句）
  *   - keyExpressions[].text（复述练习短语）
  *   - funFacts[]（Did you know 小节）
+ *   - ui（独立解释页实际渲染的提示语、HUD 标签与按钮文字）
  * 不检查：parts.realName（真实术语，设计上允许超纲）、parts.label（命名层，同属术语对照）。
  * 数字直接写阿拉伯数字（tokenize 天然跳过）——比英文数字词更 Munroe。
  *
@@ -22,7 +23,7 @@
  *
  * 用法：npx tsx scripts/check-simple-words.mjs
  * 独立解释页：npx tsx scripts/check-simple-words.mjs --entry <lesson/main.js>
- * （额外覆盖 partExplanations 与自定义 tour captions）
+ * （额外覆盖 partExplanations、ui 与自定义 tour captions）
  */
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -193,6 +194,15 @@ for (const thing of subjects) {
   }
   if (thing.tour) {
     for (const [i, step] of thing.tour.entries()) check(step.caption, `tour[${i}] caption`)
+  }
+  if (thing.ui) {
+    const checkUi = (value, path) => {
+      if (typeof value === 'string') check(value, path)
+      else if (value && typeof value === 'object') {
+        for (const [key, child] of Object.entries(value)) checkUi(child, `${path}.${key}`)
+      }
+    }
+    checkUi(thing.ui, 'ui')
   }
 
   // 汇总：同词合并报

@@ -2,11 +2,13 @@ import { iron } from '../../../../../src/data/things/iron.ts'
 import { ironDict } from '../../../../../src/data/dict/iron.ts'
 import { nuclearReactorDict } from '../../../../../src/data/dict/nuclear-reactor.ts'
 import { toiletDict } from '../../../../../src/data/dict/toilet.ts'
+import { UI } from '../../ui.js'
 
 // Existing article, flow, labels, and numbers stay in the repository's data layer.
 // This file adds only the per-part explanations the standalone lesson needs.
 export const lesson = {
   ...iron,
+  ui: UI,
   partExplanations: {
     'hand-holder': 'The hand holder gives your hand a cool place to hold. Your hand pushes down, but the heavy bottom does most of the work.',
     'hot-bottom': 'The hot bottom is a thick piece of metal. Its heat and weight press the little lines in cloth back into a flat shape.',

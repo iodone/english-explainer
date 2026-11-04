@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import {runSim} from './runtime.js';
 import {createStage} from './stage3d.js';
+import {UI} from '../../ui.js';
 
 const PARTS = [
   {id: 'hot-bottom', label: 'HOT BOTTOM', real: 'SOLEPLATE', point: [-.15, -.52, .23], sentence: 3,
@@ -33,9 +34,10 @@ const WORD_SENTENCE = {iron: 0, 'hand holder': 0, 'hot bottom': 1, 'water room':
 const DURATION = 36;
 const DEFAULTS = {
   duration: DURATION, fps: 30, seed: 7, theme: 'light', accent: '#0E7C7B',
+  ui: UI,
   hud: {
     enabled: true, title: 'CLOTH PRESSER', subtitle: '/ SIMPLE WORDS', right: 'WORD → PART / LIVE',
-    host: 'SIMPLE ENGLISH', path: 'touch a word · find its part', sideTitle: 'PART EXPLANATION', logRows: 4,
+    host: UI.simpleWords, path: 'touch a word · find its part', sideTitle: UI.partWords, logRows: 4,
   },
   stages: [
     {at: 0, name: 'FIND', cmd: 'word: hot bottom', logs: ['The words light up.', 'The same part answers in the drawing.', '!One word. One part.']},
@@ -89,6 +91,7 @@ export const lesson = {
   })),
   keyExpressions: PARTS.map(part => ({text: part.label.toLowerCase(), partId: part.id})),
   funFacts: [],
+  ui: UI,
   partExplanations: Object.fromEntries(PARTS.map(part => [part.id, part.explain])),
   tour: DEFAULTS.stages.map((stage, index) => ({
     partIds: [TOUR.find(step => step.at === stage.at)?.id || 'hot-bottom'],
@@ -119,7 +122,7 @@ function createLesson(app) {
     .tour-cursor{position:absolute;width:2rem;height:2rem;border:1px solid var(--accent);border-radius:50%;pointer-events:none;opacity:0;z-index:30}
   `;
   document.head.append(style);
-  app.insertAdjacentHTML('beforeend', `<div class="article"><div class="sentence"></div><button class="takeover">AUTO TOUR · TAKE OVER</button></div><div class="tour-cursor"></div>`);
+  app.insertAdjacentHTML('beforeend', `<div class="article"><div class="sentence"></div><button class="takeover">${UI.yourTurn}</button></div><div class="tour-cursor"></div>`);
   const sentence = app.querySelector('.sentence');
   const renderSentence = index => {
     sentence.replaceChildren();
@@ -176,7 +179,7 @@ if (typeof window !== 'undefined') runSim(DEFAULTS, async ({canvas, hud, capture
   const iron = createIron(st.scene);
   const ui = createLesson(document.querySelector('#app'));
   const side = document.querySelector('.side');
-  side.insertAdjacentHTML('afterbegin', '<div class="part-real"></div><div class="part-name"></div><div class="part-explain"></div><div class="word-hint">SIMPLE NAME ↔ REAL NAME<br><b>Touch the words in the sentence.</b></div>');
+  side.insertAdjacentHTML('afterbegin', `<div class="part-real"></div><div class="part-name"></div><div class="part-explain"></div><div class="word-hint">SIMPLE NAME ↔ REAL NAME<br><b>${UI.wordHint}</b></div>`);
   let selected = partAt(0);
   let manual = null;
   let manualAt = -100;
@@ -267,16 +270,16 @@ if (typeof window !== 'undefined') runSim(DEFAULTS, async ({canvas, hud, capture
       const k = smooth((local - 4.7) / 1.1);
       ui.cursor.style.opacity = auto && local > 4.7 ? 1 - k : 0;
       ui.cursor.style.left = `${p.x + 25 * k}px`; ui.cursor.style.top = `${p.y + 20 * k}px`;
-      ui.takeover.textContent = manual ? 'RESUME AUTO TOUR' : 'AUTO TOUR · TAKE OVER';
+      ui.takeover.textContent = manual ? UI.showMeAgain : UI.yourTurn;
       document.querySelector('.cmd').textContent = `word: ${selected.label.toLowerCase()}`;
       document.querySelector('.prompt').innerHTML = `&gt; ${selected.label.toLowerCase()} → ${selected.real.toLowerCase()}`;
       return {
-        status: manual ? 'YOUR TURN' : 'AUTO TOUR',
+        status: manual ? UI.yourTurn : UI.showMe,
         stats: [
-          {label: 'SENTENCE', value: `${String(lastSentence + 1).padStart(2, '0')} / ${String(ARTICLE.length).padStart(2, '0')}`},
-          {label: 'PARTS LINKED', value: `${String(PARTS.length).padStart(2, '0')} / ${String(PARTS.length).padStart(2, '0')}`},
-          {label: 'LINKED WORDS', value: String(Object.keys(WORD_PART).length).padStart(2, '0')},
-          {label: 'MODE', value: manual ? 'MANUAL' : 'GUIDED'},
+          {label: UI.line, value: `${String(lastSentence + 1).padStart(2, '0')} / ${String(ARTICLE.length).padStart(2, '0')}`},
+          {label: UI.partsWithWords, value: `${String(PARTS.length).padStart(2, '0')} / ${String(PARTS.length).padStart(2, '0')}`},
+          {label: UI.wordsWithParts, value: String(Object.keys(WORD_PART).length).padStart(2, '0')},
+          {label: UI.whoLeads, value: manual ? UI.youLead : UI.pageLeads},
         ],
         annotations,
       };

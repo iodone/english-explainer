@@ -10,6 +10,7 @@ import {clamp01, pad} from './upstream-util.js';
  */
 export function createHud(root, cfg) {
   const h = cfg.hud;
+  const ui = cfg.ui || {};
   root.insertAdjacentHTML(
     'beforeend',
     `<div class="hud">
@@ -151,8 +152,10 @@ export function createHud(root, cfg) {
         lastLogs = html;
       }
 
-      el.tfoot.textContent = `frame ${pad(frame, 4)}   delta ${pad((dt * 7.3) % 100, 2)}   /   ${s.name.toLowerCase()}`;
-      el.status.textContent = info.status ?? (t >= D - 0.05 ? 'DONE' : 'RUNNING');
+      el.tfoot.textContent = ui.time
+        ? `${ui.time} ${pad(frame, 4)}   ${ui.stepTime} ${pad((dt * 7.3) % 100, 2)}   /   ${s.name.toLowerCase()}`
+        : `frame ${pad(frame, 4)}   delta ${pad((dt * 7.3) % 100, 2)}   /   ${s.name.toLowerCase()}`;
+      el.status.textContent = info.status ?? (t >= D - 0.05 ? (ui.done || 'DONE') : (ui.running || 'RUNNING'));
       el.sfoot.textContent = `view ${pad(si + 1, 2)} / ${pad(h.views, 2)}    seed ${cfg.seed} · t+${dt.toFixed(2)}s`;
 
       const stats = (info.stats || []).map((x) => `<div>${esc(x.label)}<b>${esc(String(x.value))}</b></div>`).join('');

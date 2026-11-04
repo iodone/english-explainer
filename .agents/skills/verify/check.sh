@@ -13,6 +13,7 @@ npx tsx scripts/check-simple-words.mjs --entry "$SKILL/examples/iron/main.js"
 npx tsx scripts/check-simple-words.mjs --entry "$SKILL/examples/teardown-iron/main.js"
 
 node --check "$SKILL/runtime.js"
+node --check "$SKILL/ui.js"
 node --check "$SKILL/scripts/build.mjs"
 node --check "$SKILL/scripts/browser.mjs"
 node --check "$SKILL/scripts/walkthrough.mjs"

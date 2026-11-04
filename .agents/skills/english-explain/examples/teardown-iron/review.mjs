@@ -32,7 +32,7 @@ try {
   await browser.evaluate('window.SIM.render(0)');
   await browser.evaluate('window.SIM.render(7)');
   assert.equal(await browser.evaluate('window.LESSON.selected'), 'heat-maker');
-  assert.match(await browser.evaluate('document.querySelector(\'.takeover\').textContent'), /AUTO TOUR/);
+  assert.match(await browser.evaluate('document.querySelector(\'.takeover\').textContent'), /YOUR TURN/);
   console.log('PASS auto tour resumes and advances from tour data');
   assert.deepEqual(browser.errors, []);
   assert.deepEqual(browser.networkFailures, []);

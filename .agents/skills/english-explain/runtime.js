@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { UI } from './ui.js'
 
 const FINISH = {
   hull: { face: '#6E6C64', opacity: 0.12 },
@@ -22,6 +23,7 @@ const wordCount = lesson => sentencesOf(lesson).map(plainSentence).join(' ').spl
 /** The one selection state drives the drawing, article, explanation, and counters. */
 export function runEnglishExplain(lesson, shapes = []) {
   const app = document.querySelector('#app')
+  const ui = { ...UI, ...lesson.ui }
   const query = new URLSearchParams(location.search)
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
   const sentences = sentencesOf(lesson)
@@ -40,47 +42,47 @@ export function runEnglishExplain(lesson, shapes = []) {
     <main class="lesson-shell">
       <header class="lesson-header">
         <div class="title-block">
-          <div class="micro">WORD → OBJECT / FIELD NOTES</div>
+          <div class="micro">${ui.fieldNotes}</div>
           <h1></h1>
           <p class="real-name"></p>
         </div>
-        <dl class="lesson-stats" aria-label="Lesson facts">
-          <div><dt>PARTS</dt><dd data-stat="parts"></dd></div>
-          <div><dt>SENTENCES</dt><dd data-stat="sentences"></dd></div>
-          <div><dt>WORDS</dt><dd data-stat="words"></dd></div>
-          <div><dt>STEPS</dt><dd data-stat="steps"></dd></div>
+        <dl class="lesson-stats" aria-label="${ui.facts}">
+          <div><dt>${ui.parts}</dt><dd data-stat="parts"></dd></div>
+          <div><dt>${ui.lines}</dt><dd data-stat="sentences"></dd></div>
+          <div><dt>${ui.words}</dt><dd data-stat="words"></dd></div>
+          <div><dt>${ui.steps}</dt><dd data-stat="steps"></dd></div>
         </dl>
       </header>
       <section class="learning-grid">
-        <aside class="hud-panel sentence-panel" aria-label="Current reading">
-          <div class="panel-heading">READING SIGNAL <span data-current-sentence></span></div>
+        <aside class="hud-panel sentence-panel" aria-label="${ui.currentReading}">
+          <div class="panel-heading">${ui.reading} <span data-current-sentence></span></div>
           <blockquote data-reading></blockquote>
-          <div class="panel-heading">PART INDEX</div>
+          <div class="panel-heading">${ui.parts}</div>
           <div class="part-index" data-part-index></div>
           <p class="panel-note">A name in the text and a part in the drawing share one light.</p>
         </aside>
-        <section class="model-panel" aria-label="Interactive three-dimensional drawing">
-          <div class="model-topline"><span>SPECIMEN / LIVE INK</span><span data-model-part>WHOLE OBJECT</span></div>
+        <section class="model-panel" aria-label="${ui.drawing}">
+          <div class="model-topline"><span>${ui.liveDrawing}</span><span data-model-part>${ui.wholeThing}</span></div>
           <div class="canvas-wrap" data-canvas-wrap></div>
-          <div class="model-help">DRAG TO TURN · WHEEL TO ZOOM · CLICK A PART</div>
+          <div class="model-help">${ui.drawingHelp}</div>
         </section>
         <aside class="hud-panel explain-panel" aria-live="polite">
-          <div class="panel-heading">SIMPLE ENGLISH <span data-part-number></span></div>
+          <div class="panel-heading">${ui.simpleWords} <span data-part-number></span></div>
           <div data-explanation></div>
           <div class="panel-heading dictionary-heading">WORD CARD</div>
-          <div data-dictionary><p class="muted">Touch a dotted word to open its card.</p></div>
+          <div data-dictionary><p class="muted">${ui.dictionaryHint}</p></div>
         </aside>
       </section>
       <section class="article-panel">
-        <div class="article-heading"><span>THE EXPLANATION</span><span data-active-part>NO PART SELECTED</span></div>
+        <div class="article-heading"><span>${ui.readWords}</span><span data-active-part>${ui.touchPart}</span></div>
         <article data-article></article>
       </section>
       <footer class="tour-bar">
-        <button type="button" class="tour-button" data-tour-toggle>AUTO TOUR</button>
-        <button type="button" class="step-button" data-tour-prev aria-label="Previous tour step">←</button>
-        <div class="tour-copy"><span data-tour-status>TOUCH A WORD OR A PART</span><p data-tour-caption></p></div>
+        <button type="button" class="tour-button" data-tour-toggle>${ui.showMe}</button>
+        <button type="button" class="step-button" data-tour-prev aria-label="${ui.lastStep}">←</button>
+        <div class="tour-copy"><span data-tour-status>${ui.touchWordOrPart}</span><p data-tour-caption></p></div>
         <span class="tour-count" data-tour-count></span>
-        <button type="button" class="step-button" data-tour-next aria-label="Next tour step">→</button>
+        <button type="button" class="step-button" data-tour-next aria-label="${ui.nextStep}">→</button>
       </footer>
     </main>`
 
@@ -401,10 +403,10 @@ export function runEnglishExplain(lesson, shapes = []) {
     state.tour = true
     lastTourChange = performance.now()
     selectPart(step.partIds[0], step.sentenceRef, true)
-    app.querySelector('[data-tour-status]').textContent = `AUTO TOUR / ${step.kind === 'link' ? 'WORD FINDS OBJECT' : 'FOLLOW THE WORK'}`
+    app.querySelector('[data-tour-status]').textContent = `${ui.showMe} / ${step.kind === 'link' ? ui.wordFindsPart : ui.followWork}`
     app.querySelector('[data-tour-caption]').textContent = step.caption
     app.querySelector('[data-tour-count]').textContent = `${String(index + 1).padStart(2, '0')} / ${String(tourSteps.length).padStart(2, '0')}`
-    app.querySelector('[data-tour-toggle]').textContent = 'TAKE OVER'
+    app.querySelector('[data-tour-toggle]').textContent = ui.yourTurn
     app.querySelector('[data-tour-toggle]').classList.add('running')
   }
   function startTour() {
@@ -415,8 +417,8 @@ export function runEnglishExplain(lesson, shapes = []) {
     lastInput = performance.now()
     if (!state.tour) return
     state.tour = false
-    app.querySelector('[data-tour-status]').textContent = 'YOUR TURN / TOUCH A WORD OR A PART'
-    app.querySelector('[data-tour-toggle]').textContent = 'RESUME TOUR'
+    app.querySelector('[data-tour-status]').textContent = `${ui.yourTurn} / ${ui.touchWordOrPart}`
+    app.querySelector('[data-tour-toggle]').textContent = ui.showMeAgain
     app.querySelector('[data-tour-toggle]').classList.remove('running')
   }
   app.querySelector('[data-tour-toggle]').addEventListener('click', () => {
