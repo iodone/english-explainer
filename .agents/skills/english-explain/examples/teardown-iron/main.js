@@ -34,11 +34,11 @@ const DURATION = 36;
 const DEFAULTS = {
   duration: DURATION, fps: 30, seed: 7, theme: 'light', accent: '#0E7C7B',
   hud: {
-    enabled: true, title: 'CLOTH PRESSER', subtitle: '/ SIMPLE WORDS', right: 'WORD → OBJECT / LIVE',
+    enabled: true, title: 'CLOTH PRESSER', subtitle: '/ SIMPLE WORDS', right: 'WORD → PART / LIVE',
     host: 'SIMPLE ENGLISH', path: 'touch a word · find its part', sideTitle: 'PART EXPLANATION', logRows: 4,
   },
   stages: [
-    {at: 0, name: 'FIND', cmd: 'word: hot bottom', logs: ['The phrase lights up.', 'The same part answers in the drawing.', '!One phrase. One object.']},
+    {at: 0, name: 'FIND', cmd: 'word: hot bottom', logs: ['The words light up.', 'The same part answers in the drawing.', '!One word. One part.']},
     {at: 6, name: 'HEAT', cmd: 'part: heat maker', logs: ['Power runs through the wire.', 'The thick metal bottom grows hot.', '!Heat + weight → flat cloth.']},
     {at: 12, name: 'WATER', cmd: 'part: water room', logs: ['Water runs down inside the iron.', 'It touches the hot metal.', '!Water → steam → into cloth.']},
     {at: 18, name: 'HOLD', cmd: 'part: hand holder', logs: ['Your hand has a cool place to hold.', 'The heavy bottom does most of the work.', '!A simple name tells you its job.']},
@@ -65,6 +65,38 @@ const partAt = t => {
   for (const next of TOUR) if (next.at <= t) step = next;
   return PARTS.find(part => part.id === step.id);
 };
+
+// Static lesson data lets the repository's --entry gate inspect this demo in
+// Node without starting teardown. Every tour command and log is checked here.
+const markedArticle = ARTICLE.map(tokens => tokens.map(token => {
+  if (WORD_PART[token]) return {text: token, part: WORD_PART[token]};
+  if (token === 'iron') return {text: token, dict: 'iron'};
+  return token;
+}));
+export const lesson = {
+  id: 'teardown-iron',
+  slug: 'teardown-iron',
+  simpleName: 'Cloth Presser',
+  realName: 'Iron',
+  category: 'home',
+  color: '#0E7C7B',
+  parts: PARTS.map(part => ({id: part.id, label: part.label, realName: part.real, position: part.point})),
+  article: [{sentences: markedArticle}],
+  flow: DEFAULTS.stages.map((stage, index) => ({
+    partIds: [TOUR.find(step => step.at === stage.at)?.id || 'hot-bottom'],
+    caption: [stage.cmd, ...stage.logs].join(' '),
+    sentenceRef: index === 0 ? 1 : Math.min(index, ARTICLE.length - 1),
+  })),
+  keyExpressions: PARTS.map(part => ({text: part.label.toLowerCase(), partId: part.id})),
+  funFacts: [],
+  partExplanations: Object.fromEntries(PARTS.map(part => [part.id, part.explain])),
+  tour: DEFAULTS.stages.map((stage, index) => ({
+    partIds: [TOUR.find(step => step.at === stage.at)?.id || 'hot-bottom'],
+    caption: [stage.cmd, ...stage.logs].join(' '),
+    sentenceRef: index === 0 ? 1 : Math.min(index, ARTICLE.length - 1),
+  })),
+};
+export default lesson;
 
 function createLesson(app) {
   const style = document.createElement('style');
@@ -133,7 +165,7 @@ function createIron(scene) {
   return {groups, pickable};
 }
 
-runSim(DEFAULTS, async ({canvas, hud, capture}) => {
+if (typeof window !== 'undefined') runSim(DEFAULTS, async ({canvas, hud, capture}) => {
   // teardown/capture.mjs also accepts HTML pages exposing window.seek/DURATION.
   // Keep that native capture contract while using runSim for the live clock.
   window.DURATION = DURATION;
@@ -144,7 +176,7 @@ runSim(DEFAULTS, async ({canvas, hud, capture}) => {
   const iron = createIron(st.scene);
   const ui = createLesson(document.querySelector('#app'));
   const side = document.querySelector('.side');
-  side.insertAdjacentHTML('afterbegin', '<div class="part-real"></div><div class="part-name"></div><div class="part-explain"></div><div class="word-hint">SIMPLE NAME ↔ REAL NAME<br><b>Touch the phrase in the sentence.</b></div>');
+  side.insertAdjacentHTML('afterbegin', '<div class="part-real"></div><div class="part-name"></div><div class="part-explain"></div><div class="word-hint">SIMPLE NAME ↔ REAL NAME<br><b>Touch the words in the sentence.</b></div>');
   let selected = partAt(0);
   let manual = null;
   let manualAt = -100;
@@ -243,7 +275,7 @@ runSim(DEFAULTS, async ({canvas, hud, capture}) => {
         stats: [
           {label: 'SENTENCE', value: `${String(lastSentence + 1).padStart(2, '0')} / ${String(ARTICLE.length).padStart(2, '0')}`},
           {label: 'PARTS LINKED', value: `${String(PARTS.length).padStart(2, '0')} / ${String(PARTS.length).padStart(2, '0')}`},
-          {label: 'LINKED PHRASES', value: String(Object.keys(WORD_PART).length).padStart(2, '0')},
+          {label: 'LINKED WORDS', value: String(Object.keys(WORD_PART).length).padStart(2, '0')},
           {label: 'MODE', value: manual ? 'MANUAL' : 'GUIDED'},
         ],
         annotations,
