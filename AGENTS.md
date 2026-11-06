@@ -14,6 +14,10 @@ npm run build                # 生产构建（tsc -b && vite build）
 npx tsc --noEmit             # 仅类型检查
 npx tsx scripts/validate-data.mjs  # 数据一致性校验（句数/partId/dict 闭环）
 npx tsx scripts/check-simple-words.mjs  # Munroe ~1000 词闸门（article/flow/keyExpressions/funFacts 四通道）
+
+# english-explain 独立解释页（构建复用 Vite；走查零依赖，无需 dev server）
+node .agents/skills/english-explain/scripts/build.mjs .agents/skills/english-explain/examples/iron/main.js
+node .agents/skills/english-explain/scripts/walkthrough.mjs .agents/skills/english-explain/examples/iron.html
 ```
 
 ## 结构

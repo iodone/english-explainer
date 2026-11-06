@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 dist/
+english-explain-out/
 
 # Logs
 *.log
