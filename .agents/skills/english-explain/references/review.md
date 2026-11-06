@@ -7,7 +7,7 @@ node .agents/skills/english-explain/scripts/walkthrough.mjs path/to/lesson.html 
   --out english-explain-out/review
 ```
 
-工具沿用 `figure-craft/scripts/figure.mjs` 的 CDP 方式：Node 内置 fetch/WebSocket，
+`scripts/browser.mjs` 自带 CDP 传输：Node 内置 fetch/WebSocket，
 临时 headless Chrome，不安装 Playwright。默认示例的断言覆盖：
 
 1. `file://` 在浏览器离线状态下可开，canvas 与首帧就绪，无外部资源；

@@ -1,5 +1,5 @@
-// The CDP transport follows figure-craft/scripts/figure.mjs: Node's built-in
-// fetch and WebSocket, a temporary Chrome profile, and no browser dependency.
+// Self-contained CDP transport: Node's built-in fetch and WebSocket, a
+// temporary Chrome profile, and no browser dependency.
 import { spawn } from 'node:child_process'
 import { existsSync, mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
 import { createServer } from 'node:net'

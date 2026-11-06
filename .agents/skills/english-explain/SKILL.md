@@ -35,7 +35,7 @@ node "$SKILL_DIR/scripts/walkthrough.mjs" \
 ## 工作顺序
 
 1. **先读真相源。** `PRODUCT.md` 决定学习机制，`DESIGN.md` 决定纸面、墨色、HUD 青、
-   simple name ↔ real name。画机器时还要读 `figure-craft/SKILL.md`；不要改现有 SPA。
+   simple name ↔ real name。画自建几何还要遵守 `DESIGN.md` 的制图契约；不要改现有 SPA。
 2. **找一个可指的解释对象。** 实物优先参考真实照片/结构图。词或语法点则把句子中的
    语义角色做成可点的形（谁做 / 做什么 / 对谁 / 何时），不要硬套一台无关机器。
 3. **先数据，后几何。** 复制 `examples/iron/main.js` 到新目录。先写 parts、结构化 article、
@@ -77,7 +77,7 @@ node "$SKILL_DIR/scripts/walkthrough.mjs" english-explain-out/lesson.html
 
 **按本仓改掉**：不要转速、压力等工程遥测，不要装饰性 gauge；不强制拆解/cutaway；
 不做固定 1600×900 影片时间线、配乐或 ffmpeg；高亮服务“词找到物”，不是强调做功机构；
-构建复用本仓 Vite，走查复用 figure-craft 的零依赖 CDP 思路，不引入 Playwright。
+构建复用本仓 Vite，走查使用自带的零依赖 CDP 脚本，不引入 Playwright。
 
 ## References
 

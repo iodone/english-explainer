@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Zero-npm-dependency review, reusing english-explain's figure-craft CDP transport.
+// Zero-npm-dependency review using english-explain's own CDP transport.
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
